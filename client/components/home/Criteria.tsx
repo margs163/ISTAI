@@ -1,12 +1,10 @@
 import clsx from "clsx";
-import { LucideProps, Speaker } from "lucide-react";
+import { LucideProps } from "lucide-react";
 import React from "react";
 
 export default function Criteria({
   criterion,
-  description,
   icon: Icon,
-  color,
 }: {
   criterion: string;
   description: string;

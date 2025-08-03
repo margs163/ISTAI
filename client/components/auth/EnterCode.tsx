@@ -1,5 +1,5 @@
 "use client";
-import React, { useRef, useState, useEffect, InputEvent } from "react";
+import React, { useRef, useState, useEffect } from "react";
 
 export default function EnterCode({
   callback,
@@ -91,7 +91,7 @@ export default function EnterCode({
   ) {
     const input = e.target as HTMLInputElement;
     const previousInput = inputRefs[index - 1];
-    const nextInput = inputRefs[index + 1];
+    // const nextInput = inputRefs[index + 1];
 
     if ((e.key === "Backspace" || e.key === "Delete") && input.value === "") {
       e.preventDefault();
@@ -118,14 +118,14 @@ export default function EnterCode({
   };
 
   // Clear button deletes all inputs and selects the first input for entry
-  const ClearButton = () => {
-    return (
-      <button
-        onClick={resetCode}
-        className="text-2xl absolute right-[-30px] top-3"
-      ></button>
-    );
-  };
+  // const ClearButton = () => {
+  //   return (
+  //     <button
+  //       onClick={resetCode}
+  //       className="text-2xl absolute right-[-30px] top-3"
+  //     ></button>
+  //   );
+  // };
 
   return (
     <div className="flex gap-1.5 lg:gap-2 justify-center">

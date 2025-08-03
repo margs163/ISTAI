@@ -5,7 +5,6 @@ import talkingWoman from "@/assets/images/talkingWoman.jpg";
 import person1 from "@/assets/images/person1.jpg";
 import person2 from "@/assets/images/person2.jpg";
 import person3 from "@/assets/images/person3.jpg";
-import googleIcon from "@/assets/images/google.png";
 import Image from "next/image";
 import Link from "next/link";
 

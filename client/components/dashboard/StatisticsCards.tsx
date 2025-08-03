@@ -4,7 +4,6 @@ import {
   LaptopMinimalCheck,
   LucideProps,
   TrendingUp,
-  Watch,
 } from "lucide-react";
 import React, { ForwardRefExoticComponent, RefAttributes } from "react";
 

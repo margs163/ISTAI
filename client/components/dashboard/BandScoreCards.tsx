@@ -1,17 +1,5 @@
 import clsx from "clsx";
-import {
-  ArrowBigDownDash,
-  ArrowBigUpDash,
-  BookA,
-  BookMarked,
-  Clock,
-  LaptopMinimalCheck,
-  LucideProps,
-  Megaphone,
-  Mic,
-  TrendingUp,
-  Watch,
-} from "lucide-react";
+import { BookA, BookMarked, LucideProps, Megaphone, Mic } from "lucide-react";
 import React, { ForwardRefExoticComponent, RefAttributes } from "react";
 
 const scores: Score[] = [

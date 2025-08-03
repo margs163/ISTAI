@@ -101,7 +101,7 @@ export default function AppSidebar() {
           <SidebarGroupLabel>Application</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {menuItems.map((item, index) => {
+              {menuItems.map((item) => {
                 return (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton
@@ -137,7 +137,7 @@ export default function AppSidebar() {
       </SidebarContent>
       <SidebarFooter className="space-y-4 font-geist">
         <SidebarMenu className="px-3">
-          {bottomMenuItems.map((item, index) => {
+          {bottomMenuItems.map((item) => {
             return (
               <SidebarMenuItem key={item.title}>
                 <SidebarMenuButton asChild>
