@@ -1,29 +1,14 @@
 import React from "react";
 import { SidebarTrigger } from "../ui/sidebar";
-import {
-  BadgeCheck,
-  Bell,
-  FolderPlus,
-  LogIn,
-  Mail,
-  MessageCircle,
-  Plus,
-  Search,
-  Share,
-  User,
-} from "lucide-react";
+import { BadgeCheck, Bell, FolderPlus, Plus, Search } from "lucide-react";
 import {
   Menubar,
   MenubarContent,
   MenubarItem,
   MenubarMenu,
   MenubarSeparator,
-  MenubarSub,
-  MenubarSubContent,
-  MenubarSubTrigger,
   MenubarTrigger,
 } from "../ui/menubar";
-import Link from "next/link";
 import ProfileLink from "../ProfileLink";
 import NewTest from "./NewTest";
 import MainButton from "../MainButton";

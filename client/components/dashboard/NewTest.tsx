@@ -25,7 +25,7 @@ export default function NewTest({ children }: { children: React.ReactNode }) {
     resolver: zodResolver(NewTestFormSchema),
   });
 
-  const onSubmit: SubmitHandler<NewTestFormData> = (data) => {
+  const onSubmit: SubmitHandler<NewTestFormData> = () => {
     console.log("form submitted!");
     setOpen(false);
   };

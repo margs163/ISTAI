@@ -1,10 +1,4 @@
-import {
-  BookText,
-  Bot,
-  BriefcaseBusiness,
-  ChartColumn,
-  Ellipsis,
-} from "lucide-react";
+import { BookText, Bot, ChartColumn, Ellipsis } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 

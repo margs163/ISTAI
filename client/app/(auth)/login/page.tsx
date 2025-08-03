@@ -1,6 +1,5 @@
 "use client";
 import React from "react";
-import logoIcon from "@/assets/images/logo-icon.png";
 import logoText from "@/assets/images/logo-text2.png";
 import talkingWoman from "@/assets/images/talkingWoman.jpg";
 import person1 from "@/assets/images/person1.jpg";
@@ -16,14 +15,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 export default function Page() {
   const {
     register,
-    setValue,
     handleSubmit,
     formState: { errors, isLoading },
   } = useForm<SignInFormData>({
     resolver: zodResolver(UserSignInSchema),
   });
 
-  const submit: SubmitHandler<SignInFormData> = (data) => {
+  const submit: SubmitHandler<SignInFormData> = () => {
     console.log("form submitted!");
   };
   return (
