@@ -19,7 +19,9 @@ export default function Criteria({
         )}
       />
       <div>
-        <h3 className="text-base font-medium text-gray-700">{criterion}</h3>
+        <h3 className="text-sm lg:text-base font-medium text-gray-700">
+          {criterion}
+        </h3>
       </div>
     </div>
   );

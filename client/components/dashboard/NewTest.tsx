@@ -14,8 +14,10 @@ import { NewTestFormData, NewTestFormSchema } from "@/lib/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import MainButton from "../MainButton";
 import { Plus } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export default function NewTest({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const {
     register,
@@ -27,6 +29,7 @@ export default function NewTest({ children }: { children: React.ReactNode }) {
 
   const onSubmit: SubmitHandler<NewTestFormData> = () => {
     console.log("form submitted!");
+    router.replace("/practice");
     setOpen(false);
   };
 
