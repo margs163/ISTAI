@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 import {
   BookText,
   Bot,
@@ -42,7 +43,7 @@ const tests: Test[] = [
     name: "Speaking Test 4",
     timeAgo: "2 days ago",
     duration: 14,
-    band: 7.0,
+    band: 5.5,
     assistant: "Ron",
   },
   {
@@ -68,9 +69,27 @@ export function PracticeTest({ test }: { test: Test }) {
           </p>
         </div>
       </Link>
-      <div className="px-2.5 py-1 rounded-full bg-green-100 hidden lg:inline-block">
-        <p className="text-xs font-medium text-green-700">
-          band {test.band.toFixed(1)}
+      <div
+        className={cn(
+          "px-2.5 py-1 rounded-xl border hidden lg:inline-block",
+          test.band > 6.0
+            ? "border-green-300 bg-green-50"
+            : test.band >= 4.5
+            ? "border-yellow-300 bg-yellow-50"
+            : "border-red-300 bg-red-50"
+        )}
+      >
+        <p
+          className={cn(
+            "text-xs font-medium",
+            test.band > 6.0
+              ? "text-green-600"
+              : test.band >= 4.5
+              ? "text-yellow-600"
+              : "text-red-600"
+          )}
+        >
+          Band {test.band.toFixed(1)}
         </p>
       </div>
       <h3 className="text-sm font-medium text-gray-800 flex-row items-center gap-1 hidden lg:flex">
@@ -79,10 +98,10 @@ export function PracticeTest({ test }: { test: Test }) {
       </h3>
       <div className="flex flex-row gap-2 items-center">
         <Link href={"#"}>
-          <ChartColumn className="size-4 p-1.5 rounded-full hover:bg-gray-50 active:bg-gray-50 text-gray-800 hover:text-gray-700 active:text-gray-700 transition-colors box-content" />
+          <ChartColumn className="size-4 p-1.5 rounded-full hover:bg-gray-100 active:bg-gray-100 text-gray-800 hover:text-gray-700 active:text-gray-700 transition-colors box-content" />
         </Link>
         <Link href={"#"}>
-          <Ellipsis className="size-4 p-1.5 rounded-full hover:bg-gray-50 active:bg-gray-50 text-gray-800 hover:text-gray-700 active:text-gray-700 transition-colors box-content" />
+          <Ellipsis className="size-4 p-1.5 rounded-full hover:bg-gray-100 active:bg-gray-100 text-gray-800 hover:text-gray-700 active:text-gray-700 transition-colors box-content" />
         </Link>
       </div>
     </div>

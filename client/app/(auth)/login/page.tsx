@@ -1,3 +1,4 @@
+"use client";
 import React from "react";
 import logoIcon from "@/assets/images/logo-icon.png";
 import logoText from "@/assets/images/logo-text2.png";
@@ -8,8 +9,23 @@ import person3 from "@/assets/images/person3.jpg";
 import googleIcon from "@/assets/images/google.png";
 import Image from "next/image";
 import Link from "next/link";
+import { SubmitHandler, useForm } from "react-hook-form";
+import { SignInFormData, UserSignInSchema } from "@/lib/types";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 export default function Page() {
+  const {
+    register,
+    setValue,
+    handleSubmit,
+    formState: { errors, isLoading },
+  } = useForm<SignInFormData>({
+    resolver: zodResolver(UserSignInSchema),
+  });
+
+  const submit: SubmitHandler<SignInFormData> = (data) => {
+    console.log("form submitted!");
+  };
   return (
     <div className="min-h-screen w-full p-6 flex items-center justify-center lg:px-20 xl:px-40 font-geist">
       <section className=" shadow-md bg-white w-full lg:flex lg:flex-row lg:shadow-lg shadow-slate-200 rounded-lg">
@@ -18,7 +34,10 @@ export default function Page() {
             {/* <Image src={logoIcon} alt="iconLogo" className="w-6" /> */}
             <Image src={logoText} alt="iconText" className="w-16" />
           </div>
-          <form className="flex flex-col items-center justify-center gap-4 px-3 pb-6 lg:pb-10 lg:w-3/4 xl:w-[65%]">
+          <form
+            onSubmit={handleSubmit(submit)}
+            className="flex flex-col items-center justify-center gap-4 px-3 pb-6 lg:pb-10 lg:w-3/4 xl:w-[65%]"
+          >
             <div className="space-y-1">
               <h1 className="font-semibold text-xl text-gray-800">
                 Welcome back! Log in
@@ -39,18 +58,33 @@ export default function Page() {
               <hr className="h-[2px] text-gray-200 w-1/2" />
             </div>
             <div className="flex flex-col gap-4 justify-start items-stretch w-full">
-              <input
-                type="email"
-                name="email"
-                placeholder="Email"
-                className="text-sm text-gray-700 font-normal border-b-2 border-gray-200 px-2 py-2 focus-within:outline-0 focus-within:border-b-indigo-200 transition-colors"
-              />
-              <input
-                type="password"
-                name="password"
-                placeholder="Password"
-                className="text-sm text-gray-700 font-normal border-b-2 border-gray-200 px-2 py-2 focus-within:outline-0 focus-within:border-b-indigo-200 transition-colors"
-              />
+              <div className="space-y-2">
+                <input
+                  type="email"
+                  placeholder="Email"
+                  {...register("email")}
+                  className="text-sm w-full text-gray-700 font-normal border-b-2 border-gray-200 px-2 py-2 focus-within:outline-0 focus-within:border-b-indigo-200 transition-colors"
+                />
+                {errors.email && (
+                  <p className="text-red-700 font-normal text-xs">
+                    {errors.email.message}
+                  </p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <input
+                  type="password"
+                  placeholder="Password"
+                  {...register("password")}
+                  className="text-sm w-full text-gray-700 font-normal border-b-2 border-gray-200 px-2 py-2 focus-within:outline-0 focus-within:border-b-indigo-200 transition-colors"
+                />
+                {errors.password && (
+                  <p className="text-red-700 font-normal text-xs">
+                    {errors.password.message}
+                  </p>
+                )}
+              </div>
+
               <Link href={"/password-reset"} className="ml-auto">
                 <p className="text-xs text-gray-600 hover:text-gray-800 transition-colors">
                   Forgot password
@@ -58,7 +92,11 @@ export default function Page() {
               </Link>
             </div>
             <div className="w-full space-y-3 mt-6">
-              <button className="w-full py-2.5 rounded-md bg-indigo-700 text-white font-medium lg:font-semibold text-xs hover:bg-indigo-600 transition-colors">
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full disabled:bg-indigo-500 py-2.5 rounded-md bg-indigo-700 text-white font-medium lg:font-semibold text-xs hover:bg-indigo-600 transition-colors"
+              >
                 Log In
               </button>
               <Link href={"/signup"}>

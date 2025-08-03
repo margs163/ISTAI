@@ -1,5 +1,7 @@
-import React from "react";
-import logoIcon from "@/assets/images/logo-icon.png";
+"use client";
+import React, { FormEvent } from "react";
+import { SubmitHandler, useForm } from "react-hook-form";
+// import logoIcon from "@/assets/images/logo-icon.png";
 import logoText from "@/assets/images/logo-text2.png";
 import talkingWoman from "@/assets/images/person1.jpg";
 import person1 from "@/assets/images/person1.jpg";
@@ -8,8 +10,22 @@ import person3 from "@/assets/images/person3.jpg";
 import googleIcon from "@/assets/images/google.png";
 import Image from "next/image";
 import Link from "next/link";
+import { SignUpFormData, UserSignUpSchema } from "@/lib/types";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 export default function Page() {
+  const {
+    register,
+    setValue,
+    handleSubmit,
+    formState: { errors, isLoading },
+  } = useForm<SignUpFormData>({
+    resolver: zodResolver(UserSignUpSchema),
+  });
+
+  const submit: SubmitHandler<SignUpFormData> = (data) => {
+    console.log("form submitted!");
+  };
   return (
     <div className="min-h-screen w-full p-6 flex items-center justify-center lg:px-20 xl:px-40 font-geist">
       <section className=" shadow-md bg-white w-full lg:flex lg:flex-row lg:shadow-lg shadow-slate-200 rounded-lg">
@@ -18,7 +34,10 @@ export default function Page() {
             {/* <Image src={logoIcon} alt="iconLogo" className="w-6" /> */}
             <Image src={logoText} alt="iconText" className="w-16" />
           </div>
-          <form className="flex flex-col items-center justify-center gap-4 px-3 pb-6 lg:pb-10 lg:w-3/4 xl:w-[65%]">
+          <form
+            className="flex flex-col items-center justify-center gap-4 px-3 pb-6 lg:pb-10 lg:w-3/4 xl:w-[65%]"
+            onSubmit={handleSubmit(submit)}
+          >
             <div className="space-y-1">
               <h1 className="font-semibold text-xl text-gray-800">
                 Sign Up to Get Started
@@ -39,30 +58,68 @@ export default function Page() {
               <hr className="h-[2px] text-gray-200 w-1/2" />
             </div>
             <div className="flex flex-col gap-4 justify-start items-stretch w-full">
-              <input
-                type="text"
-                name="name"
-                placeholder="Name"
-                className="text-sm text-gray-700 font-normal border-b-2 border-gray-200 px-2 py-2 focus-within:outline-0 focus-within:border-b-indigo-200 transition-colors"
-              />
-              <input
-                type="email"
-                name="email"
-                placeholder="Email"
-                className="text-sm text-gray-700 font-normal border-b-2 border-gray-200 px-2 py-2 focus-within:outline-0 focus-within:border-b-indigo-200 transition-colors"
-              />
-              <input
-                type="password"
-                name="password"
-                placeholder="Password"
-                className="text-sm text-gray-700 font-normal border-b-2 border-gray-200 px-2 py-2 focus-within:outline-0 focus-within:border-b-indigo-200 transition-colors"
-              />
+              <div className="w-full space-y-2">
+                <input
+                  type="text"
+                  placeholder="First name"
+                  {...register("firstName")}
+                  className="text-sm w-full text-gray-700 font-normal border-b-2 border-gray-200 px-2 py-2 focus-within:outline-0 focus-within:border-b-indigo-200 transition-colors"
+                />
+                {errors.firstName && (
+                  <p className="text-red-700 font-normal text-xs">
+                    {errors.firstName.message}
+                  </p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <input
+                  type="text"
+                  placeholder="Last name"
+                  {...register("lastName")}
+                  className="text-sm w-full text-gray-700 font-normal border-b-2 border-gray-200 px-2 py-2 focus-within:outline-0 focus-within:border-b-indigo-200 transition-colors"
+                />
+                {errors.lastName && (
+                  <p className="text-red-700 font-normal text-xs">
+                    {errors.lastName.message}
+                  </p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <input
+                  type="email"
+                  placeholder="Email"
+                  {...register("email")}
+                  className="text-sm w-full text-gray-700 font-normal border-b-2 border-gray-200 px-2 py-2 focus-within:outline-0 focus-within:border-b-indigo-200 transition-colors"
+                />
+                {errors.email && (
+                  <p className="text-red-700 font-normal text-xs">
+                    {errors.email.message}
+                  </p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <input
+                  type="password"
+                  placeholder="Password"
+                  {...register("password")}
+                  className="text-sm w-full text-gray-700 font-normal border-b-2 border-gray-200 px-2 py-2 focus-within:outline-0 focus-within:border-b-indigo-200 transition-colors"
+                />
+                {errors.password && (
+                  <p className="text-red-700 font-normal text-xs">
+                    {errors.password.message}
+                  </p>
+                )}
+              </div>
             </div>
             <div className="w-full space-y-3 mt-6">
-              <button className="w-full py-2.5 rounded-md bg-indigo-700 hover:bg-indigo-600 text-white font-medium lg:font-semibold text-xs transition-colors">
+              <button
+                disabled={isLoading}
+                type="submit"
+                className="w-full disabled:bg-indigo-400 py-2.5 rounded-md bg-indigo-700 hover:bg-indigo-600 text-white font-medium lg:font-semibold text-xs transition-colors"
+              >
                 Sign Up
               </button>
-              <Link href={"/login"}>
+              <Link href={"/login"} aria-disabled={isLoading}>
                 <p className="text-center text-xs font-normal text-gray-500 active:text-gray-700 hover:text-gray-700 transition-colors">
                   Already have an account?
                 </p>

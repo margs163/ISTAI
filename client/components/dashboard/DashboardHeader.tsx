@@ -25,6 +25,8 @@ import {
 } from "../ui/menubar";
 import Link from "next/link";
 import ProfileLink from "../ProfileLink";
+import NewTest from "./NewTest";
+import MainButton from "../MainButton";
 
 export default function DashboardHeader() {
   return (
@@ -39,10 +41,12 @@ export default function DashboardHeader() {
           className="w-full text-sm font-normal text-gray-700 focus-within:outline-0"
         />
       </div>
-      <button className="px-3 py-2 rounded-md bg-gray-800 hover:bg-gray-700 active:bg-gray-700 text-sm font-medium text-white flex flex-row gap-2 items-center transition-colors ml-auto">
-        <Plus className="size-4" />
-        <span className="text-xs font-medium font-geist">New Test</span>
-      </button>
+      <NewTest>
+        <MainButton>
+          <Plus className="size-4" />
+          <span className="text-xs font-medium font-geist">New Test</span>
+        </MainButton>
+      </NewTest>
       <Menubar className=" p-0 h-auto border-0 font-geist">
         <MenubarMenu>
           <MenubarTrigger className="p-2 rounded-full w-full border-0">
