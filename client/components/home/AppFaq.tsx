@@ -32,7 +32,7 @@ const faqs: Faq[] = [
 
 export default function AppFaq() {
   return (
-    <section className="w-full flex flex-col items-center p-8 gap-8 lg:flex-row lg:p-20 lg:px-20 xl:px-40 lg:gap-12 xl:gap-20">
+    <section className="w-full flex flex-col items-center p-8 gap-8 lg:flex-row lg:p-20 lg:px-20 xl:px-40 lg:gap-12 xl:gap-20 relative">
       <div className="hidden lg:flex flex-col gap-8">
         <h2 className="font-semibold text-3xl lg:text-5xl lg:font-semibold max-w-[500px]">
           Frequently Asked Questions

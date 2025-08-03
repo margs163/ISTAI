@@ -2,21 +2,23 @@ import Advantages from "@/components/home/Advantages";
 import AppFaq from "@/components/home/AppFaq";
 import FeedbackInfo from "@/components/home/FeedbackInfo";
 import Hero from "@/components/home/Hero";
-import NavBar from "@/components/home/NavBar";
+import NavBar from "@/components/NavBar";
 import TestInfo from "@/components/home/TestInfo";
 import React from "react";
+import Footer from "@/components/Footer";
 
 export default function Page() {
   return (
-    <div className="h-screen w-full flex flex-col gap-10 lg:gap-16">
+    <div className="h-lvh lg:h-lvw w-full flex flex-col gap-10 lg:gap-16 home-bg pb-4 font-mont">
       <NavBar />
       <Hero />
-      <section className=" relative -top-36 lg:-top-68 bg-white z-20 space-y-8">
+      <section className=" relative bg-white z-20 space-y-8 mb-8 lg:mb-12">
         <Advantages />
         <TestInfo />
         <FeedbackInfo />
         <AppFaq />
       </section>
+      <Footer />
     </div>
   );
 }

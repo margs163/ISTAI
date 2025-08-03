@@ -6,7 +6,7 @@ import Image from "next/image";
 import { Menu } from "lucide-react";
 import Link from "next/link";
 import { clsx } from "clsx";
-import ButtonPrimary from "./ButtonPrimary";
+import ButtonPrimary from "./home/ButtonPrimary";
 
 export default function NavBar() {
   const [menuPressed, setMenuPressed] = useState(false);
@@ -14,7 +14,7 @@ export default function NavBar() {
     <header
       className={clsx(
         "w-full lg:flex lg:flex-row lg:justify-between lg:items-center lg:px-20 lg:py-5 z-40",
-        menuPressed && "bg-white"
+        menuPressed && "bg-white fixed top-0 left-0"
       )}
     >
       <div className="flex justify-between items-center p-4 px-5 lg:p-0">
@@ -31,7 +31,7 @@ export default function NavBar() {
       <div
         className={
           menuPressed
-            ? "fixed top-14 w-full bg-white opacity-100 h-screen"
+            ? "fixed top-14 w-full bg-white opacity-100 h-screen z-40"
             : "hidden opacity-0 transition-opacity duration-500"
         }
       >
@@ -65,7 +65,7 @@ export default function NavBar() {
             </Link>
           </li>
           <li className=" px-5 py-3">
-            <Link href={"#"}>
+            <Link href={"/signup"}>
               <ButtonPrimary className="">Free Sign Up</ButtonPrimary>
             </Link>
           </li>
@@ -103,7 +103,7 @@ export default function NavBar() {
           </li>
         </ul>
       </div>
-      <Link href={"#"} className="hidden lg:block">
+      <Link href={"/signup"} className="hidden lg:block">
         <ButtonPrimary className="lg:text-sm lg:py-2 lg:px-5">
           Free Sign Up
         </ButtonPrimary>
