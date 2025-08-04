@@ -30,11 +30,11 @@ export default function TestProgress() {
     (item) => item.status === "completed"
   ).length;
   return (
-    <section className="p-6 py-0 max-w-[420px] min-w-[370px] mx-auto lg:mx-0">
+    <section className="p-6 py-0 max-w-[600px] lg:px-0">
       <div className="p-6 rounded-xl border border-gray-200 space-y-6 bg-white">
         <header className="flex flex-row items-center gap-2">
           <BookOpen className="size-6 text-indigo-600" />
-          <h3 className="font-semibold text-gray-800 text-xl">
+          <h3 className="font-semibold text-gray-800 text-lg">
             Test Structure
           </h3>
         </header>
@@ -45,7 +45,7 @@ export default function TestProgress() {
                 <div
                   key={index}
                   className={cn(
-                    "p-3 px-4 rounded-lg border flex flex-row gap-3 items-center justify-start",
+                    "p-4 rounded-lg border flex flex-row gap-3 items-center justify-start",
                     item.status === "completed"
                       ? "border-green-200 bg-green-50"
                       : item.status === "ongoing"

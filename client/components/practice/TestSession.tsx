@@ -10,11 +10,11 @@ import {
 
 export default function TestSession() {
   return (
-    <section className="p-6 py-0 max-w-[420px] min-w-[370px] mx-auto lg:mx-0">
+    <section className="p-6 py-0 max-w-[600px] lg:px-0">
       <div className="p-6 rounded-xl border border-gray-200 space-y-6 bg-white">
         <div className="flex flex-row items-center gap-2">
           <Target className="size-6 text-indigo-600" />
-          <h3 className="font-semibold text-gray-800 text-xl">Test Session</h3>
+          <h3 className="font-semibold text-gray-800 text-lg">Test Session</h3>
         </div>
         <div className="flex flex-col gap-3 items-start justify-start">
           <div className="flex flex-row justify-start w-full items-stretch gap-3">

@@ -149,9 +149,9 @@ export function ProgressBar({
   frequency: number;
 }): React.JSX.Element {
   return (
-    <div className="w-full h-2 bg-gray-400 rounded-full">
+    <div className="w-full h-2 bg-gray-200 rounded-full">
       <div
-        className={clsx(` h-full rounded-full bg-gray-800 z-10`)}
+        className={clsx(` h-full rounded-full bg-gray-700 z-10`)}
         style={{ width: `${frequency}%` }}
       ></div>
     </div>
