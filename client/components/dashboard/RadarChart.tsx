@@ -27,8 +27,8 @@ const chartConfig = {
 
 export default function RadarChart() {
   return (
-    <section className="px-6 lg:px-0 w-full flex flex-col gap-4">
-      <div className=" w-full flex flex-col gap-6 bg-white rounded-lg border border-gray-200">
+    <section className="px-6 lg:pl-0 w-full flex flex-col gap-4">
+      <div className=" w-full flex flex-col gap-2 lg:gap-6 bg-white rounded-lg border border-gray-200">
         <header className="p-5 px-6 w-full flex flex-row justify-between items-start gap-20">
           <div className="flex flex-col items-start justify-start gap-0">
             <h3 className="font-semibold text-lg text-gray-800">

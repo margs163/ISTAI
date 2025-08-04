@@ -16,13 +16,13 @@ const stats: Stat[] = [
   },
   {
     icon: LaptopMinimalCheck,
-    stat: 12,
+    stat: "12 tests",
     description: "Tests Completed",
     color: "green",
   },
   {
     icon: TrendingUp,
-    stat: 7.0,
+    stat: "7.0",
     description: "Current Band Score",
     color: "purple",
   },
@@ -40,7 +40,11 @@ type Stat = {
 export function StatisticCard({ stat }: { stat: Stat }) {
   const Icon = stat.icon;
   return (
-    <div className="flex flex-row flex-1/4 gap-4 items-start justify-start p-5 bg-white border border-slate-200/80 rounded-xl">
+    <div className="flex flex-row flex-1/4 gap-4 items-start justify-between p-5 px-6 bg-white border border-slate-200/80 rounded-lg">
+      <div>
+        <p className="text-sm font-normal text-gray-600">{stat.description}</p>
+        <h3 className="text-xl text-gray-700 font-bold">{stat.stat}</h3>
+      </div>
       <div
         className={clsx(
           "p-3 rounded-lg",
@@ -62,17 +66,13 @@ export function StatisticCard({ stat }: { stat: Stat }) {
           )}
         />
       </div>
-      <div>
-        <h3 className="text-xl text-gray-800 font-bold">{stat.stat}</h3>
-        <p className="text-xs font-normal text-gray-600">{stat.description}</p>
-      </div>
     </div>
   );
 }
 
 export default function StatisticsCards() {
   return (
-    <section className="flex flex-col lg:flex-col flex-wrap gap-2 lg:gap-3 px-6 lg:pl-0">
+    <section className="flex flex-col lg:flex-col flex-wrap gap-2 lg:gap-3 px-6 lg:pr-0">
       {stats.map((item, index) => (
         <StatisticCard key={index} stat={item} />
       ))}

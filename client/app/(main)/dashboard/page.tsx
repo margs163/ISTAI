@@ -12,10 +12,10 @@ export default function Page() {
     <div className="w-full flex flex-col gap-6 bg-gray-50 pb-6">
       <DashboardHeader />
       <Greeting />
-      <div className="w-full flex flex-col gap-6 lg:grid lg:grid-cols-[0.4fr_0.34fr_0.26fr]">
+      <div className="w-full flex flex-col gap-6 lg:grid lg:grid-cols-[0.24fr_0.49fr_0.32fr] lg:justify-items-stretch">
+        <StatisticsCards />
         <BandScoreChart />
         <RadarChart />
-        <StatisticsCards />
       </div>
       <div className="w-full flex flex-col gap-6 lg:grid lg:grid-cols-[0.7fr_0.3fr] lg:gap-6">
         <RecentPracticeTests />

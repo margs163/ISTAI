@@ -21,10 +21,10 @@ export default function MainButton({
       type={type}
       className={cn(
         "px-3 py-2 rounded-md text-sm font-medium flex flex-row gap-2 items-center transition-colors ml-auto",
-        className,
         variant === "primary"
           ? "bg-gray-800 hover:bg-gray-700 active:bg-gray-700 text-white"
-          : "bg-gray-100 hover:bg-gray-200 active:bg-gray-200 text-gray-800"
+          : "bg-gray-100 hover:bg-gray-200 active:bg-gray-200 text-gray-800",
+        className
       )}
       {...props}
     >

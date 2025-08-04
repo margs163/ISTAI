@@ -30,8 +30,8 @@ const chartConfig = {
 
 export default function BandScoreChart() {
   return (
-    <section className="px-6 lg:pr-0 w-full flex flex-col gap-4">
-      <div className=" w-full flex flex-col gap-4 bg-white rounded-lg border border-gray-200">
+    <section className="px-6 lg:px-0 w-full flex flex-col gap-4">
+      <div className=" w-full flex flex-col gap-4 bg-white rounded-lg border border-gray-200 h-full">
         <header className="p-5 px-6 w-full flex flex-row justify-between items-start gap-20">
           <div className="flex flex-col items-start justify-start gap-0">
             <h3 className="font-semibold text-lg text-gray-800">
@@ -49,7 +49,7 @@ export default function BandScoreChart() {
         </header>
         <ChartContainer
           config={chartConfig}
-          className="aspect-auto h-[160px] lg:h-[208px] w-full px-2 lg:px-4 pb-5"
+          className="aspect-auto h-[160px] my-auto lg:min-h-[200px] w-full px-2 lg:px-4 pb-5"
         >
           <LineChart
             accessibilityLayer
