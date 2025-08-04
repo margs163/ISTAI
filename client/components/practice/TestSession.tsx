@@ -32,7 +32,7 @@ export default function TestSession() {
                 <SquareChartGantt className="text-blue-600 size-5" />
                 <p className="text-sm font-medium text-gray-600">Part</p>
               </div>
-              <h3 className="text-gray-800 text-base font-medium rounded-md">
+              <h3 className="text-gray-800 text-sm font-medium rounded-md">
                 1 of 3
               </h3>
             </div>
@@ -43,7 +43,7 @@ export default function TestSession() {
                 <Clock className="text-gray-600 size-4.5" />
                 <p className="text-sm font-medium text-gray-600">Started</p>
               </div>
-              <h3 className="text-gray-800 text-base font-medium rounded-md tracking-wider">
+              <h3 className="text-gray-800 text-sm font-medium rounded-md tracking-wider">
                 17:58
               </h3>
             </div>
@@ -52,7 +52,7 @@ export default function TestSession() {
                 <TimerReset className="text-blue-600 size-5" />
                 <p className="text-sm font-medium text-gray-600">Duration</p>
               </div>
-              <h3 className="text-gray-800 text-base font-medium rounded-md">
+              <h3 className="text-gray-800 text-sm font-medium rounded-md">
                 11-14 min
               </h3>
             </div>
@@ -63,7 +63,7 @@ export default function TestSession() {
                 <Bot className="text-gray-600 size-5" />
                 <p className="text-sm font-medium text-gray-600">Assistant</p>
               </div>
-              <h3 className="text-gray-800 text-base font-medium rounded-md tracking-wider">
+              <h3 className="text-gray-800 text-sm font-medium rounded-md tracking-wider">
                 Ron
               </h3>
             </div>
@@ -72,7 +72,7 @@ export default function TestSession() {
                 <UserCircle className="text-blue-600 size-5" />
                 <p className="text-sm font-medium text-gray-600">User</p>
               </div>
-              <h3 className="text-gray-800 text-base font-medium rounded-md">
+              <h3 className="text-gray-800 text-sm font-medium rounded-md">
                 John
               </h3>
             </div>
