@@ -75,7 +75,7 @@ export function StrongAspect({
 export default function StrongAspects() {
   return (
     <section className="w-full px-6 lg:px-0">
-      <div className="p-6 lg:p-8 border border-gray-200 rounded-lg bg-white flex flex-col gap-6">
+      <div className="p-6 lg:p-8 border border-gray-200 rounded-lg bg-white flex flex-col gap-6 shadow-none">
         <header className="flex flex-row items-center gap-2">
           <CircleCheck className="size-6 text-green-600" strokeWidth={1.8} />
           <h3 className="font-semibold lg:text-xl text-gray-800 text-lg">

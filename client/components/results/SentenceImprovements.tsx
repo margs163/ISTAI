@@ -63,7 +63,7 @@ export function Improvement({
   };
 }) {
   return (
-    <div className="border border-gray-200 bg-white rounded-md lg:rounded-lg p-5 lg:p-6 space-y-2">
+    <div className="border border-gray-200 bg-white rounded-md lg:rounded-md p-5 lg:p-6 space-y-2">
       <div className="bg-red-50 border-l-2 border-red-300 rounded-r-md p-4 flex flex-col items-start gap-1 lg:gap-2">
         <div className="flex flex-row gap-1 items-center">
           <CircleX className="text-red-500 size-4" />
@@ -103,8 +103,8 @@ export function Improvement({
 
 export default function SentenceImprovements() {
   return (
-    <section className="w-full px-6 lg:px-20 xl:px-40">
-      <div className="p-6 lg:p-8 border border-gray-200 rounded-lg bg-white flex flex-col gap-6">
+    <section className="w-full px-6 lg:px-20 xl:px-36">
+      <div className="p-6 lg:p-8 border border-gray-200 rounded-lg bg-white flex flex-col gap-6 shadow-none">
         <header className="flex flex-row items-center gap-2">
           <GanttChartSquare className="size-6 text-indigo-600" />
           <h3 className="font-semibold lg:text-xl text-gray-800 text-lg">
@@ -116,7 +116,7 @@ export default function SentenceImprovements() {
             <p className="text-sm font-medium px-2 py-1 rounded-md border border-indigo-200 text-indigo-600">
               Grammar
             </p>
-            <div className="flex flex-col gap-3 lg:flex-row lg:gap-4">
+            <div className="flex flex-col gap-3 lg:flex-row lg:gap-6">
               {improvements.grammar.map((item, index) => (
                 <Improvement improvement={item} key={index} />
               ))}
@@ -126,7 +126,7 @@ export default function SentenceImprovements() {
             <p className="text-sm font-medium px-2 py-1 rounded-md border border-indigo-200 text-indigo-600">
               Vocabulary
             </p>
-            <div className="flex flex-col gap-3 lg:flex-row lg:gap-4">
+            <div className="flex flex-col gap-3 lg:flex-row lg:gap-6">
               {improvements.vocabulary.map((item, index) => (
                 <Improvement improvement={item} key={index} />
               ))}

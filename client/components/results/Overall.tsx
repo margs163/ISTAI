@@ -21,7 +21,9 @@ export default function Overall({ score }: { score: number }) {
         <Award className="text-white size-8 lg:size-10 box-content" />
       </div>
       <div className="flex flex-col items-center justify-start gap-4">
-        <h1 className="font-bold text-3xl text-gray-800">Overall Band Score</h1>
+        <h1 className="font-bold text-2xl lg:text-3xl text-gray-800">
+          Overall Band Score
+        </h1>
         <h3
           className={cn(
             "text-5xl font-bold",
@@ -36,7 +38,7 @@ export default function Overall({ score }: { score: number }) {
         </h3>
         <p
           className={cn(
-            "text-base px-4 py-2 rounded-lg font-semibold",
+            "text-sm px-4 py-2 rounded-lg font-semibold",
             score > 4.5 && score < 5.5
               ? "text-red-600 bg-red-100"
               : score >= 5.5 && score < 7.0

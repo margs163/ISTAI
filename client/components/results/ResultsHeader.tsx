@@ -5,19 +5,19 @@ import MainButton from "../MainButton";
 
 export default function ResultsHeader() {
   return (
-    <header className="text-gray-800 w-full bg-white">
-      <div className="w-full flex flex-row gap-3 lg:gap-12 px-6 lg:px-20 xl:px-24 py-2.5 lg:py-5 items-center justify-start">
+    <header className="text-gray-800 w-full bg-white mb-4 lg:mb-8 fixed top-0">
+      <div className="w-full flex flex-row gap-3 lg:gap-12 px-6 lg:px-20 xl:px-24 py-2.5 lg:py-3 items-center justify-start">
         <Link
           href={"/dashboard"}
-          className="p-1 lg:p-2 rounded-full hover:bg-gray-50 active:bg-gray-50 flex flex-row items-center gap-2"
+          className="p-1 lg:p-2 rounded-md hover:bg-gray-50 active:bg-gray-50 flex flex-row items-center gap-2"
         >
           <ArrowLeft className="size-4.5  shrink-0 box-content transition-colors" />
-          <p className="text-gray-800 text-base font-medium hidden lg:block">
+          <p className="text-gray-800 text-sm font-medium hidden lg:block">
             Back to Dashboard
           </p>
         </Link>
         <div className="flex flex-col items-start">
-          <h3 className="text-base lg:text-xl font-semibold">
+          <h3 className="text-base lg:text-lg font-semibold">
             Speaking Test Result
           </h3>
           <p className="text-xs lg:text-sm font-normal text-gray-600 flex flex-row items-center justify-start gap-1">

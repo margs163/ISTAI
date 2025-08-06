@@ -102,8 +102,8 @@ export function CriterionBand({ score }: { score: CriterionScore }) {
 
 export default function CriterionScores() {
   return (
-    <section className="w-full px-6 lg:px-20 xl:px-40">
-      <div className="p-6 lg:p-8 border border-gray-200 rounded-lg bg-white flex flex-col gap-6">
+    <section className="w-full px-6 lg:px-20 xl:px-36">
+      <div className="p-6 lg:p-8 border border-gray-200 rounded-lg bg-white flex flex-col gap-6 shadow-none">
         <header className="flex flex-row items-center gap-2">
           <ChartColumn className="size-6 text-indigo-600" />
           <h3 className="font-semibold lg:text-xl text-gray-800 text-lg">
