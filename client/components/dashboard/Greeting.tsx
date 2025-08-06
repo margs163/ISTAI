@@ -2,6 +2,7 @@ import { ExternalLink, File, FileInput, Flame } from "lucide-react";
 import React from "react";
 import ButtonSecondary from "../home/ButtonSecondary";
 import MainButton from "../MainButton";
+import DailyStreak from "./DailyStreak";
 
 const currentDate = new Date();
 
@@ -22,18 +23,7 @@ export default function Greeting() {
         </h2>
       </div>
       <div className="flex flex-row gap-4 items-end lg:px-1">
-        <div className=" rounded-xl flex flex-row items-center gap-2 lg:pr-6">
-          <Flame
-            className="fill-orange-500 text-orange-600 size-8 lg:size-9"
-            strokeWidth={3}
-          />
-          <div className="">
-            <p className="text-xs lg:text-sm text-gray-600">Daily Streak</p>
-            <h3 className="text-base lg:text-lg lg:leading-[1.45] font-semibold text-gray-800">
-              0 Days Streak
-            </h3>
-          </div>
-        </div>
+        <DailyStreak />
         <MainButton
           variant="secondary"
           className={

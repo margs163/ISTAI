@@ -100,7 +100,7 @@ const bottomMenuItems = [
 export default function AppSidebar() {
   const currentLink = usePathname();
   return (
-    <Sidebar className="font-geist">
+    <Sidebar className="font-geist bg-white">
       <SidebarHeader className="px-6 py-6 pt-8">
         <LogoWithIcon />
       </SidebarHeader>
