@@ -87,7 +87,7 @@ export function Tip({
 
 export default function ImprovementTips() {
   return (
-    <section className="w-full px-6 lg:px-20 xl:px-36 shadow-none">
+    <section className="w-full px-6 lg:px-20 xl:px-36 shadow-none mb-8 lg:mb-16">
       <div className="p-6 lg:p-8 border border-gray-200 rounded-lg bg-white flex flex-col gap-6 shadow-none">
         <header className="flex flex-row items-center gap-2">
           <Lightbulb className="size-6 text-blue-600" strokeWidth={1.8} />

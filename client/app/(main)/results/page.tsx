@@ -1,3 +1,4 @@
+import Footer from "@/components/Footer";
 import AdvancedVocabulary from "@/components/results/AdvancedVocabulary";
 import CriterionScores from "@/components/results/CriterionScores";
 import GrammarErrors from "@/components/results/GrammarErrors";
@@ -13,7 +14,7 @@ import React from "react";
 
 export default function Page() {
   return (
-    <div className="font-geist w-full min-h-screen flex flex-col gap-6 lg:gap-10 bg-gray-50 pt-24 lg:pt-32 pb-24">
+    <div className="font-geist w-full min-h-screen flex flex-col gap-6 lg:gap-10 bg-gray-50 pt-24 lg:pt-32 pb-0">
       <ResultsHeader />
       <Overall score={6} />
       <CriterionScores />
@@ -29,6 +30,7 @@ export default function Page() {
       </div>
       <PronunciationIssues />
       <ImprovementTips />
+      <Footer />
     </div>
   );
 }
