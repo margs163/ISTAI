@@ -4,7 +4,6 @@ import PartInfo from "@/components/practice/PartInfo";
 import QuickTestActions from "@/components/practice/QuickTestActions";
 import TestProgress from "@/components/practice/TestProgress";
 import TestSession from "@/components/practice/TestSession";
-import TestTips from "@/components/practice/TestTips";
 import React from "react";
 
 export default function page() {

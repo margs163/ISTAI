@@ -1,5 +1,13 @@
 import clsx from "clsx";
-import { BookA, BookMarked, LucideProps, Megaphone, Mic } from "lucide-react";
+import {
+  BookA,
+  BookMarked,
+  LucideProps,
+  Megaphone,
+  Mic,
+  TrendingDown,
+  TrendingUp,
+} from "lucide-react";
 import React, { ForwardRefExoticComponent, RefAttributes } from "react";
 
 const scores: Score[] = [
@@ -79,13 +87,17 @@ export function BandScoreCard({ score }: { score: Score }) {
         //   strokeWidth={1.5}
         //   className="size-10 text-green-600 ml-auto"
         // />
-        <h3 className="text-xl text-green-600 font-semibold ml-auto">+ 0.5</h3>
+        <h3 className="text-xl text-green-500 font-semibold ml-auto flex flex-row items-center gap-2">
+          <TrendingUp className="text-green-500 size-5.5" /> 0.5
+        </h3>
       ) : (
         // <ArrowBigDownDash
         //   strokeWidth={1.5}
         //   className="size-10 text-red-600 ml-auto"
         // />
-        <h3 className="text-xl text-red-600 font-semibold ml-auto">- 0.5</h3>
+        <h3 className="text-xl text-red-500 font-semibold ml-auto flex flex-row items-center gap-2">
+          <TrendingDown className="text-red-500 size-5.5" /> 0.5
+        </h3>
       )}
     </div>
   );

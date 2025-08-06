@@ -47,7 +47,7 @@ export default function NewTest({ children }: { children: React.ReactNode }) {
           onSubmit={handleSubmit(onSubmit)}
           className="flex flex-col justify-between gap-10 items-start"
         >
-          <div className="flex flex-row gap-2 items-center justify-start w-full">
+          <div className="flex flex-col md:flex-row gap-2 items-stretch md:items-center justify-start w-full px-1 md:px-0">
             <div className="space-y-2 w-full flex flex-col items-start justify-start">
               <label
                 htmlFor="testName"
@@ -59,7 +59,7 @@ export default function NewTest({ children }: { children: React.ReactNode }) {
                 type="text"
                 id="testName"
                 placeholder="Enter test name"
-                className="text-sm focus-within:outline-0 focus-within:border-gray-400 font-normal text-gray-800 rounded-md px-4 py-2 border-2 border-gray-300 transition-all"
+                className="text-sm focus-within:outline-0 focus-within:border-gray-400 font-normal text-gray-800 rounded-md px-4 py-2 border-2 border-gray-300 transition-all w-full"
                 {...register("testName")}
               />
               {errors.testName && (
