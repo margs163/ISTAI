@@ -2,8 +2,8 @@ import React from "react";
 import Tag from "./Tag";
 import ButtonPrimary from "./ButtonPrimary";
 import ButtonSecondary from "./ButtonSecondary";
-import phoneImage from "@/assets/images/phoneISTAI.png";
-import tabletImage from "@/assets/images/tabletISTAI.png";
+import phoneImage from "@/assets/images/phoneEdited1.png";
+import tabletImage from "@/assets/images/tabletMain2.png";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -35,18 +35,20 @@ export default function Hero() {
           <ButtonSecondary>See How it Works</ButtonSecondary>
         </Link>
       </div>
-      <div className="flex flex-row gap-2 items-center justify-center absolute w-full mt-8 px-3 -bottom-88 lg:-bottom-160">
+      {/* <div> */}
+      <div className="flex flex-row gap-2 items-center justify-center absolute w-full mt-8 -bottom-88 lg:-bottom-160">
         <Image
           src={tabletImage}
-          className=" w-84 lg:w-[540px] rounded-xl relative -right-20 lg:-right-4 lg:-top-18 shadow-md"
+          className=" w-84 lg:w-[540px] rounded-xl relative lg:-right-4 -top-12 lg:-top-17 shadow-md"
           alt="phoneIstai"
         />
         <Image
           src={phoneImage}
-          className=" w-40 lg:w-[290px] rounded-[1.7rem] relative -left-20 z-10 shadow-md"
+          className=" w-40 lg:w-[280px] rounded-[2rem] hidden relative lg:block -left-20 -bottom-4 z-10 shadow-md"
           alt="phoneIstai"
         />
       </div>
+      {/* </div> */}
     </section>
   );
 }

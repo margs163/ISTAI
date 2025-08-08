@@ -11,7 +11,7 @@ export default function Advantages() {
         </span>{" "}
         Test Conditions
       </h1>
-      <div className="flex flex-col lg:flex-row items-center lg:items-start justify-center gap-8 lg:gap-20">
+      <div className="flex flex-col lg:flex-row items-center lg:items-start justify-center gap-8 lg:gap-16">
         <div className="flex flex-col gap-4 lg:gap-8 items-center justify-start px-6">
           <BadgePlus className="size-8 lg:size-12 shrink-0 box-content p-3 lg:p-5 bg-gradient-to-b from-indigo-500 to-purple-500 rounded-full text-white shadow-lg shadow-purple-200" />
           <div className="text-center space-y-2">

@@ -1,15 +1,16 @@
 import Image from "next/image";
 import React from "react";
-import phoneMain from "@/assets/images/phoneISTAI.png";
+import phoneMain from "@/assets/images/phoneEdited1.png";
+import phoneMain2 from "@/assets/images/phoneEdited2.png";
 
 export default function TestInfo() {
   return (
-    <section className="w-full flex flex-col items-center p-8 gap-8 lg:flex-row lg:p-20 lg:px-20 xl:px-40 lg:gap-12 xl:gap-20">
-      <div className="space-y-4 lg:space-y-10 hidden lg:block lg:flex-1/2 lg:p-8 lg:max-w-[600px]">
+    <section className="w-full flex flex-col items-center p-8 gap-8 lg:flex-row lg:p-20 lg:px-20 xl:px-42 lg:gap-12 xl:gap-20">
+      <div className="space-y-4 lg:space-y-10 hidden lg:block lg:flex-1/2 lg:p-8">
         <h2 className="font-semibold text-3xl lg:text-5xl lg:font-semibold">
           Our AI powered Test Simulator is Ideal for Preparation
         </h2>
-        <p className="text-xs font-normal text-gray-700 leading-relaxed tracking-wide lg:text-base lg:font-medium">
+        <p className="text-sm font-normal text-gray-700 leading-relaxed tracking-wide lg:text-base lg:font-medium lg:max-w-[540px]">
           Our AI-powered IELTS Speaking Test Simulator is designed to closely
           mirror the official exam experience. You&apos;ll practice with
           authentic question types, strict timing, and realistic test scenarios,
@@ -30,9 +31,9 @@ export default function TestInfo() {
           </div>
         </div>
       </div>
-      <div className="grad-bg p-6 lg:p-2 rounded-3xl lg:rounded-4xl h-[300px] lg:h-[500px] overflow-hidden flex flex-row justify-center gap-0 lg:flex-1/2 xl:flex-1/3 lg:pt-12">
+      <div className="grad-bg p-6 lg:p-2 rounded-3xl lg:rounded-4xl h-[300px] lg:h-[500px] max-w-[580px] overflow-hidden flex flex-row justify-center gap-0 lg:flex-1/2 xl:flex-1/2 lg:pt-12">
         <Image
-          src={phoneMain}
+          src={phoneMain2}
           alt="phoneDamn"
           className="min-h-[360px] w-auto lg:min-h-[500px] rounded-3xl xl:rounded-4xl relative left-14 lg:left-20 -bottom-16"
         />

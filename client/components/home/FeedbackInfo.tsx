@@ -1,6 +1,6 @@
 import React from "react";
-import result1 from "@/assets/images/phoneResult1.png";
-import result2 from "@/assets/images/phoneResult2.png";
+import result1 from "@/assets/images/editedPhone3.png";
+import result2 from "@/assets/images/phoneEdited2.png";
 import Image from "next/image";
 import { BookMarked, BookOpen, Megaphone, Mic } from "lucide-react";
 import Criteria from "./Criteria";
@@ -34,8 +34,8 @@ const criteria = [
 
 export default function FeedbackInfo() {
   return (
-    <section className="w-full flex flex-col items-center p-8 gap-8 lg:flex-row lg:p-20 lg:px-20 xl:px-40 lg:gap-12 xl:gap-12">
-      <div className="grad-bg p-6 lg:p-2 rounded-3xl lg:rounded-4xl h-[300px] lg:h-[500px] overflow-hidden flex flex-row justify-center gap-0 lg:flex-1/2 xl:flex-1/3 lg:pt-12">
+    <section className="w-full flex flex-col items-center p-8 gap-8 lg:flex-row lg:p-20 lg:px-20 xl:px-42 lg:gap-12 xl:gap-20">
+      <div className="grad-bg p-6 lg:p-2 rounded-3xl lg:rounded-4xl h-[300px] lg:h-[500px] lg:max-w-[580px] overflow-hidden flex flex-row justify-center gap-0 lg:flex-1/2 xl:flex-1/2 lg:pt-12">
         <Image
           src={result2}
           alt="phoneDamn"
@@ -47,16 +47,15 @@ export default function FeedbackInfo() {
           className="min-h-[360px] w-auto lg:min-h-[540px] rounded-3xl xl:rounded-4xl relative right-14 lg:right-20"
         />
       </div>
-      <div className="space-y-8 lg:space-y-10 lg:block lg:flex-1/2 lg:p-8 lg:max-w-[750px]">
+      <div className="space-y-8 lg:space-y-10 lg:block lg:flex-1/2 lg:p-8">
         <h2 className="font-semibold text-3xl lg:text-5xl lg:font-semibold">
-          Recieve Comperehensive Feedback and Analyze Your Skills
+          Comperehensive Analysis of Your Speech
         </h2>
-        <p className="text-xs font-normal text-gray-700 leading-relaxed tracking-wide lg:text-base lg:font-medium">
-          Our simulator evaluates your speaking performance across all official
+        <p className="text-xs font-normal text-gray-700 leading-relaxed tracking-wide lg:text-base lg:font-medium lg:max-w-[540px]">
+          Our simulator evaluates your speaking performance across official
           IELTS criteria, providing clear insights into your strengths and areas
           for improvement. With instant, actionable feedback and detailed
-          analysis, you can track your progress and focus your practice for
-          maximum results.
+          analysis, you can track your progress and maximize your score.
         </p>
         <div className="flex flex-row lg:grid lg:grid-cols-2 item-stretch justify-stretch flex-wrap gap-4">
           {criteria.map((item, index) => {

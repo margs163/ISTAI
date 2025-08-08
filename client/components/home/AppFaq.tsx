@@ -1,5 +1,6 @@
 import Image from "next/image";
-import phoneMain from "@/assets/images/phoneISTAI.png";
+import phoneMain from "@/assets/images/phoneEdited1.png";
+import phoneMain2 from "@/assets/images/phoneEdited2.png";
 import FaqItem from "./FaqItem";
 
 type Faq = {
@@ -32,9 +33,9 @@ const faqs: Faq[] = [
 
 export default function AppFaq() {
   return (
-    <section className="w-full flex flex-col items-center p-8 gap-8 lg:flex-row lg:p-20 lg:px-20 xl:px-40 lg:gap-12 xl:gap-20 relative">
-      <div className="hidden lg:flex flex-col gap-8">
-        <h2 className="font-semibold text-3xl lg:text-5xl lg:font-semibold max-w-[500px]">
+    <section className="w-full flex flex-col items-center p-8 gap-8 lg:flex-row lg:p-20 lg:px-20 xl:px-42 lg:gap-12 xl:gap-20 relative">
+      <div className="hidden lg:flex flex-col gap-8 lg:flex-1/2">
+        <h2 className="font-semibold text-3xl lg:text-5xl lg:font-semibold">
           Frequently Asked Questions
         </h2>
         <div className="hidden lg:flex lg:flex-col gap-8 max-w-[600px]">
@@ -43,9 +44,9 @@ export default function AppFaq() {
           })}
         </div>
       </div>
-      <div className="grad-bg p-6 lg:p-2 rounded-3xl lg:rounded-4xl h-[300px] lg:h-[500px] overflow-hidden flex flex-row justify-center gap-0 lg:flex-1/2 xl:flex-1/3 lg:pt-12">
+      <div className="grad-bg p-6 lg:p-2 rounded-3xl lg:rounded-4xl h-[300px] lg:h-[500px] lg:max-w-[580px] overflow-hidden flex flex-row justify-center gap-0 lg:flex-1/2 xl:flex-1/2 lg:pt-12">
         <Image
-          src={phoneMain}
+          src={phoneMain2}
           alt="phoneDamn"
           className="min-h-[360px] w-auto lg:min-h-[500px] rounded-3xl xl:rounded-4xl relative left-14 lg:left-20 -bottom-16"
         />
