@@ -1,0 +1,54 @@
+from fastapi import FastAPI
+from fastapi_users import FastAPIUsers
+from .routers.email import router as email_router
+from .routers.questions import router as questions_router
+from .lib.auth_db import User
+from .users import fastapi_users, auth_backend
+from .schemas.user import UserRead, UserCreate, UserUpdate
+from .routers.transcriptions import router as transcription_router
+from .routers.practice_test import router as practice_router
+from .routers.reading_cards import router as reading_cards_router
+
+app = FastAPI()
+
+app.include_router(email_router, prefix="/email", tags=["email"])
+app.include_router(
+    fastapi_users.get_auth_router(auth_backend), prefix="/auth/jwt", tags=["auth"]
+)
+app.include_router(
+    fastapi_users.get_register_router(UserRead, UserCreate),
+    prefix="/auth",
+    tags=["auth"],
+)
+app.include_router(
+    fastapi_users.get_verify_router(UserRead),
+    prefix="/auth",
+    tags=["auth"],
+)
+app.include_router(
+    fastapi_users.get_reset_password_router(),
+    prefix="/auth",
+    tags=["auth"],
+)
+app.include_router(
+    fastapi_users.get_users_router(UserRead, UserUpdate),
+    prefix="/users",
+    tags=["users"],
+)
+
+app.include_router(questions_router, prefix="/questions", tags=["questions"])
+
+app.include_router(
+    transcription_router, prefix="/transcription", tags=["transcription"]
+)
+
+app.include_router(practice_router, prefix="/practice_test", tags=["practice_test"])
+
+app.include_router(
+    reading_cards_router, prefix="/reading_cards", tags=["reading_cards"]
+)
+
+
+@app.get("/")
+async def main():
+    return {"message": "Hello, World!"}

@@ -1,0 +1,493 @@
+{
+  "id": 1,
+  "total_records": 30,
+  "part1": [
+    {
+      "Topic": "Hometown & Weather",
+      "Question1": "What is your country famous for?",
+      "Question2": "Where do you live in your country?",
+      "Question3": "Is it a interesting place to live?",
+      "Question4": "Are you planning to live there in the future?",
+      "Question5": "How is the weather today?",
+      "Question6": "WhatвЂ™s your favourite kind of weather?",
+      "Question7": "Is there any type of weather you really dont like?",
+      "Question8": "What is the climate like in your country?",
+      "Question9": "Does the weather affect peoples lives in your country?",
+      "Question10": "Do people change in the summer?",
+      "Question11": "Does bad weather ever affect transport in your country?"
+    },
+    {
+      "Topic": "Shopping",
+      "Question1": "Do you like shopping?",
+      "Question2": "WhatвЂ™s your favourite shop?",
+      "Question3": "Do you prefer shopping alone or with others?",
+      "Question4": "What kinds of shops are there where you live?",
+      "Question5": "Have you ever bought anything online?",
+      "Question6": "Do you think men and women have different opinions about shopping?"
+    },
+    {
+      "Topic": "Transport",
+      "Question1": "How did you get here today?",
+      "Question2": "What is your favourite mode of transport?",
+      "Question3": "Do you ever use public transport?",
+      "Question4": "Do you like the transport system in your country?",
+      "Question5": "What is the difference between taking a bus and taking a train?"
+    },
+    {
+      "Topic": "Work",
+      "Question1": "Do you have a job right now?",
+      "Question2": "Do you enjoy your job?",
+      "Question3": "What responsibilities do you have at work?",
+      "Question4": "What is your typical day like at work?",
+      "Question5": "What would you change about your job?",
+      "Question6": "What job do you think you will be doing in five years?",
+      "Question7": "What skills and qualifications are required for this job?"
+    },
+    {
+      "Topic": "Volunteer Works",
+      "Question1": "Have you ever worked before?",
+      "Question2": "What was your first day at work like?",
+      "Question3": "What responsibilities did you have at work?",
+      "Question4": "What was your typical day like at work?",
+      "Question5": "Have you taken any volunteer works?",
+      "Question6": "Why did you do the volunteer works?",
+      "Question7": "Do you know any volunteers?",
+      "Question8": "How do you define volunteer work?"
+    },
+    {
+      "Topic": "Hometown",
+      "Question1": "Can you tell me about your hometown?",
+      "Question2": "How has your hometown changed over the years?",
+      "Question3": "Is there any way your hometown could be made better?",
+      "Question4": "Are there good transportation links to your hometown?",
+      "Question5": "What kind of jobs do the people in your hometown do?",
+      "Question6": "Do you have a lot of friends?",
+      "Question7": "Who is your best friend and why?",
+      "Question8": "Who would you most like to be friends with and why?",
+      "Question9": "What kind of person can you make friends with easily?",
+      "Question10": "Which is more important to you, friends or family?"
+    },
+    {
+      "Topic": "Pets",
+      "Question1": "Do you have a pet?",
+      "Question2": "Do you like animals?",
+      "Question3": "WhatвЂ™s your favourite animal?",
+      "Question4": "What is a popular pet to have in your country?",
+      "Question5": "Did you have a pet as a child?",
+      "Question6": "Why do people have pets?"
+    },
+    {
+      "Topic": "High School & Hometown",
+      "Question1": "Where is your hometown?",
+      "Question2": "How often do you visit your hometown?",
+      "Question3": "How many people live in your hometown?",
+      "Question4": "What is your hometown famous for?",
+      "Question5": "WhatвЂ™s the oldest part of your hometown?",
+      "Question6": "Who was your favorite teacher in high school?",
+      "Question7": "WhatвЂ™s your favorite subject in high school?",
+      "Question8": "Do you still remember what happened on your first day of high school?",
+      "Question9": "Do you still keep in touch with your friends from high school?",
+      "Question10": "Do you miss your life in high school?"
+    },
+    {
+      "Topic": "Lifestyle & Work",
+      "Question1": "What do you do in your free time?",
+      "Question2": "Do you have a busy social life?",
+      "Question3": "Do you lead an active life?",
+      "Question4": "Has your life changed much in the last year?",
+      "Question5": "What would you like to change about your lifestyle?",
+      "Question6": "Do you work right now?",
+      "Question7": "Do you get on well with your co-workers?",
+      "Question8": "What responsibilities do you have at your work?",
+      "Question9": "Are there good work opportunities in your home country?"
+    },
+    {
+      "Topic": "Family & Housework",
+      "Question1": "How many people are there in your immediate family?",
+      "Question2": "Who do you get on best within your family?",
+      "Question3": "Do you have a large extended family?",
+      "Question4": "What do you do together with your family?",
+      "Question5": "Why is family important to you?",
+      "Question6": "Do you do housework at home?",
+      "Question7": "What kind of housework do you often do?",
+      "Question8": "Did you do housework when you were a child?",
+      "Question9": "Do you think that children should do housework?"
+    },
+    {
+      "Topic": "Daily Routine",
+      "Question1": "When do you usually get up in the morning?",
+      "Question2": "Do you usually have the same routine every day?",
+      "Question3": "What is your daily routine?",
+      "Question4": "Do you ever change your routine?",
+      "Question5": "Is your routine the same today as it was when you were a child?",
+      "Question6": "Do you think it is important to have a daily routine?"
+    },
+    {
+      "Topic": "Books & TV",
+      "Question1": "Do you like watching TV?",
+      "Question2": "How often do you watch TV?",
+      "Question3": "What kind of TV programmes do you like to watch?",
+      "Question4": "What are the most popular TV shows in your country?",
+      "Question5": "Has the internet affected your viewing habits?",
+      "Question6": "How often do you read?",
+      "Question7": "Do you like reading books? Why?",
+      "Question8": "Do you have many books at home?",
+      "Question9": "Do you prefer to buy books or borrow them?",
+      "Question10": "What are the benefits of reading?"
+    },
+    {
+      "Topic": "Home & TV",
+      "Question1": "Who do you live with?",
+      "Question2": "What is your favourite room in your home?",
+      "Question3": "How is your home decorated?",
+      "Question4": "Do you like visitors coming to your home?",
+      "Question5": "Do you like watching TV?",
+      "Question6": "What is your favourite TV show now?",
+      "Question7": "What was your favourite show when you were a child?",
+      "Question8": "Do you like watching TV shows from other countries?"
+    },
+    {
+      "Topic": "Accommodation & Weather",
+      "Question1": "Do you live in a house or a flat?",
+      "Question2": "Is it a big place?",
+      "Question3": "How long have you lived there?",
+      "Question4": "What do you like about living there?",
+      "Question5": "Is there a garden in the place you live in?",
+      "Question6": "Do you prefer to hot weather or cold?",
+      "Question7": "Tell me about the weather in your country in different times of the year?",
+      "Question8": "Which time of the year did you enjoy the most when you were the child?",
+      "Question9": "Do you (usually) pay attention to the weather forecasts?",
+      "Question10": "Has the weather changed much in your country in recent years?"
+    },
+    {
+      "Topic": "Advertisements & Books",
+      "Question1": "Do you like reading books? Why?",
+      "Question2": "What book would you take on a long journey?",
+      "Question3": "How easy is it for you to read books in English?",
+      "Question4": "Have you given up reading a book recently?",
+      "Question5": "What kind of people like reading and what kind of people donвЂ™t like reading very much?",
+      "Question6": "Do you like watching advertisements?",
+      "Question7": "Will you buy something because of an advertisement?",
+      "Question8": "How do you feel when you see pop-up ads on the internet?",
+      "Question9": "Do you like funny or serious advertisements?",
+      "Question10": "What makes a good advertisement?"
+    },
+    {
+      "Topic": "Celebrity & Computer",
+      "Question1": "Do you use computers?",
+      "Question2": "What do you use a computer to do?",
+      "Question3": "Did you use computers when you were little?",
+      "Question4": "Do people often use computers these days?",
+      "Question5": "Will people continue to use computers in the future?",
+      "Question6": "Who is your favorite celebrity?",
+      "Question7": "Do you like any foreign celebrities?",
+      "Question8": "Would you want to be a celebrity in the future?",
+      "Question9": "Do you think we should protect famous peopleвЂ™s privacy?",
+      "Question10": "How do celebrities influence their fans in your country?"
+    },
+    {
+      "Topic": "Movies & Music",
+      "Question1": "How often do you go to the cinema?",
+      "Question2": "Are cinema tickets expensive in your country?",
+      "Question3": "What are the advantages of seeing a film at the cinema?",
+      "Question4": "Do you usually watch films alone or with others?",
+      "Question5": "Which actor would you like to play you in a film?",
+      "Question6": "How do you listen to music?",
+      "Question7": "When do you listen to music?",
+      "Question8": "WhatвЂ™s your favorite kind of music?",
+      "Question9": "Is music an important subject at school in your country?",
+      "Question10": "What kinds of music are (most) popular in your country?"
+    },
+    {
+      "Topic": "Music & Newspaper And Magazine",
+      "Question1": "WhatвЂ™s your favorite kind of music?",
+      "Question2": "Do you like to listen to live music?",
+      "Question3": "Is live music popular in your country?",
+      "Question4": "Have you ever been to a concert before? Or Have you ever been to a musical performance?",
+      "Question5": "Do you often read newspapers?",
+      "Question6": "Do you prefer to read local news or international news?",
+      "Question7": "Which is more popular where you live, newspapers or magazines?",
+      "Question8": "Do many people today read newspapers?",
+      "Question9": "In the future, do you think more people than today will read magazines, or fewer people?",
+      "Question10": "Do you think newspapers will be very important to you in the future?"
+    },
+    {
+      "Topic": "Music & Travel",
+      "Question1": "Where was the last place you visited on holiday?",
+      "Question2": "Would you like to go back there again?",
+      "Question3": "What kind of tourist destinations do you usually prefer?",
+      "Question4": "Has a foreign visitor ever stayed at your home?",
+      "Question5": "WhatвЂ™s the best way to save money while traveling?",
+      "Question6": "How much time do you spend listening to music every day?",
+      "Question7": "Are your music tastes varied?",
+      "Question8": "What is your favorite song?",
+      "Question9": "Do you like to sing along to your favorite songs?",
+      "Question10": "Are you learning to play a musical instrument at the moment?"
+    },
+    {
+      "Topic": "Internet & Major",
+      "Question1": "How important is the Internet to you?",
+      "Question2": "Do you use the Internet more for work or in your free time?",
+      "Question3": "Do you think you use the Internet too much?",
+      "Question4": "How will the Internet develop in the future?",
+      "Question5": "Are there any negative things about the Internet?",
+      "Question6": "What is your major? Or what was your major?",
+      "Question7": "Did you or do you like it?",
+      "Question8": "Is it a popular major at your university?",
+      "Question9": "If you could change to another major, what would it be?",
+      "Question10": "Would you change it if you had the chance?"
+    },
+    {
+      "Topic": "Internet & Outdoor Activities",
+      "Question1": "Do you like outdoor activities?",
+      "Question2": "What outdoor sports do you like?",
+      "Question3": "How much time do you spend outdoors every week?",
+      "Question4": "What types of outdoor activities are popular in your country?",
+      "Question5": "How often do you use the Internet?",
+      "Question6": "Do you think you use the Internet too much?",
+      "Question7": "What are your favourite websites?",
+      "Question8": "What are the positive and negative things about the Internet?"
+    },
+    {
+      "Topic": "Indoor Activities & Transportation",
+      "Question1": "Do you prefer public transportation or private transportation?",
+      "Question2": "WhatвЂ™s the most popular means of transportation in your hometown?",
+      "Question3": "Is it easy to catch a bus in your country?",
+      "Question4": "Is driving to work popular in your country?",
+      "Question5": "What do you think will become the most popular means of transportation in your country?",
+      "Question6": "Do you like indoor activities?",
+      "Question7": "What indoor activities do you like?",
+      "Question8": "How much time do you spend indoors every week?",
+      "Question9": "What types of indoor activities are popular in your country?"
+    },
+    {
+      "Topic": "Major & Sports",
+      "Question1": "Do you work or study?",
+      "Question2": "What is your major? Or what was your major?",
+      "Question3": "Why did you choose that major?",
+      "Question4": "What is the most difficult part of studying that subject?",
+      "Question5": "Do you plan to use the subject you are studying in the future?",
+      "Question6": "Do you play any sports?",
+      "Question7": "Do you watch sports on TV?",
+      "Question8": "What is the most popular sport in your country?",
+      "Question9": "How do people in your country stay fit?",
+      "Question10": "Is it important for children to play sports?"
+    },
+    {
+      "Topic": "Gift & Noise",
+      "Question1": "Do you mind noises?",
+      "Question2": "What types of noise do you come across in your daily life?",
+      "Question3": "Are there any sounds that you like?",
+      "Question4": "Where can you hear loud noises?",
+      "Question5": "Do you think thereвЂ™s too much noise in modem society?",
+      "Question6": "Are cities becoming noisier?",
+      "Question7": "When do you send gifts?",
+      "Question8": "When was the last time you received a gift?",
+      "Question9": "Have you received a gift you didnвЂ™t like?",
+      "Question10": "How do you feel when you receive a gift?",
+      "Question11": "Do people in your country send gifts to show their generosity?"
+    },
+    {
+      "Topic": "Patience & Politeness",
+      "Question1": "What do you think patience is?",
+      "Question2": "Do you think patience is important?",
+      "Question3": "Do you think you are an patient person?",
+      "Question4": "Have you ever lost your patience?",
+      "Question5": "Are you a polite person?",
+      "Question6": "Who taught you to be polite?",
+      "Question7": "Is it important to be polite?",
+      "Question8": "What do you do if others are not polite to you?"
+    },
+    {
+      "Topic": "Colors & Weather",
+      "Question1": "WhatвЂ™s the best season of the whole year?",
+      "Question2": "What do people normally do in that season?",
+      "Question3": "WhatвЂ™s the weather usually like in your country (or, your hometown)?",
+      "Question4": "How is the weather here different from the weather in your home country?",
+      "Question5": "What colors do you like?",
+      "Question6": "WhatвЂ™s the most popular color in your country?",
+      "Question7": "Do you like to wear dark or bright colors?",
+      "Question8": "WhatвЂ™s the difference between men and womenвЂ™s preference for colors?",
+      "Question9": "Do colors affect your mood?"
+    },
+    {
+      "Topic": "Food & Weather",
+      "Question1": "Do you have a healthy diet?",
+      "Question2": "Do you prefer eating at home or eating out?",
+      "Question3": "Do you like ordering food to be delivered?",
+      "Question4": "Who do you get food delivered with?",
+      "Question5": "Do you eat meals differently now compared to when you were little?",
+      "Question6": "What sort of weather do you like the most?",
+      "Question7": "Would you say the weather in your hometown is suitable for working (or studying)?",
+      "Question8": "Would you like to move to a place with the different weather?",
+      "Question9": "What season (or weather) do you think is most suitable for work and/or study?"
+    },
+    {
+      "Topic": "Clothes & Photos",
+      "Question1": "What is your favourite item of clothing?",
+      "Question2": "Are there any traditional clothes in your country?",
+      "Question3": "Where do you usually purchase your clothes?",
+      "Question4": "Have you ever bought clothes online?",
+      "Question5": "Who do you usually take photos of?",
+      "Question6": "How do you keep your photos?",
+      "Question7": "Do you keep your photographs on your computer?",
+      "Question8": "Have you framed any of your photos?",
+      "Question9": "Do you prefer to send postcards to people or to send photos that you took yourself?"
+    },
+    {
+      "Topic": "Art & Photography",
+      "Question1": "Do you like art?",
+      "Question2": "Do you think art classes are necessary?",
+      "Question3": "How do you think art classes affect childrenвЂ™s development?",
+      "Question4": "What kind of paintings do people in your country like?",
+      "Question5": "What benefits can you get from painting as a hobby?",
+      "Question6": "Do you like to take photographs?",
+      "Question7": "Do you prefer to take photos yourself or to have other people take photos?",
+      "Question8": "How often do you take photographs?",
+      "Question9": "Do you prefer to take pictures of people or of scenery?",
+      "Question10": "Are there any photos on the walls of your home?"
+    },
+    {
+      "Topic": "Bags & Boat",
+      "Question1": "Have you ever taken a ride on a boat?",
+      "Question2": "Do you like traveling by boat?",
+      "Question3": "What are the advantages of travelling by boat?",
+      "Question4": "Do people in your country like to travel by boat?",
+      "Question5": "Will it get more popular in the future?",
+      "Question6": "Do you like bags?",
+      "Question7": "What types of bags do you like?",
+      "Question8": "Do you usually carry a bag (when you go out)?",
+      "Question9": "What types of bags do you use in your everyday life?",
+      "Question10": "What do you put in these bags?",
+      "Question11": "What sorts of bags do women like to buy?"
+    }
+  ],
+  "part2": [
+    {
+      "Topic": "Describe a house or apartment you would like to live in. and explain why would like to live in this place",
+      "Question1": "where it is / Where it would be",
+      "Question2": "what you would (like to) do there",
+      "Question3": "who you would (like to) live therewith"
+    },
+    {
+      "Topic": "Describe an interesting animal you have seen. and explain how you feel about this animal",
+      "Question1": "What animal it was",
+      "Question2": "When and Where you saw it",
+      "Question3": "who paid for this uniform"
+    },
+    {
+      "Topic": "Describe a successful small business that you know about. and explain why you think this business/company is successful.",
+      "Question1": "what business/company it is",
+      "Question2": "what this business does",
+      "Question3": "how you know about this business"
+    },
+    {
+      "Topic": "Describe a crowded place you’ve been to. and explain how you felt about the place",
+      "Question1": "when you went there",
+      "Question2": "where the place is (or, was)",
+      "Question3": "who you went therewith"
+    },
+    {
+      "Topic": "Describe a family member you spend a lot of time with. and explain why you spend the most time with him/her.",
+      "Question1": "who this person is",
+      "Question2": "what you usually do together",
+      "Question3": "what kind of person he/she is"
+    },
+    {
+      "Topic": "Describe a person who is often in the news, and who you would like to meet. and explain why you would like to meet him/her.",
+      "Question1": "who this person is",
+      "Question2": "how you know him/her",
+      "Question3": "why he/she is often in the news"
+    },
+    {
+      "Topic": "Describe a change that could improve your local area. and explain how this change would improve your local area.",
+      "Question1": "what the change would be",
+      "Question2": "how this change could be made",
+      "Question3": "what problems are causing the need for this change"
+    },
+    {
+      "Topic": "Describe a performance you enjoyed watching. and explain why you enjoyed the performance.",
+      "Question1": "what the performance was",
+      "Question2": "when and where you watched the performance",
+      "Question3": "who was performing (or, who performed)"
+    },
+    {
+      "Topic": "Describe an important text message you received. and explain why the message was important to you.",
+      "Question1": "who sent the message",
+      "Question2": "what was in the message",
+      "Question3": "why the person sent the message"
+    },
+    {
+      "Topic": "Describe a uniform you have worn, (such as a school or company uniform). and explain how you felt about that uniform.",
+      "Question1": "what it looked like",
+      "Question2": "when and where you needed to wear this uniform",
+      "Question3": "who paid for this uniform"
+    },
+    {
+      "Topic": "Describe a time when someone apologized to you. and explain why they apologized to you.",
+      "Question1": "when this happened",
+      "Question2": "what you were doing",
+      "Question3": "who apologized to you"
+    },
+    {
+      "Topic": "Describe an article you read in a magazine or on the Internet that could help people improve their health. and explain why (you think) it could improve people’s health.",
+      "Question1": "when you read it",
+      "Question2": "where you read it",
+      "Question3": "what it was about"
+    },
+    {
+      "Topic": "Describe a trip you took by public transport. and explain how you felt about the trip. and explain how you felt about the trip.",
+      "Question1": "when it happened",
+      "Question2": "what means of transport you took",
+      "Question3": "what you did during the trip"
+    },
+    {
+      "Topic": "Describe a challenging thing you have done. and explain why you thought it was challenging. and explain why you thought it was challenging.",
+      "Question1": "when you did it",
+      "Question2": "why you did it",
+      "Question3": "how you handled this challenge"
+    },
+    {
+      "Topic": "Describe a person who taught you something important. and explain why you think what they taught is important.",
+      "Question1": "who this person was",
+      "Question2": "what they taught you",
+      "Question3": "how they taught it to you"
+    },
+    {
+      "Topic": "Describe a member of a team that you know about.",
+      "Question1": "what team it is",
+      "Question2": "what role in the team this person plays",
+      "Question3": "and explain why you like him/her"
+    },
+    {
+      "Topic": "Describe a job you would not like to do. and explain why you would not like to do it. and explain why you would not like to do it.",
+      "Question1": "what the job is",
+      "Question2": "how you know about it",
+      "Question3": "whether it is an easy or difficult job"
+    },
+    {
+      "Topic": "Describe an exciting experience you have had. and explain why it was exciting for you. and explain why it was exciting for you.",
+      "Question1": "when you did it",
+      "Question2": "where you were when you did it",
+      "Question3": "who you did it with"
+    },
+    {
+      "Topic": "Describe a time when you couldn’t use your mobile phone. and explain why you were not able to use your mobile phone.",
+      "Question1": "where it was",
+      "Question2": "what you were doing at this time",
+      "Question3": "when it was"
+    },
+    {
+      "Topic": "Describe a time when the weather prevented you from doing something. and explain how you felt when you had to change your plans.",
+      "Question1": "what your plan was",
+      "Question2": "what weather you were hoping for",
+      "Question3": "what happened"
+    },
+    {
+      "Topic": "Describe something you bought that was difficult to use at first. and explain why it was difficult to use at first.",
+      "Question1": "what it was",
+      "Question2": "why you bought it",
+      "Question3": "how you use it"
+    }
+  ]
+}
