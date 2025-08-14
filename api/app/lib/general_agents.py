@@ -1,30 +1,48 @@
-from typing import TypedDict, Dict, List
+from operator import add
+from typing import Annotated, TypedDict, Dict, List
 import asyncio
 from dotenv import load_dotenv
 from langgraph.graph import StateGraph, START, END
 from langchain_groq import ChatGroq
 from langchain.prompts import ChatPromptTemplate
-from .prompts import general_agents_prompts, test_taker_prompt, FluencyEvaluation, GrammaticalEvaluation, LexicalEvaluation
+from .prompts import (
+    general_agents_prompts,
+    test_taker_prompt,
+    FluencyEvaluation,
+    GrammaticalEvaluation,
+    LexicalEvaluation,
+)
+
 load_dotenv()
 
 llm = ChatGroq(model="llama-3.3-70b-versatile", temperature=0.5)
 
 fluency_prompt = ChatPromptTemplate(
-    [("system", general_agents_prompts['system_fluency_prompt']), ("user", str(test_taker_prompt))]
+    [
+        ("system", general_agents_prompts["system_fluency_prompt"]),
+        ("user", str(test_taker_prompt)),
+    ]
 )
 grammar_prompt = ChatPromptTemplate(
-    [("system", general_agents_prompts['system_grammar_prompt']), ("user", str(test_taker_prompt))]
+    [
+        ("system", general_agents_prompts["system_grammar_prompt"]),
+        ("user", str(test_taker_prompt)),
+    ]
 )
 lexis_prompt = ChatPromptTemplate(
-    [("system", general_agents_prompts['system_lexis_prompt']), ("user", str(test_taker_prompt))]
+    [
+        ("system", general_agents_prompts["system_lexis_prompt"]),
+        ("user", str(test_taker_prompt)),
+    ]
 )
 
+
 class GeneralState(TypedDict):
-    #metadata
+    # metadata
     metadata_id: str
     speech_metadata: Dict[str, float]
     transcriptions: List
-    #criteria
+    # criteria
     fluency_score: float
     fluency_strong_points: List[str]
     fluency_weak_sides: List[str]
@@ -41,32 +59,40 @@ class GeneralState(TypedDict):
 
 async def fluency_invoke(state: GeneralState) -> Dict:
     chain = fluency_prompt | llm.with_structured_output(FluencyEvaluation)
-    response: FluencyEvaluation = await chain.ainvoke({"transcriptions": state["transcriptions"]})
+    response: FluencyEvaluation = await chain.ainvoke(
+        {"transcriptions": state["transcriptions"]}
+    )
     return {
         "fluency_score": response.fluencyScore,
         "fluency_strong_points": response.fluencyStrongPoints,
         "fluency_weak_sides": response.fluencyWeakSide,
-        "fluency_tips": response.fluencyTips
+        "fluency_tips": response.fluencyTips,
     }
+
 
 async def grammar_invoke(state: GeneralState) -> Dict:
     chain = grammar_prompt | llm.with_structured_output(GrammaticalEvaluation)
-    response: FluencyEvaluation = await chain.ainvoke({"transcriptions": state["transcriptions"]})
+    response: FluencyEvaluation = await chain.ainvoke(
+        {"transcriptions": state["transcriptions"]}
+    )
     return {
         "grammar_score": response.fluencyScore,
         "grammar_strong_points": response.fluencyStrongPoints,
         "grammar_weak_sides": response.fluencyWeakSide,
-        "grammar_tips": response.fluencyTips
+        "grammar_tips": response.fluencyTips,
     }
+
 
 async def lexis_invoke(state: GeneralState) -> Dict:
     chain = lexis_prompt | llm.with_structured_output(LexicalEvaluation)
-    response: LexicalEvaluation = await chain.ainvoke({"transcriptions": state["transcriptions"]})
+    response: LexicalEvaluation = await chain.ainvoke(
+        {"transcriptions": state["transcriptions"]}
+    )
     return {
         "lexis_score": response.lexicalScore,
         "lexis_strong_points": response.lexicalStrongPoints,
         "lexis_weak_sides": response.lexicalWeakSide,
-        "lexis_tips": response.lexicalTips
+        "lexis_tips": response.lexicalTips,
     }
 
 
@@ -85,13 +111,10 @@ general_app = general_graph.compile()
 
 
 if __name__ == "__main__":
+
     async def main():
         print("-----------------------Graph image-----------------------:\n")
         general_app.get_graph(xray=True).print_ascii()
         print("---------------------------------------------------------\n\n")
 
     asyncio.run(main())
-
-
-
-   

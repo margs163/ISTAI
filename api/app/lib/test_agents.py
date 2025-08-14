@@ -5,6 +5,8 @@ from langchain_core.messages import HumanMessage, AIMessageChunk
 from .conv_agent import part1_graph
 from .conversation_agents import agent_part1, agent_part3
 from ..dependencies import get_polly_client, get_s3_client
+import azure.cognitiveservices.speech as speechsdk
+import time
 import boto3
 import botocore
 from botocore.exceptions import ClientError
@@ -44,6 +46,72 @@ async def polly():
         )
     except Exception as e:
         print(e)
+
+
+async def azure_stt():
+    azure_region = os.getenv("AZURE_REGION")
+    azure_api_key = os.getenv("AZURE_SUBSCRIPTION_KEY")
+
+    reference_text = "My first attempt at baking chocolate chip cookies was absolutely catastrophic. I carefully measured all the ingredients: flour, sugar, butter, eggs, and vanilla extract. However, I accidentally confused salt with sugar and added three tablespoons instead of three teaspoons. When I tasted the raw batter, it was incredibly salty and completely inedible. I threw everything away and started over, this time reading the recipe more carefully. The second batch turned out perfectly golden brown and deliciously sweet. My family couldn't believe the difference between my first disaster and final success."
+
+    pronunciation_assessment_config = speechsdk.PronunciationAssessmentConfig(
+        reference_text=reference_text,
+        grading_system=speechsdk.PronunciationAssessmentGradingSystem.HundredMark,
+        granularity=speechsdk.PronunciationAssessmentGranularity.Phoneme,
+        enable_miscue=True,
+    )
+
+    speech_config = speechsdk.SpeechConfig(
+        subscription=azure_api_key, region=azure_region
+    )
+    speech_config.speech_recognition_language = "en-GB"
+
+    audio_config = speechsdk.audio.AudioConfig(filename="./app/data/test.wav")
+
+    recognizer = speechsdk.SpeechRecognizer(
+        speech_config=speech_config, audio_config=audio_config
+    )
+
+    pronunciation_assessment_config.apply_to(recognizer)
+
+    results = []
+
+    def recognize_handle(event):
+        if event.result.reason == speechsdk.ResultReason.RecognizedSpeech:
+            pronunciation_result = speechsdk.PronunciationAssessmentResult(event.result)
+            results.append(pronunciation_result)
+            print(f"Recognized: {event.result.text}")
+            print(f"Accuracy Score: {pronunciation_result.accuracy_score}")
+            print(f"Fluency Score: {pronunciation_result.fluency_score}")
+            print(f"Prosody Score: {pronunciation_result.prosody_score}")
+
+            for word in pronunciation_result.words:
+                print(
+                    f" Word: {word.word}, Accuracy: {word.accuracy_score}, Error: {word.error_type}"
+                )
+
+    def canceled(event):
+        print(f"Recognition canceled: {event.cancellation_details.reason}")
+        if event.cancellation_details.reason == speechsdk.CancellationReason.Error:
+            print(f"Error details: {event.cancellation_details.error_details}")
+
+    recognizer.recognized.connect(recognize_handle)
+    recognizer.canceled.connect(recognize_handle)
+
+    print("Starting continuous recognition...")
+    recognizer.start_continuous_recognition()
+
+    time.sleep(40)
+
+    recognizer.stop_continuous_recognition()
+    print("Recognition stopped.")
+
+    print("\nSummary of Pronunciation Assessment:")
+    for i, pronunciation_result in enumerate(results):
+        print(f"Segment {i+1}:")
+        print(f"  Accuracy: {pronunciation_result.accuracy_score}")
+        print(f"  Fluency: {pronunciation_result.fluency_score}")
+        print(f"  Prosody: {pronunciation_result.prosody_score}")
 
 
 async def main():
@@ -96,4 +164,4 @@ async def main():
 
 
 if __name__ == "__main__":
-    asyncio.run(polly())
+    asyncio.run(azure_stt())

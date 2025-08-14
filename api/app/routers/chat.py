@@ -77,7 +77,6 @@ async def chat_websocket(
                         ):
                             call_args = ai_chunk.tool_calls[0]
                             if call_args["name"] == "conclude_part3":
-                                current_part = 2
                                 await websocket.send_json(
                                     {
                                         "type": "endTest",
@@ -95,18 +94,21 @@ async def chat_websocket(
                 if data["assistant"] == AssistantEnumSchema.Kate:
                     voice_id = "Salli"
                 else:
-                    voice_id = "Joey"
+                    voice_id = "Stephen"
 
-                response = polly_client.synthesize_speech(
+                response = await polly_client.synthesize_speech(
                     Text=full_text_response,
                     OutputFormat="mp3",
                     VoiceId=voice_id,
+                    Engine="neural",
                 )
 
-                s3_client.put_object(
+                byte_body = await response["AudioStream"].read()
+
+                await s3_client.put_object(
                     Bucket=bucket_name,
                     Key=tts_filename,
-                    Body=response["AudioStream"].read(),
+                    Body=byte_body,
                 )
 
                 await websocket.send_json(
@@ -116,6 +118,8 @@ async def chat_websocket(
                         "text": full_text_response,
                     }
                 )
+
+                full_text_response = ""
 
     except Exception as e:
         raise WebSocketException(

@@ -1,21 +1,33 @@
-from typing import Generator
+from contextlib import asynccontextmanager
+from typing import AsyncGenerator, Generator
 import boto3.session
 from fastapi_mail import ConnectionConfig
 from .users import fastapi_users
 from dotenv import load_dotenv
 import os
-import boto3
+import aioboto3
+from aioboto3.session import Session
 
 load_dotenv()
 
 current_active_user = fastapi_users.current_user(active=True)
-polly_client = boto3.client("polly", region_name="eu-north-1")
-s3_client = boto3.client("s3", region_name="eu-north-1")
 
 
-def get_polly_client() -> Generator[boto3.session.Session, None]:
-    yield polly_client
+@asynccontextmanager
+async def get_polly_client() -> AsyncGenerator[Session, None]:
+    session = Session()
+    async with session.client("polly", region_name="eu-north-1") as polly:
+        try:
+            yield polly
+        finally:
+            pass
 
 
-def get_s3_client() -> Generator[boto3.session.Session, None]:
-    yield s3_client
+@asynccontextmanager
+async def get_s3_client() -> AsyncGenerator[Session, None]:
+    session = Session()
+    async with session.client("s3", region_name="eu-north-1") as s3:
+        try:
+            yield s3
+        finally:
+            pass

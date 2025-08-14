@@ -2,6 +2,7 @@ from fastapi_users_db_sqlalchemy import SQLAlchemyBaseUserTableUUID
 import enum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import (
+    FLOAT,
     ForeignKey,
     String,
     DateTime,
@@ -62,6 +63,9 @@ class User(Base, SQLAlchemyBaseUserTableUUID):
     analytics: Mapped["Analytics"] = relationship(back_populates="user")
     notificates: Mapped["Notifications"] = relationship(back_populates="user")
     transcriptions: Mapped[list["Transcription"]] = relationship(back_populates="user")
+    pronunciation_tests: Mapped[list["PronunciationTest"]] = relationship(
+        back_populates="user"
+    )
 
 
 class Result(Base):
@@ -83,6 +87,21 @@ class Result(Base):
     repeated_words: Mapped[list[dict]] = mapped_column(JSONB)
     pronunciation_issues: Mapped[list[dict]] = mapped_column(JSONB)
     general_tips: Mapped[dict[str, list[str]]] = mapped_column(JSONB)
+
+
+class PronunciationTest(Base):
+    __tablename__ = "pronunciation_test_table"
+
+    id: Mapped[UUID_ID] = mapped_column(GUID, primary_key=True, default=uuid.uuid4)
+    user_id: Mapped[UUID_ID] = mapped_column(
+        GUID, ForeignKey("user_table.id"), index=True
+    )
+    user: Mapped[User] = relationship(back_populates="pronunciation_tests")
+    pronunciation_score: Mapped[float] = mapped_column(FLOAT)
+    pronunciation_strong_points: Mapped[list[str]] = mapped_column(ARRAY(String))
+    pronunciation_weak_sides: Mapped[list[str]] = mapped_column(ARRAY(String))
+    pronunciation_mistakes: Mapped[list[dict]] = mapped_column(JSONB)
+    pronunciation_tips: Mapped[list[str]] = mapped_column(ARRAY(String))
 
 
 class Transcription(Base):
