@@ -6,6 +6,7 @@ from sqlalchemy import (
     ForeignKey,
     String,
     DateTime,
+    Date,
     Enum as ORMEnum,
     Integer,
     Float,
@@ -13,7 +14,7 @@ from sqlalchemy import (
     Text,
     sql,
 )
-from datetime import timedelta
+from datetime import date, timedelta
 from fastapi_users_db_sqlalchemy.generics import GUID
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import DeclarativeBase
@@ -52,6 +53,8 @@ class Base(DeclarativeBase):
 
 
 class User(Base, SQLAlchemyBaseUserTableUUID):
+    first_name: Mapped[str] = mapped_column(String)
+    last_name: Mapped[str] = mapped_column(String, nullable=True)
     createdAt: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.now(), nullable=True
     )
@@ -138,9 +141,7 @@ class QuestionCard(Base):
     __tablename__ = "question_cards_table"
 
     id: Mapped[UUID_ID] = mapped_column(GUID, primary_key=True, default=uuid.uuid4)
-    part: Mapped[TestPartEnum] = mapped_column(
-        ORMEnum(TestPartEnum, name="test_part_enum")
-    )
+    part: Mapped[int] = mapped_column(Integer)
     topic: Mapped[str] = mapped_column(String(512))
     questions: Mapped[list[str]] = mapped_column(ARRAY(String))
 
@@ -164,15 +165,13 @@ class PracticeTest(Base):
     user_id: Mapped[UUID_ID] = mapped_column(ForeignKey("user_table.id"), index=True)
     user: Mapped[User] = relationship(back_populates="practice_tests")
     result: Mapped[Result] = relationship(back_populates="practice_test")
-    status: Mapped[TestStatusEnum] = mapped_column(
-        ORMEnum(TestStatusEnum, name="test_status_enum")
-    )
+    status: Mapped[str] = mapped_column(String)
 
     practice_name: Mapped[str] = mapped_column(String(length=100))
-    assistant: Mapped[AssistantEnum] = mapped_column(
-        ORMEnum(AssistantEnum, name="assistant_enum")
-    )
+    assistant: Mapped[str] = mapped_column(String)
     transcription: Mapped[Transcription] = relationship(back_populates="practice_test")
+    test_duration: Mapped[int] = mapped_column(Integer, nullable=True)
+    test_date: Mapped[datetime] = mapped_column(DateTime, default=datetime.now())
 
     part_one_card_id = mapped_column(
         GUID, ForeignKey("question_cards_table.id"), index=True
@@ -212,8 +211,6 @@ class Subscription(Base):
     user_id: Mapped[UUID_ID] = mapped_column(
         GUID, ForeignKey("user_table.id"), index=True
     )
-    sub_tier: Mapped[SubscriptionEnum] = mapped_column(
-        ORMEnum(SubscriptionEnum), name="subscription_tier_enum"
-    )
+    sub_tier: Mapped[str] = mapped_column(String)
     credits_total_purchased: Mapped[int] = mapped_column(Integer)
     credits_left: Mapped[int] = mapped_column(Integer)

@@ -4,8 +4,7 @@ from pydantic import BaseModel, Field
 class PronunciationMistake(BaseModel):
     word: str
     accuracy: int = Field(ge=0, le=100)
-    userPhonemes: str
-    correctPhonemes: str
+    phonemes: str
 
 
 class PronunciationAnalysis(BaseModel):

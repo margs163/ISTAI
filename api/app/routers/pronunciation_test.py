@@ -97,7 +97,7 @@ async def test_pronunciation(
                         {
                             word.word: {
                                 "accuracy": word.accuracy_score,
-                                "phonemes": word.phonemes,
+                                "phonemes": str(word.phonemes),
                             }
                         }
                     )

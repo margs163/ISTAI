@@ -3,14 +3,17 @@ from fastapi import APIRouter, Depends, Body, HTTPException, Path, Query, status
 
 from api.app.lib.auth_db import get_async_session
 from api.app.schemas.db_tables import (
+    AssistantEnum,
     PracticeTest,
     QuestionCard,
     Result,
+    TestStatusEnum,
     Transcription,
     User,
 )
 from ..schemas.practice_test import PracticeTestSchema, PracticeTestUpdateSchema
 from sqlalchemy import insert, select
+from sqlalchemy.orm import joinedload, selectinload
 from ..dependencies import current_active_user
 
 router = APIRouter(dependencies=[Depends(current_active_user)])
@@ -22,7 +25,7 @@ async def create_test(
     user: Annotated[User, Depends(current_active_user)],
 ):
     insert_dict = {
-        "id": user.id,
+        "user_id": user.id,
         "status": "Ongoing",
         "practice_name": test.practice_name,
         "assistant": test.assistant,
@@ -43,19 +46,20 @@ async def create_test(
                 result = await session.scalars(
                     insert(PracticeTest).returning(PracticeTest), [insert_dict]
                 )
-                return {"status": "Success", "obj": result.all()}
+                return {"status": "Success", "data": result.all()}
             except Exception as e:
+                await session.rollback()
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail=f"Could not create a practice test {e}",
                 )
 
 
-@router.get("/{test_id}")
+@router.get("/")
 async def get_practice_test(
-    test_ids: Annotated[list[str] | None, Path()],
-    user_id: Annotated[bool | None, Query()],
     user: Annotated[User, Depends(current_active_user)],
+    test_ids: Annotated[list[str] | None, Query()] = None,
+    user_id: Annotated[bool | None, Query()] = None,
 ):
     if not test_ids and not user_id:
         raise HTTPException(
@@ -63,7 +67,13 @@ async def get_practice_test(
             detail="Specify one of the parameters",
         )
 
-    query = select(PracticeTest)
+    query = select(PracticeTest).options(
+        joinedload(PracticeTest.result),
+        joinedload(PracticeTest.transcription),
+        joinedload(PracticeTest.part_one_card),
+        joinedload(PracticeTest.part_two_card),
+        selectinload(PracticeTest.reading_cards),
+    )
     if user_id:
         query = query.where(PracticeTest.user_id == user.id)
     if test_ids:
@@ -167,3 +177,8 @@ async def delete_test(test_id: Annotated[str, Path()]):
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail=f"Could not delete a practice test {e}",
                 )
+
+
+# "Could not create a practice test (sqlalchemy.dialects.postgresql.asyncpg.Error) <class 'asyncpg.exceptions.InvalidTextRepresentationError'>: invalid input value for enum test_status_enum: \"ONGOING\"
+# \n[SQL: INSERT INTO practice_test_table (id, user_id, status, practice_name, assistant, test_date) VALUES ($1::UUID, $2::UUID, $3::test_status_enum, $4::VARCHAR, $5::assistant_enum, $6::DATE) RETURNING practice_test_table.id, practice_test_table.user_id, practice_test_table.status, practice_test_table.practice_name, practice_test_table.assistant, practice_test_table.test_duration, practice_test_table.test_date, practice_test_table.part_one_card_id, practice_test_table.part_two_card_id]\n[parameters: ('be127298-c6ea-4d09-82fb-0dc2c7e0c8be', '5bd3cfa3-05be-4946-b141-2301565ec06f', 'ONGOING', 'string', 'RON', datetime.date(2025, 8, 15))]
+# (Background on this error at: https://sqlalche.me/e/20/dbapi)"

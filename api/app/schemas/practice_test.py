@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field
 
 from api.app.schemas.db_tables import AssistantEnum, QuestionCard
+from api.app.schemas.pronunciation import PronunciationMistake
 from api.app.schemas.transcriptions import TranscriptionSchema
 
 # class Result(Base):
@@ -143,6 +144,13 @@ class GeneralTips(BaseModel):
     lexis: list[str] = Field(min_length=3, max_length=5)
 
 
+class GrammarAnalysis(BaseModel):
+    grammar_analysis: list[ErrorMistake] = Field(
+        ...,
+        description="An array of 3–5 objects, each representing a grammar-focused analysis",
+    )
+
+
 class Result(BaseModel):
     overall_score: float = Field(
         ge=2.0, le=9.0, multiple_of=0.5, description="Overall band score of the test"
@@ -152,9 +160,10 @@ class Result(BaseModel):
     strong_points: StrongPoints = Field()
     sentence_improvements: SentenceImprovements = Field()
     grammar_errors: list[ErrorMistake] = Field()
-    vocabulary_usage: VocabUsage = Field()
-    repeated_words: VocabRepetition = Field()
+    vocabulary_usage: list[VocabUsage] = Field()
+    repeated_words: list[VocabRepetition] = Field()
     general_tips: GeneralTips = Field()
+    pronunciation_mistakes: list[PronunciationMistake] = Field()
 
 
 class ReadingCardSchema(BaseModel):
@@ -163,13 +172,13 @@ class ReadingCardSchema(BaseModel):
 
 
 class PracticeTestSchema(BaseModel):
-    result: Result | None = Field()
+    result: Result | None = Field(default=None)
     practice_name: str = Field(max_length=200)
-    assistant: AssistantEnum = Field()
-    transcription: TranscriptionSchema | None = Field()
-    part_one_card_id: str | None = Field()
-    part_two_card_id: str | None = Field()
-    reading_card_id: str | None = Field()
+    assistant: str = Field()
+    transcription: TranscriptionSchema | None = Field(default=None)
+    part_one_card_id: str | None = Field(default=None)
+    part_two_card_id: str | None = Field(default=None)
+    reading_card_id: str | None = Field(default=None)
 
 
 class PracticeTestUpdateSchema(BaseModel):
@@ -177,3 +186,4 @@ class PracticeTestUpdateSchema(BaseModel):
     transcription: TranscriptionSchema | None = Field()
     part_one_card_id: str | None = Field()
     part_two_card_id: str | None = Field()
+    test_duration: int | None = Field()

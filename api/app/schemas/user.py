@@ -6,12 +6,16 @@ from fastapi_users import schemas
 
 
 class UserRead(schemas.BaseUser[uuid.UUID]):
-    pass
+    first_name: str
+    last_name: str
+
 
 class UserCreate(schemas.BaseUserCreate):
-    createdAt: Optional[datetime.datetime] = Field(default_factory=datetime.datetime.now)
+    first_name: str
+    last_name: str | None
 
 
 class UserUpdate(schemas.BaseUserUpdate):
-    updatedAt: Optional[datetime.datetime] = Field(default_factory=datetime.datetime.now)
-
+    first_name: str | None
+    last_name: str | None
+    pass

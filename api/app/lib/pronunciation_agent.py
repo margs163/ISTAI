@@ -21,7 +21,7 @@ pronunciation_prompt = ChatPromptTemplate(
 )
 
 
-class GeneralState(TypedDict):
+class PronunciationState(TypedDict):
     # metadata
     metadata_id: str
     transcriptions: List
@@ -34,7 +34,7 @@ class GeneralState(TypedDict):
     pronunciation_tips: List[str]
 
 
-async def agent_invoke(state: GeneralState) -> Dict:
+async def agent_invoke(state: PronunciationState) -> Dict:
     chain = pronunciation_system_prompt | llm.with_structured_output(
         PronunciationAnalysis
     )
@@ -50,7 +50,7 @@ async def agent_invoke(state: GeneralState) -> Dict:
     }
 
 
-pronunciation_graph = StateGraph(GeneralState)
+pronunciation_graph = StateGraph(PronunciationState)
 pronunciation_graph.add_node("call_node_pronunciation", agent_invoke)
 
 pronunciation_graph.add_edge(START, "call_node_pronunciation")
