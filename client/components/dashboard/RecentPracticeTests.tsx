@@ -1,4 +1,7 @@
+"use client";
 import { cn } from "@/lib/utils";
+import { useQuery } from "@tanstack/react-query";
+import axios from "axios";
 import { BookText, Bot, ChartColumn, Ellipsis } from "lucide-react";
 import Link from "next/link";
 import React from "react";
@@ -103,6 +106,41 @@ export function PracticeTest({ test }: { test: Test }) {
 }
 
 export default function RecentPracticeTests() {
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["practice-tests"],
+    queryFn: () =>
+      fetch("http://localhost:8000/practice_test?user_id=true", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error("Could not fetch");
+          }
+          return response.json();
+        })
+        .then((data) => data)
+        .catch((error) => console.error(error)),
+  });
+
+  if (isLoading)
+    return (
+      <h1 className="text-sm text-center font-medium text-gray-800">
+        Loading...
+      </h1>
+    );
+
+  if (error)
+    return (
+      <h1 className="text-sm text-center font-medium text-red-800">
+        Error: {error.message}
+      </h1>
+    );
+
+  console.log(data);
   return (
     <section className="px-6 lg:pr-0 w-full flex flex-col gap-6">
       <div className="p-5 w-full flex flex-col gap-6 bg-white rounded-lg border border-gray-200/80">

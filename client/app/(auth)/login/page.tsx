@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 import logoText from "@/assets/images/logo-text2.png";
 import talkingWoman from "@/assets/images/talkingWoman.jpg";
 import person1 from "@/assets/images/person1.jpg";
@@ -11,19 +11,40 @@ import Link from "next/link";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { SignInFormData, UserSignInSchema } from "@/lib/types";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
 
 export default function Page() {
+  const router = useRouter();
   const {
     register,
     handleSubmit,
-    formState: { errors, isLoading },
+    formState: { errors, isLoading, isSubmitting },
   } = useForm<SignInFormData>({
     resolver: zodResolver(UserSignInSchema),
   });
 
-  const submit: SubmitHandler<SignInFormData> = () => {
-    console.log("form submitted!");
+  const submit: SubmitHandler<SignInFormData> = async (
+    data: SignInFormData
+  ) => {
+    const formData = new FormData();
+    formData.set("username", data.email);
+    formData.set("password", data.password);
+
+    try {
+      const response = await fetch("http://localhost:8000/auth/jwt/login", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error("Could not login");
+      }
+      router.replace("/dashboard");
+    } catch (error) {
+      console.error(error);
+    }
   };
+
   return (
     <div className="min-h-screen w-full p-6 flex items-center justify-center lg:px-20 xl:px-40 font-geist">
       <section className=" shadow-md bg-white w-full lg:flex lg:flex-row lg:shadow-lg shadow-slate-200 rounded-lg">
@@ -92,12 +113,12 @@ export default function Page() {
             <div className="w-full space-y-3 mt-6">
               <button
                 type="submit"
-                disabled={isLoading}
+                disabled={isSubmitting}
                 className="w-full disabled:bg-indigo-500 py-2.5 rounded-md bg-indigo-700 text-white font-medium lg:font-semibold text-xs hover:bg-indigo-600 transition-colors"
               >
-                Log In
+                {isSubmitting ? "Logging in..." : "Log In"}
               </button>
-              <Link href={"/signup"}>
+              <Link href={"/signup"} aria-disabled={isSubmitting}>
                 <p className="text-center text-xs font-normal text-gray-500 active:text-gray-700 hover:text-gray-700 transition-colors">
                   Don&apos;t have an account?
                 </p>

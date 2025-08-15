@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import logoText from "@/assets/images/logo-text2.png";
 import talkingWoman from "@/assets/images/person1.jpg";
@@ -11,19 +11,50 @@ import Image from "next/image";
 import Link from "next/link";
 import { SignUpFormData, UserSignUpSchema } from "@/lib/types";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { userData, useUserStore } from "@/lib/userStorage";
+import { useRouter } from "next/navigation";
 
 export default function Page() {
+  const router = useRouter();
   const {
     register,
     handleSubmit,
-    formState: { errors, isLoading },
+    formState: { errors, isLoading, isSubmitting },
   } = useForm<SignUpFormData>({
     resolver: zodResolver(UserSignUpSchema),
   });
 
-  const submit: SubmitHandler<SignUpFormData> = () => {
-    console.log("form submitted!");
+  const setUserData = useUserStore((state) => state.setUserData);
+
+  const submit: SubmitHandler<SignUpFormData> = async (
+    data: SignUpFormData
+  ) => {
+    try {
+      const response = await fetch("http://localhost:8000/auth/register", {
+        method: "POST",
+        body: JSON.stringify({
+          first_name: data.firstName,
+          last_name: data.lastName,
+          email: data.email,
+          password: data.password,
+        }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Could not signup!");
+      }
+
+      const json_data: userData = await response.json();
+      setUserData(json_data);
+      router.replace("/login");
+    } catch (error) {
+      console.error(error);
+    }
   };
+
   return (
     <div className="min-h-screen w-full p-6 flex items-center justify-center lg:px-20 xl:px-40 font-geist">
       <section className=" shadow-md bg-white w-full lg:flex lg:flex-row lg:shadow-lg shadow-slate-200 rounded-lg">
@@ -111,13 +142,13 @@ export default function Page() {
             </div>
             <div className="w-full space-y-3 mt-6">
               <button
-                disabled={isLoading}
+                disabled={isSubmitting}
                 type="submit"
                 className="w-full disabled:bg-indigo-400 py-2.5 rounded-md bg-indigo-700 hover:bg-indigo-600 text-white font-medium lg:font-semibold text-xs transition-colors"
               >
-                Sign Up
+                {isSubmitting ? "Signing Up..." : "Sign Up"}
               </button>
-              <Link href={"/login"} aria-disabled={isLoading}>
+              <Link href={"/login"} aria-disabled={isSubmitting}>
                 <p className="text-center text-xs font-normal text-gray-500 active:text-gray-700 hover:text-gray-700 transition-colors">
                   Already have an account?
                 </p>

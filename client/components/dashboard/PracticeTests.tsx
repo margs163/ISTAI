@@ -1,6 +1,8 @@
+import { QueryClient } from "@tanstack/react-query";
 import { BookText, Bot, ChartColumn, Ellipsis } from "lucide-react";
 import Link from "next/link";
 import React from "react";
+import axios from "axios";
 
 type Test = {
   name: string;
@@ -62,7 +64,16 @@ const tests: Test[] = [
   },
 ];
 
-export function PracticeTest({ test }: { test: Test }) {
+export async function PracticeTest({ test }: { test: Test }) {
+  const queryClient = new QueryClient();
+
+  await queryClient.prefetchQuery({
+    queryKey: ["practice-tests"],
+    queryFn: () => {
+      axios.get();
+    },
+  });
+
   return (
     <div className="border border-gray-100 rounded-lg w-full px-5 py-2.5 flex flex-row justify-between items-center hover:bg-slate-50 transition-colors active:bg-slate-50">
       <Link href={"#"} className="flex flex-row gap-3 items-center">

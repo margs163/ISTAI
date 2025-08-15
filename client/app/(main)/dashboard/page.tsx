@@ -5,9 +5,11 @@ import QuickActions from "@/components/dashboard/QuickActions";
 import RadarChart from "@/components/dashboard/RadarChart";
 import RecentPracticeTests from "@/components/dashboard/RecentPracticeTests";
 import StatisticsCards from "@/components/dashboard/StatisticsCards";
+import { QueryClient } from "@tanstack/react-query";
 import React from "react";
+import axios from "axios";
 
-export default function Page() {
+export default async function Page() {
   return (
     <div className="w-full flex flex-col gap-6 bg-gray-50 pb-6">
       <DashboardHeader />

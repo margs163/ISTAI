@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Montserrat, Roboto, Inter, Geist } from "next/font/google";
+import Providers from "./providers";
 import "./globals.css";
 
 const montFont = Montserrat({
@@ -39,7 +40,7 @@ export default function RootLayout({
       <body
         className={`${montFont.variable} ${geistFont.variable} ${interFont.variable} ${robotoFont.variable} antialiased`}
       >
-        {children}
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

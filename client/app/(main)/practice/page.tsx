@@ -21,7 +21,6 @@ export default function page() {
       </div>
       <div className="space-y-6">
         <Chat />
-        {/* <TestTips /> */}
         <QuickTestActions />
       </div>
     </div>
