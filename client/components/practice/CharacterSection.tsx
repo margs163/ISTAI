@@ -5,6 +5,7 @@ import React, { useCallback, useRef, useState } from "react";
 import PartInfo from "./PartInfo";
 import QuickActions from "../dashboard/QuickActions";
 import QuickTestActions from "./QuickTestActions";
+import { cn } from "@/lib/utils";
 
 export default function CharacterSection({
   activePart = 1,
@@ -15,6 +16,7 @@ export default function CharacterSection({
   setIsRecording,
   videoRef,
   audioContext,
+  volumeSliderRef,
 }: {
   activePart?: 1 | 2 | 3;
   timerActive: boolean;
@@ -24,6 +26,7 @@ export default function CharacterSection({
   setIsRecording: React.Dispatch<React.SetStateAction<boolean>>;
   videoRef: React.RefObject<HTMLVideoElement | null>;
   audioContext: React.RefObject<AudioContext | null>;
+  volumeSliderRef: React.RefObject<HTMLDivElement | null>;
 }) {
   return (
     <section className="p-6 py-0 max-w-[600px] lg:mx-0 lg:max-w-max lg:px-0 lg:h-full">
@@ -33,6 +36,7 @@ export default function CharacterSection({
         </div>
         <Character videoRef={videoRef} />
         <TestControls
+          volumeSliderRef={volumeSliderRef}
           isRecording={isRecording}
           setIsRecording={setIsRecording}
           startRecording={startRecording}
@@ -54,6 +58,7 @@ export function TestControls({
   startRecording,
   stopRecording,
   audioContext,
+  volumeSliderRef,
 }: {
   activePart?: 1 | 2 | 3;
   timerActive: boolean;
@@ -62,6 +67,7 @@ export function TestControls({
   startRecording: () => void;
   stopRecording: () => void;
   audioContext: React.RefObject<AudioContext | null>;
+  volumeSliderRef: React.RefObject<HTMLDivElement | null>;
 }) {
   const ToggleRecording = useCallback(async () => {
     if (isRecording) {
@@ -75,7 +81,7 @@ export function TestControls({
       await audioContext.current?.resume();
     }
 
-    console.log("Toggled recording");
+    console.log("Toggled recording: ", isRecording);
   }, [
     isRecording,
     startRecording,
@@ -87,7 +93,12 @@ export function TestControls({
     <div className="rounded-2xl pt-1.5 bg-white border border-gray-200 relative -top-2">
       <div className="p-4 flex flex-col gap-6">
         <div className="rounded-3xl w-full h-2 bg-gray-300">
-          <div className="w-1/2 bg-indigo-400 h-full rounded-tl-3xl rounded-bl-3xl volume-slider"></div>
+          <div
+            ref={volumeSliderRef}
+            className={cn(
+              " bg-indigo-400 h-full rounded-tl-3xl rounded-bl-3xl volume-slider"
+            )}
+          ></div>
         </div>
         <div className=" flex flex-row justify-center items-center gap-6">
           <button className="p-3 rounded-[50%] hover:bg-gray-100 active:bg-gray-100 transition-colors">
@@ -116,11 +127,7 @@ export function TestControls({
                   : "p-4 bg-indigo-50 rounded-[50%] hover:bg-indigo-600 text-indigo-600 hover:text-indigo-50 cursor-pointer transition-colors"
               }
             >
-              <Mic
-                size={30}
-                className="sm:w-8"
-                onClick={() => () => setIsRecording(!isRecording)}
-              />
+              <Mic size={30} className="sm:w-8" onClick={ToggleRecording} />
             </button>
           )}
           <button className="p-3 rounded-[50%] hover:bg-gray-100 active:bg-gray-100 transition-colors">

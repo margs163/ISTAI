@@ -1,5 +1,7 @@
-from typing import Annotated
+from datetime import date, datetime
+from typing import Annotated, Any
 from fastapi import APIRouter, Depends, Body, HTTPException, Path, Query, status
+from pydantic import BaseModel
 
 from api.app.lib.auth_db import get_async_session
 from api.app.schemas.db_tables import (
@@ -17,6 +19,24 @@ from sqlalchemy.orm import joinedload, selectinload
 from ..dependencies import current_active_user
 
 router = APIRouter(dependencies=[Depends(current_active_user)])
+
+
+class PostResponse(BaseModel):
+    class Data(BaseModel):
+        id: str
+        result: Any
+        status: str
+        practice_name: str
+        assistant: str
+        transcription: Any
+        test_duration: int
+        test_date: datetime
+        part_one_card: Any
+        part_two_card: Any
+        reading_cards: list
+
+    status: str
+    data: list[Data]
 
 
 @router.post("/new")
@@ -40,13 +60,40 @@ async def create_test(
     if test.part_two_card_id:
         insert_dict.update({"part_two_card_id": test.part_two_card_id})
 
+    practice_test = None
+    async for session in get_async_session():
+        async with session.begin():
+            try:
+                practice_test = PracticeTest(**insert_dict)
+                session.add(practice_test)
+
+            except Exception as e:
+                await session.rollback()
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Could not create a practice test {e}",
+                )
     async for session in get_async_session():
         async with session.begin():
             try:
                 result = await session.scalars(
-                    insert(PracticeTest).returning(PracticeTest), [insert_dict]
+                    select(PracticeTest)
+                    .where(PracticeTest.id == practice_test.id)
+                    .options(
+                        joinedload(PracticeTest.result),
+                        joinedload(PracticeTest.transcription),
+                        joinedload(PracticeTest.part_one_card),
+                        joinedload(PracticeTest.part_two_card),
+                        selectinload(PracticeTest.reading_cards),
+                    )
                 )
-                return {"status": "Success", "data": result.all()}
+
+                data = result.first()
+
+                return {
+                    "status": "Success",
+                    "data": data,
+                }
             except Exception as e:
                 await session.rollback()
                 raise HTTPException(

@@ -10,15 +10,32 @@ import {
   DialogTrigger,
 } from "../ui/dialog";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { NewTestFormData, NewTestFormSchema } from "@/lib/types";
+import {
+  NewTestFormData,
+  NewTestFormSchema,
+  PracticeTestType,
+  TestSessionType,
+} from "@/lib/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import MainButton from "../MainButton";
 import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useTestSessionStore } from "@/lib/testSessionStore";
+import { useUserStore } from "@/lib/userStorage";
+import { useMutation } from "@tanstack/react-query";
+import axios from "axios";
+
+type PostResponse = {
+  status: string;
+  data: PracticeTestType;
+};
 
 export default function NewTest({ children }: { children: React.ReactNode }) {
   const router = useRouter();
+  const firstName = useUserStore((state) => state.firstName);
+  const lastName = useUserStore((state) => state.lastName);
   const [open, setOpen] = useState(false);
+  const setSessionData = useTestSessionStore((state) => state.setSessionData);
   const {
     register,
     handleSubmit,
@@ -27,8 +44,37 @@ export default function NewTest({ children }: { children: React.ReactNode }) {
     resolver: zodResolver(NewTestFormSchema),
   });
 
-  const onSubmit: SubmitHandler<NewTestFormData> = () => {
-    console.log("form submitted!");
+  const mutation = useMutation({
+    mutationFn: (data: { assistant: "Ron" | "Emma"; practice_name: string }) =>
+      axios
+        .post<PostResponse>("http://localhost:8000/practice_test/new", data, {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          withCredentials: true,
+        })
+        .then((response) => response.data)
+        .catch((error) => console.error(error)),
+  });
+
+  const onSubmit: SubmitHandler<NewTestFormData> = (data) => {
+    mutation.mutate({
+      assistant: data.assisstant,
+      practice_name: data.testName,
+    });
+    const session: TestSessionType = {
+      testName: data.testName,
+      assistant: data.assisstant,
+      currentPart: 1,
+      status: "active",
+      startedTime: new Date().toLocaleString("en-GB", {
+        hour: "numeric",
+        minute: "numeric",
+      }),
+      duration: "11-14 min",
+      user: firstName + " " + lastName,
+    };
+    setSessionData(session);
     router.replace("/practice");
     setOpen(false);
   };
@@ -82,7 +128,7 @@ export default function NewTest({ children }: { children: React.ReactNode }) {
               >
                 <option value="">Select</option>
                 <option value="Ron">Ron</option>
-                <option value="Kate">Kate</option>
+                <option value="Emma">Emma</option>
               </select>
               {errors.assisstant && (
                 <p className="text-red-700 font-normal text-xs">

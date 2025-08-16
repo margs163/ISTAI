@@ -1,3 +1,4 @@
+import { useTestSessionStore } from "@/lib/testSessionStore";
 import {
   Bot,
   CircleCheck,
@@ -9,6 +10,7 @@ import {
 } from "lucide-react";
 
 export default function TestSession() {
+  const testSessionState = useTestSessionStore((state) => state);
   return (
     <section className="p-6 py-0 max-w-[600px] lg:px-0">
       <div className="p-6 rounded-xl border border-gray-200 space-y-6 bg-white">
@@ -24,7 +26,7 @@ export default function TestSession() {
                 <p className="text-sm font-medium text-gray-600">Status</p>
               </div>
               <h3 className="text-green-600 px-2 py-0.5 rounded-md font-medium text-sm bg-green-100">
-                Active
+                {testSessionState.status}
               </h3>
             </div>
             <div className="flex flex-col items-start justify-start gap-1 w-1/2 p-3 px-4 rounded-lg bg-gray-50 py-3">
@@ -33,7 +35,7 @@ export default function TestSession() {
                 <p className="text-sm font-medium text-gray-600">Part</p>
               </div>
               <h3 className="text-gray-800 text-sm font-medium rounded-md">
-                1 of 3
+                {testSessionState.currentPart} of 3
               </h3>
             </div>
           </div>
@@ -44,7 +46,7 @@ export default function TestSession() {
                 <p className="text-sm font-medium text-gray-600">Started</p>
               </div>
               <h3 className="text-gray-800 text-sm font-medium rounded-md tracking-wider">
-                17:58
+                {testSessionState.startedTime}
               </h3>
             </div>
             <div className="flex flex-col items-start justify-start gap-1 w-1/2 p-3 px-4 rounded-lg bg-gray-50 py-3">
@@ -53,7 +55,7 @@ export default function TestSession() {
                 <p className="text-sm font-medium text-gray-600">Duration</p>
               </div>
               <h3 className="text-gray-800 text-sm font-medium rounded-md">
-                11-14 min
+                {testSessionState.duration}
               </h3>
             </div>
           </div>
@@ -64,7 +66,7 @@ export default function TestSession() {
                 <p className="text-sm font-medium text-gray-600">Assistant</p>
               </div>
               <h3 className="text-gray-800 text-sm font-medium rounded-md tracking-wider">
-                Ron
+                {testSessionState.assistant}
               </h3>
             </div>
             <div className="flex flex-col items-start justify-start gap-1 w-1/2 p-3 px-4 rounded-lg bg-gray-50 py-3">
@@ -73,7 +75,7 @@ export default function TestSession() {
                 <p className="text-sm font-medium text-gray-600">User</p>
               </div>
               <h3 className="text-gray-800 text-sm font-medium rounded-md">
-                John
+                {testSessionState.user}
               </h3>
             </div>
           </div>

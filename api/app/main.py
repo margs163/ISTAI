@@ -50,9 +50,9 @@ app.include_router(
     reading_cards_router, prefix="/reading_cards", tags=["reading_cards"]
 )
 
-app.include_router(stt_router, prefix="stt", tags=["stt"])
+app.include_router(stt_router, prefix="/stt", tags=["stt"])
 
-app.include_router(chat_router, prefix="chat", tags=["chat"])
+app.include_router(chat_router, prefix="/chat", tags=["chat"])
 
 
 @app.get("/")

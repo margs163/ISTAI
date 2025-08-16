@@ -118,7 +118,7 @@ export default function RecentPracticeTests() {
       })
         .then((response) => {
           if (!response.ok) {
-            throw new Error("Could not fetch");
+            console.error("Could not fetch");
           }
           return response.json();
         })

@@ -1,5 +1,12 @@
 from typing import Annotated, Any
-from fastapi import APIRouter, Depends, WebSocket, WebSocketException, status
+from fastapi import (
+    APIRouter,
+    Depends,
+    WebSocket,
+    WebSocketDisconnect,
+    WebSocketException,
+    status,
+)
 from langchain_core.runnables import RunnableConfig
 from langchain_core.messages import AIMessageChunk
 from dotenv import load_dotenv
@@ -120,6 +127,8 @@ async def chat_websocket(
                 )
 
                 full_text_response = ""
+    except WebSocketDisconnect:
+        pass
 
     except Exception as e:
         raise WebSocketException(

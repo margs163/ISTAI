@@ -4,41 +4,6 @@ from api.app.schemas.db_tables import AssistantEnum, QuestionCard
 from api.app.schemas.pronunciation import PronunciationMistake
 from api.app.schemas.transcriptions import TranscriptionSchema
 
-# class Result(Base):
-#     __tablename__ = "result_table"
-
-#     id: Mapped[UUID_ID] = mapped_column(GUID, primary_key=True, expire_on_commit=False, default=uuid.uuid4)
-#     practice_test_id: Mapped[UUID_ID] = mapped_column(GUID, ForeignKey("practice_test_table.id"), index=True)
-#     practice_test: Mapped["PracticeTest"] = relationship(back_populates="result")
-
-#     overall_score: Mapped[float] = mapped_column(Float)
-#     criterion_scores: Mapped[dict[str, float]] = mapped_column(JSONB)
-#     weak_sides: Mapped[dict[str, list[str]]] = mapped_column(JSONB)
-#     strong_sides: Mapped[dict[str, list[str]]] = mapped_column(JSONB)
-#     sentence_improvements: Mapped[dict[str, Any]] = mapped_column(JSONB)
-#     grammar_errors: Mapped[dict[str, Any] | list[dict]] = mapped_column(JSONB)
-#     vocabulary_usage: Mapped[list[dict]] = mapped_column(JSONB)
-#     repeated_words: Mapped[list[dict]] = mapped_column(JSONB)
-#     pronunciation_issues: Mapped[list[dict]] = mapped_column(JSONB)
-#     general_tips: Mapped[dict[str, list[str]]] = mapped_column(JSONB)
-
-# class PracticeTest(Base):
-#     __tablename__ = "practice_test_table"
-
-#     id: Mapped[UUID_ID] = mapped_column(GUID, primary_key=True, expire_on_commit=False, default=uuid.uuid4)
-#     user_id: Mapped[UUID_ID] = mapped_column(ForeignKey("user_table.id"), index=True)
-#     user: Mapped[User] = relationship(back_populates="practice_tests")
-#     result: Mapped[Result] = relationship(back_populates="practice_test")
-
-#     practice_name: Mapped[str] = mapped_column(String(length=100))
-#     assistant: Mapped[AssistantEnum] = mapped_column(ORMEnum(AssistantEnum, name="assistant_enum"))
-#     transcription: Mapped[Transcription] = relationship(back_populates="practice_test")
-
-#     part_one_card_id = mapped_column(GUID, ForeignKey("question_cards_table.id"), index=True)
-#     part_two_card_id = mapped_column(GUID, ForeignKey("question_cards_table.id"), index=True)
-#     part_one_card: Mapped[QuestionCard] = relationship("QuestionCard", foreign_keys=[part_one_card_id])
-#     part_two_card: Mapped[QuestionCard] = relationship("QuestionCard", foreign_keys=[part_two_card_id])
-
 
 class CriteriaScores(BaseModel):
     fluency: float = Field(

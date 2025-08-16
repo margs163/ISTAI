@@ -1,6 +1,7 @@
 from typing import Annotated
 from fastapi import (
     APIRouter,
+    HTTPException,
     WebSocket,
     WebSocketDisconnect,
     WebSocketException,
@@ -16,19 +17,24 @@ import os
 
 
 def get_speech_metadata(transcription) -> list:
-    no_speech = 0
-    avg_logprob = 0
-    compression = 0
-    count = 0
-    for segment in transcription["segments"]:
-        no_speech += segment["no_speech_prob"]
-        avg_logprob += segment["avg_logprob"]
-        compression += segment["compression_ratio"]
-        count += 1
+    try:
+        no_speech = 0
+        avg_logprob = 0
+        compression = 0
+        count = 0
+        for segment in transcription["segments"]:
+            no_speech += segment["no_speech_prob"]
+            avg_logprob += segment["avg_logprob"]
+            compression += segment["compression_ratio"]
+            count += 1
+    except Exception as e:
+        raise WebSocketException(
+            code=status.WS_1011_INTERNAL_ERROR, reason="Could not get speech metadata"
+        )
     return [no_speech / count, avg_logprob / count, compression / count]
 
 
-router = APIRouter(dependencies=[Depends(current_active_user)])
+router = APIRouter()
 
 
 @router.websocket("/ws")
@@ -60,11 +66,13 @@ async def stt_websocket(websocket: WebSocket):
                 if os.path.exists(temp_file_path):
                     os.remove(temp_file_path)
             except Exception as e:
-                print(e)
                 raise WebSocketException(
                     code=status.WS_1011_INTERNAL_ERROR,
-                    reason="Could not transcribe audio chunks",
+                    reason=f"Could not transcribe audio chunks: {e}",
                 )
+
+    except WebSocketDisconnect:
+        pass
     except Exception as e:
         print(e)
         raise WebSocketException(

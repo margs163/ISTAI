@@ -33,7 +33,7 @@ export const UserSignInSchema = z.object({
 
 export type NewTestFormData = {
   testName: string;
-  assisstant: "Ron" | "Kate";
+  assisstant: "Ron" | "Emma";
 };
 
 export const NewTestFormSchema = z.object({
@@ -41,7 +41,7 @@ export const NewTestFormSchema = z.object({
     .string()
     .min(1, "Invalid test name")
     .max(40, "Test name must be less than 40 characters"),
-  assisstant: z.enum(["Ron", "Kate"]),
+  assisstant: z.enum(["Ron", "Emma"]),
 });
 
 export const TranscribedMessage = z.object({
@@ -52,6 +52,18 @@ export const TranscribedMessage = z.object({
 });
 
 export type TranscribedMessageType = z.infer<typeof TranscribedMessage>;
+
+export const TestSessionSchema = z.object({
+  testName: z.string(),
+  status: z.enum(["active", "inactive"]),
+  currentPart: z.number().gte(1).lte(3),
+  startedTime: z.string(),
+  duration: z.string().default("11-14 min"),
+  assistant: z.enum(["Ron", "Emma"]).nullable(),
+  user: z.string().nullable(),
+});
+
+export type TestSessionType = z.infer<typeof TestSessionSchema>;
 
 export const ChatMessage = z.object({
   role: z.enum(["Assistant", "User"]),
@@ -178,12 +190,14 @@ const PracticeTestSchema = z.object({
   status: z.enum(["Ongoing", "Cancelled", "Finished", "Paused"]),
   practice_name: z.string(),
   assistant: z.enum(["Ron", "Emma"]),
-  transcription: TestTranscriptionsSchema.optional(),
-  test_duration: z.number().optional(),
+  transcription: TestTranscriptionsSchema.nullable().optional(),
+  test_duration: z.number().nullable().optional(),
   test_date: z.date(),
-  part_one_card: QuestionCardSchema.optional(),
-  part_two_card: QuestionCardSchema.optional(),
-  reading_cards: z.array(ReadingCardSchema).optional(),
+  part_one_card_id: z.string().nullable().optional(),
+  part_two_card_id: z.string().nullable().optional(),
+  part_one_card: QuestionCardSchema.nullable().optional(),
+  part_two_card: QuestionCardSchema.nullable().optional(),
+  reading_cards: z.array(ReadingCardSchema).nullable().optional(),
 });
 
 const PronunciationTestSchema = z.object({

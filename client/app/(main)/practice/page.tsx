@@ -7,7 +7,12 @@ import TestProgress from "@/components/practice/TestProgress";
 import TestSession from "@/components/practice/TestSession";
 import { useChatStore } from "@/lib/chatStore";
 import { useMetadataStore } from "@/lib/metadataStore";
-import { ChatMessageType, TranscribedMessage } from "@/lib/types";
+import { useTestSessionStore } from "@/lib/testSessionStore";
+import {
+  ChatMessageType,
+  TestSessionType,
+  TranscribedMessage,
+} from "@/lib/types";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 
@@ -40,6 +45,7 @@ export default function Page() {
       transcribeWebsocketRef.current.onmessage = (event: MessageEvent) => {
         const message = JSON.parse(event.data);
         const result = TranscribedMessage.safeParse(message);
+        console.log("RECIEVED MESSAGE!");
         if (!result.success) {
           console.error(`Could not parse stt websocket data: ${result.error}`);
           return;
@@ -92,10 +98,45 @@ export default function Page() {
               type: "audio/webm",
             });
             audioBlobs.current = recordedBlob;
+
+            const reader = new FileReader();
+            reader.readAsArrayBuffer(audioBlobs.current);
+
+            console.log("Converting blobs to an array buffer");
+
+            reader.onloadend = () => {
+              console.log("Sending an array buffer to server");
+              if (transcribeWebsocketRef.current && reader.result) {
+                transcribeWebsocketRef.current.send(reader.result);
+              }
+            };
+            audioBlobs.current = null;
           };
         })
         .catch((error) => console.error("Could not access user media:", error));
+    } else {
+      console.error("Browser does not support media devices");
     }
+
+    return () => {
+      if (transcribeWebsocketRef.current?.OPEN) {
+        transcribeWebsocketRef.current.close();
+        transcribeWebsocketRef.current = null;
+      }
+      if (chatWebsocketRef.current?.OPEN) {
+        chatWebsocketRef.current.close();
+        chatWebsocketRef.current = null;
+      }
+      if (mediaStream.current) {
+        mediaStream.current = null;
+      }
+      if (mediaRecorder.current) {
+        mediaRecorder.current = null;
+      }
+      if (audioContext.current) {
+        audioContext.current = null;
+      }
+    };
   }, []);
 
   const optimizedUpdateVisualSlider = useCallback(function updateVisualSlider(
@@ -132,7 +173,7 @@ export default function Page() {
   const optimizedStopRecording = useCallback(() => {
     if (mediaRecorder.current && mediaRecorder.current.state === "recording") {
       mediaRecorder.current.stop();
-      mediaStream.current?.getTracks().forEach((track) => track.stop());
+      // mediaStream.current?.getTracks().forEach((track) => track.stop());
       console.log("Stopped recording audio:", mediaRecorder.current.state);
     }
 
@@ -155,6 +196,7 @@ export default function Page() {
           <PartInfo currentPart={1} />
         </div>
         <CharacterSection
+          volumeSliderRef={volumeSlider}
           startRecording={optimizedStartRecoring}
           stopRecording={optimizedStopRecording}
           isRecording={isRecording}

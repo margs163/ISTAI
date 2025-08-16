@@ -1,3 +1,4 @@
+"use client";
 import BandScoreChart from "@/components/dashboard/BandScoreChart";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import Greeting from "@/components/dashboard/Greeting";
@@ -5,11 +6,45 @@ import QuickActions from "@/components/dashboard/QuickActions";
 import RadarChart from "@/components/dashboard/RadarChart";
 import RecentPracticeTests from "@/components/dashboard/RecentPracticeTests";
 import StatisticsCards from "@/components/dashboard/StatisticsCards";
-import { QueryClient } from "@tanstack/react-query";
-import React from "react";
+import React, { useEffect } from "react";
 import axios from "axios";
+import { UserData, UserDataServer, useUserStore } from "@/lib/userStorage";
+import { useQuery } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 
-export default async function Page() {
+export default function Page() {
+  const setUserData = useUserStore((state) => state.setUserData);
+  const router = useRouter();
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["user"],
+    queryFn: () =>
+      axios
+        .get<UserDataServer>("http://localhost:8000/users/me", {
+          withCredentials: true,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+        .then((response) => {
+          const data = response.data;
+          const user = {
+            id: data.id,
+            email: data.email,
+            isActive: data.is_active,
+            isVerified: data.is_verified,
+            isSuperuser: data.is_superuser,
+            firstName: data.first_name,
+            lastName: data.last_name,
+          };
+          setUserData(user);
+          return user;
+        })
+        .catch((error) => {
+          router.replace("/login");
+          console.error(error);
+        }),
+  });
+
   return (
     <div className="w-full flex flex-col gap-6 bg-gray-50 pb-6">
       <DashboardHeader />

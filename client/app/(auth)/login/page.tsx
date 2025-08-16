@@ -26,14 +26,18 @@ export default function Page() {
   const submit: SubmitHandler<SignInFormData> = async (
     data: SignInFormData
   ) => {
-    const formData = new FormData();
-    formData.set("username", data.email);
-    formData.set("password", data.password);
+    const formData = new URLSearchParams();
+    formData.append("grant_type", "password");
+    formData.append("username", data.email);
+    formData.append("password", data.password);
 
     try {
       const response = await fetch("http://localhost:8000/auth/jwt/login", {
         method: "POST",
-        body: formData,
+        body: formData.toString(),
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
       });
 
       if (!response.ok) {
