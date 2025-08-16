@@ -1,7 +1,7 @@
 "use client";
 
 import { Mic, RotateCcw, X } from "lucide-react";
-import React, { useRef, useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import PartInfo from "./PartInfo";
 import QuickActions from "../dashboard/QuickActions";
 import QuickTestActions from "./QuickTestActions";
@@ -9,12 +9,22 @@ import QuickTestActions from "./QuickTestActions";
 export default function CharacterSection({
   activePart = 1,
   timerActive = false,
+  startRecording,
+  stopRecording,
+  isRecording,
+  setIsRecording,
+  videoRef,
+  audioContext,
 }: {
   activePart?: 1 | 2 | 3;
   timerActive: boolean;
+  startRecording: () => void;
+  stopRecording: () => void;
+  isRecording: boolean;
+  setIsRecording: React.Dispatch<React.SetStateAction<boolean>>;
+  videoRef: React.RefObject<HTMLVideoElement | null>;
+  audioContext: React.RefObject<AudioContext | null>;
 }) {
-  const [isRecording, setIsRecording] = useState(false);
-  const videoRef = useRef<HTMLVideoElement | null>(null);
   return (
     <section className="p-6 py-0 max-w-[600px] lg:mx-0 lg:max-w-max lg:px-0 lg:h-full">
       <div className="p-6 pb-3 rounded-xl border border-gray-200 flex flex-col justify-between bg-white lg:h-full">
@@ -25,8 +35,11 @@ export default function CharacterSection({
         <TestControls
           isRecording={isRecording}
           setIsRecording={setIsRecording}
+          startRecording={startRecording}
+          stopRecording={stopRecording}
           activePart={activePart}
           timerActive={timerActive}
+          audioContext={audioContext}
         />
       </div>
     </section>
@@ -38,12 +51,38 @@ export function TestControls({
   timerActive = true,
   isRecording,
   setIsRecording,
+  startRecording,
+  stopRecording,
+  audioContext,
 }: {
   activePart?: 1 | 2 | 3;
   timerActive: boolean;
   isRecording: boolean;
   setIsRecording: React.Dispatch<React.SetStateAction<boolean>>;
+  startRecording: () => void;
+  stopRecording: () => void;
+  audioContext: React.RefObject<AudioContext | null>;
 }) {
+  const ToggleRecording = useCallback(async () => {
+    if (isRecording) {
+      stopRecording();
+    } else {
+      startRecording();
+    }
+    setIsRecording((prev) => !prev);
+
+    if (audioContext.current?.state !== "running") {
+      await audioContext.current?.resume();
+    }
+
+    console.log("Toggled recording");
+  }, [
+    isRecording,
+    startRecording,
+    stopRecording,
+    audioContext,
+    setIsRecording,
+  ]);
   return (
     <div className="rounded-2xl pt-1.5 bg-white border border-gray-200 relative -top-2">
       <div className="p-4 flex flex-col gap-6">
@@ -67,11 +106,7 @@ export function TestControls({
                     }`
               }
             >
-              <Mic
-                size={30}
-                className="sm:w-8"
-                onClick={() => setIsRecording(!isRecording)}
-              />
+              <Mic size={30} className="sm:w-8" onClick={ToggleRecording} />
             </button>
           ) : (
             <button

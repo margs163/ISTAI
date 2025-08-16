@@ -44,6 +44,30 @@ export const NewTestFormSchema = z.object({
   assisstant: z.enum(["Ron", "Kate"]),
 });
 
+export const TranscribedMessage = z.object({
+  text: z.string(),
+  no_speech_prob: z.float64(),
+  avg_logprob: z.float64(),
+  compression_ratio: z.float64(),
+});
+
+export type TranscribedMessageType = z.infer<typeof TranscribedMessage>;
+
+export const ChatMessage = z.object({
+  role: z.enum(["Assistant", "User"]),
+  messageId: z.string(),
+  text: z.string(),
+});
+
+export type ChatMessageType = z.infer<typeof ChatMessage>;
+
+export const TranscriptionMessage = z.object({
+  name: z.string(),
+  text: z.string(),
+});
+
+export type TranscriptionMessageType = z.infer<typeof TranscriptionMessage>;
+
 const objectSchema = z.record(z.string(), z.any());
 
 const CriterionScoresSchema = z.object({

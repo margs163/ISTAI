@@ -1,5 +1,12 @@
 from typing import Annotated
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect, WebSocketException, status, Depends
+from fastapi import (
+    APIRouter,
+    WebSocket,
+    WebSocketDisconnect,
+    WebSocketException,
+    status,
+    Depends,
+)
 from ..lib.auth_db import User
 import uuid
 from ..lib.groq_audio import transcribe_audio_in_chunks
@@ -7,8 +14,9 @@ from pathlib import Path
 from ..dependencies import current_active_user
 import os
 
+
 def get_speech_metadata(transcription) -> list:
-    no_speech = 0 
+    no_speech = 0
     avg_logprob = 0
     compression = 0
     count = 0
@@ -19,7 +27,9 @@ def get_speech_metadata(transcription) -> list:
         count += 1
     return [no_speech / count, avg_logprob / count, compression / count]
 
+
 router = APIRouter(dependencies=[Depends(current_active_user)])
+
 
 @router.websocket("/ws")
 async def stt_websocket(websocket: WebSocket):
@@ -28,9 +38,9 @@ async def stt_websocket(websocket: WebSocket):
         await websocket.accept()
         while True:
             data = await websocket.receive_bytes()
-            temp_file_path = f"temp_audio_{uuid.uuid4().hex}.webm"
+            temp_file_path = f"./data/temp_audio_{uuid.uuid4().hex}.webm"
 
-            with open(temp_file_path, 'wb') as file:
+            with open(temp_file_path, "wb") as file:
                 file.write(data)
 
             try:
@@ -51,7 +61,13 @@ async def stt_websocket(websocket: WebSocket):
                     os.remove(temp_file_path)
             except Exception as e:
                 print(e)
-                raise WebSocketException(code=status.WS_1011_INTERNAL_ERROR, reason="Could not transcribe audio chunks")
+                raise WebSocketException(
+                    code=status.WS_1011_INTERNAL_ERROR,
+                    reason="Could not transcribe audio chunks",
+                )
     except Exception as e:
         print(e)
-        raise WebSocketException(code=status.WS_1008_POLICY_VIOLATION, reason="Could not recieve audio chunks")
+        raise WebSocketException(
+            code=status.WS_1008_POLICY_VIOLATION,
+            reason="Could not recieve audio chunks",
+        )

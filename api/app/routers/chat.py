@@ -16,7 +16,7 @@ bucket_name = os.getenv("S3_BUCKET_NAME")
 router = APIRouter()
 
 
-@router.websocket("/")
+@router.websocket("/ws")
 async def chat_websocket(
     websocket: WebSocket,
     s3_client: Annotated[Any, Depends(get_s3_client)],
