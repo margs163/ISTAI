@@ -15,8 +15,8 @@ import React from "react";
 export default function Page() {
   return (
     <div className="font-geist w-full min-h-screen flex flex-col gap-6 lg:gap-10 bg-gray-50 pt-24 lg:pt-32 pb-0">
-      <ResultsHeader />
-      <Overall score={6} />
+      {/* <ResultsHeader /> */}
+      <Overall score={7} />
       <CriterionScores />
       <div className="lg:px-20 lg:grid-cols-2 lg:grid lg:gap-6 space-y-6 lg:space-y-0 xl:px-36">
         <StrongAspects />

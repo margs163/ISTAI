@@ -1,7 +1,8 @@
 import { cn } from "@/lib/utils";
 import { BookOpen, Check } from "lucide-react";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { ProgressBar } from "../dashboard/MistakesCard";
+import { useTestSessionStore } from "@/lib/testSessionStore";
 
 const testProgress = [
   {
@@ -19,19 +20,59 @@ const testProgress = [
   },
   {
     name: "Part 3",
-    staus: "completed",
+    staus: "unknown",
     duration: "4-5 minutes",
     description: "Two-way Discussion",
   },
 ];
 
 export default function TestProgress() {
+  const currentPart = useTestSessionStore((state) => state.currentPart);
+  const [testProgress, setTestProgress] = useState([
+    {
+      name: "Part 1",
+      status: "completed",
+      duration: "4-5 minutes",
+      description: "Introduction & interview",
+      score: 7.5,
+    },
+    {
+      name: "Part 2",
+      status: "ongoing",
+      duration: "3-4 minutes",
+      description: "Individual Long Turn",
+    },
+    {
+      name: "Part 3",
+      staus: "unknown",
+      duration: "4-5 minutes",
+      description: "Two-way Discussion",
+    },
+  ]);
+
+  useEffect(() => {
+    setTestProgress((prev) => {
+      const copiedProgress = [...prev];
+      for (let i = 0; i < copiedProgress.length; i++) {
+        if (i < currentPart - 1) {
+          copiedProgress[i].status = "completed";
+        } else if (i === currentPart - 1) {
+          copiedProgress[i].status = "ongoing";
+        } else {
+          copiedProgress[i].status = "unknown";
+        }
+      }
+      return copiedProgress;
+    });
+  }, [currentPart]);
+
   const completedCount = testProgress.filter(
     (item) => item.status === "completed"
   ).length;
+
   return (
     <section className="p-6 py-0 max-w-[600px] lg:px-0">
-      <div className="p-6 rounded-xl border border-gray-200 space-y-6 bg-white">
+      <div className="p-6 rounded-xl border border-gray-200 space-y-6 bg-white second-step">
         <header className="flex flex-row items-center gap-2">
           <BookOpen className="size-6 text-indigo-600" />
           <h3 className="font-semibold text-gray-800 text-lg">

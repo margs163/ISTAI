@@ -65,14 +65,14 @@ const tests: Test[] = [
 ];
 
 export async function PracticeTest({ test }: { test: Test }) {
-  const queryClient = new QueryClient();
+  // const queryClient = new QueryClient();
 
-  await queryClient.prefetchQuery({
-    queryKey: ["practice-tests"],
-    queryFn: () => {
-      axios.get();
-    },
-  });
+  // await queryClient.prefetchQuery({
+  //   queryKey: ["practice-tests"],
+  //   queryFn: () => {
+  //     axios.get();
+  //   },
+  // });
 
   return (
     <div className="border border-gray-100 rounded-lg w-full px-5 py-2.5 flex flex-row justify-between items-center hover:bg-slate-50 transition-colors active:bg-slate-50">

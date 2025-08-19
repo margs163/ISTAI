@@ -141,7 +141,7 @@ export function PlanCard({ plan }: { plan: Plan }) {
 export default function PlansPricing() {
   const [activeTab, setActiveTab] = useState<"month" | "year">("year");
   return (
-    <section className=" w-full flex flex-col items-center justify-center p-8 py-10 lg:px-20 xl:px-42 lg:py-20 gap-10 lg:gap-10">
+    <section className=" w-full flex flex-col items-center justify-center p-8 lg:p-20 gap-10 lg:gap-10 max-w-[1400px] mx-auto">
       <header className="space-y-2 lg:space-y-4">
         <h1 className="font-bold text-3xl lg:text-5xl text-gray-800 text-center leading-[1.3]">
           Plans and Pricing

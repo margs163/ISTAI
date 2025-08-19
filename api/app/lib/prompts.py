@@ -69,7 +69,6 @@ Additional Instructions to Ensure a Smooth Test Experience:
 - Maintain a neutral, professional tone and avoid unnecessary comments.
 - Ensure that all follow-up questions are clearly related to the Part 2 topic, but explore broader ideas, opinions, or implications.
 - Do not summarize or analyze the test taker’s responses.
-{part2_questions}
 """
 
 pronunciation_system_prompt = """

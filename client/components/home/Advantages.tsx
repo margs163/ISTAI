@@ -3,7 +3,7 @@ import React from "react";
 
 export default function Advantages() {
   return (
-    <section className=" w-full flex flex-col items-center justify-center p-8 py-10 lg:px-20 xl:px-40 lg:py-20 gap-10 lg:gap-20">
+    <section className=" w-full flex flex-col items-center justify-center p-8 lg:gap-20 lg:p-20 max-w-[1400px] mx-auto">
       <h1 className="font-bold text-3xl lg:text-5xl text-gray-800 text-center leading-[1.3]">
         Smart AI Emulator with <br className="hidden lg:inline-block" />
         <span className="px-2 py-1 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-xl">

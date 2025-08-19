@@ -11,10 +11,10 @@ import PlansPricing from "@/components/home/PlansPricing";
 
 export default function Page() {
   return (
-    <div className="h-lvh lg:h-lvw w-full flex flex-col gap-10 lg:gap-14 home-bg pb-4 font-mont">
+    <div className="h-lvh lg:h-lvw w-full flex flex-col gap-10 lg:gap-10 home-bg pb-4 font-mont">
       <NavBar />
       <Hero />
-      <section className=" relative bg-white z-20 space-y-8 mb-8 lg:mb-12">
+      <section className=" relative bg-white z-20 space-y-8 mb-8 lg:mb-14 lg:mt-4">
         <Advantages />
         <TestInfo />
         <PowerfulFeatures />

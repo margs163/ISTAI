@@ -25,7 +25,7 @@ const infoParts = {
 export default function PartInfo({ currentPart }: { currentPart: 1 | 2 | 3 }) {
   return (
     <section className="p-6 py-0 max-w-[600px] lg:mx-0 lg:max-w-max lg:px-0">
-      <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl p-6 xl:px-7 flex flex-col gap-5 items-start justify-start">
+      <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl p-6 xl:px-7 flex flex-col gap-5 items-start justify-start third-step">
         <div className="flex flex-row justify-start items-center gap-3">
           <div className="p-3 bg-blue-400 rounded-xl shrink-0">
             <Info className="text-white size-7" />

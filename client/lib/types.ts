@@ -58,7 +58,7 @@ export const TestSessionSchema = z.object({
   status: z.enum(["active", "inactive"]),
   currentPart: z.number().gte(1).lte(3),
   startedTime: z.string(),
-  duration: z.string().default("11-14 min"),
+  duration: z.number().default(0),
   assistant: z.enum(["Ron", "Emma"]).nullable(),
   user: z.string().nullable(),
 });
@@ -79,6 +79,22 @@ export const TranscriptionMessage = z.object({
 });
 
 export type TranscriptionMessageType = z.infer<typeof TranscriptionMessage>;
+
+export type ChatSocketMessage = {
+  type: "userResponse" | "part2QuestionCard";
+  part: 1 | 2 | 3;
+  text: string;
+  assistant: string;
+  questionCard?: Omit<QuestionCardType, "id" | "part">;
+};
+
+export const ChatSocketResponseSchema = z.object({
+  type: z.enum(["ttsFileName", "switchToPart2", "endTest"]),
+  filename: z.string().optional(),
+  text: z.string(),
+});
+
+export type ChatSocketResponse = z.infer<typeof ChatSocketResponseSchema>;
 
 const objectSchema = z.record(z.string(), z.any());
 
@@ -167,8 +183,9 @@ const ResultSchema = z.object({
 
 const TestTranscriptionsSchema = z.object({
   id: z.string(),
-  assistant_responses: z.array(z.string()),
-  user_responses: z.array(z.string()),
+  part_one: z.array(TranscriptionMessage),
+  part_two: z.array(TranscriptionMessage),
+  part_three: z.array(TranscriptionMessage),
 });
 
 const ReadingCardSchema = z.object({
@@ -184,15 +201,31 @@ const QuestionCardSchema = z.object({
   questions: z.array(z.string()),
 });
 
-const PracticeTestSchema = z.object({
+// assistant: "Emma"
+// id: "d80ab77a-8a5a-4323-9ea7-bf3d9ce89d24"
+// part_one_card: null
+// part_one_card_id: null
+// part_two_card: null
+// part_two_card_id: null
+// practice_name: "Test Iteration 4"
+// reading_cards: Array []
+// result: null
+// status: "Ongoing"
+// test_date: "2025-08-18T14:14:06.442190"
+// test_duration: null
+// transcription: null
+// user_id: "5bd3cfa3-05be-4946-b141-2301565ec06f"
+
+export const PracticeTestSchema = z.object({
   id: z.string(),
-  result: ResultSchema.optional(),
+  user_id: z.string(),
+  result: ResultSchema.nullable().optional(),
   status: z.enum(["Ongoing", "Cancelled", "Finished", "Paused"]),
   practice_name: z.string(),
   assistant: z.enum(["Ron", "Emma"]),
   transcription: TestTranscriptionsSchema.nullable().optional(),
   test_duration: z.number().nullable().optional(),
-  test_date: z.date(),
+  test_date: z.string(),
   part_one_card_id: z.string().nullable().optional(),
   part_two_card_id: z.string().nullable().optional(),
   part_one_card: QuestionCardSchema.nullable().optional(),
@@ -242,3 +275,4 @@ export type GeneralTipType = z.infer<typeof GeneralTipSchema>;
 export type WeakSidesType = z.infer<typeof WeakSidesSchema>;
 export type StrongPointsType = z.infer<typeof StrongPointsSchema>;
 export type CriterionScoresType = z.infer<typeof CriterionScoresSchema>;
+export type ResultType = z.infer<typeof ResultSchema>;

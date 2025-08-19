@@ -8,12 +8,38 @@ import {
   TimerReset,
   UserCircle,
 } from "lucide-react";
+import { useEffect } from "react";
+
+function parseTime(time: number) {
+  const minutes = Math.floor(time / 60);
+  const seconds = time - minutes * 60;
+
+  return `${minutes < 10 ? 0 : ""}${minutes}:${
+    seconds < 10 ? 0 : ""
+  }${seconds}`;
+}
 
 export default function TestSession() {
   const testSessionState = useTestSessionStore((state) => state);
+  const setTestSession = useTestSessionStore((state) => state.setSessionData);
+
+  useEffect(() => {
+    if (testSessionState.status === "active") {
+      const intervalId = setInterval(() => {
+        const copySession = { ...testSessionState };
+        copySession.duration += 1;
+        setTestSession(copySession);
+      }, 1000);
+
+      return () => {
+        clearInterval(intervalId);
+      };
+    }
+  }, [testSessionState]);
+
   return (
     <section className="p-6 py-0 max-w-[600px] lg:px-0">
-      <div className="p-6 rounded-xl border border-gray-200 space-y-6 bg-white">
+      <div className="p-6 rounded-xl border border-gray-200 space-y-6 bg-white first-step">
         <div className="flex flex-row items-center gap-2">
           <Target className="size-6 text-indigo-600" />
           <h3 className="font-semibold text-gray-800 text-lg">Test Session</h3>
@@ -55,7 +81,7 @@ export default function TestSession() {
                 <p className="text-sm font-medium text-gray-600">Duration</p>
               </div>
               <h3 className="text-gray-800 text-sm font-medium rounded-md">
-                {testSessionState.duration}
+                {parseTime(testSessionState.duration)}
               </h3>
             </div>
           </div>

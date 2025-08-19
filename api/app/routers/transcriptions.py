@@ -12,6 +12,7 @@ from ..schemas.db_tables import (
 
 router = APIRouter(dependencies=[Depends(current_active_user)])
 
+
 @router.post("/new")
 async def post_transcription(
     transcription: TranscriptionSchema,
@@ -34,8 +35,9 @@ async def post_transcription(
                 create_obj = Transcription(
                     user_id=user.id,
                     test_id=test_id,
-                    user_responses=transcription.user_responses,
-                    assistant_responses=transcription.assistant_responses,
+                    part_one=transcription.part_one,
+                    part_two=transcription.part_two,
+                    part_three=transcription.part_three,
                 )
                 session.add(create_obj)
 
@@ -60,16 +62,17 @@ async def get_transcription(
         async with session.begin():
             try:
                 if not test_id and not user_id:
-                    raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail="Specify one of the queries")
+                    raise HTTPException(
+                        status_code=status.HTTP_406_NOT_ACCEPTABLE,
+                        detail="Specify one of the queries",
+                    )
                 if user_id:
                     result = await session.scalars(
-                        select(Transcription)
-                        .where(Transcription.user_id == user.id)
+                        select(Transcription).where(Transcription.user_id == user.id)
                     )
                 else:
                     result = await session.scalars(
-                        select(Transcription)
-                        .where(Transcription.user_id == user.id) 
+                        select(Transcription).where(Transcription.user_id == user.id)
                     )
 
                 return {"transcriptions": result.all()}

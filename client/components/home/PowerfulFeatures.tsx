@@ -4,6 +4,8 @@ import feature1 from "@/assets/images/sentenceImrpovements.png";
 import feature2 from "@/assets/images/repeatedWords.png";
 import feature3 from "@/assets/images/pronunIssues.png";
 import feature4 from "@/assets/images/tips.png";
+import feature5 from "@/assets/images/advancedVocab1.png";
+import feature6 from "@/assets/images/grammarErrors.png";
 
 const powerful = [
   {
@@ -19,6 +21,19 @@ const powerful = [
     title: "Analysis of Word Repetitions",
     description:
       "We analyze your speech and identify word repetitions, suggest synonyms",
+  },
+  {
+    src: feature5,
+    alt: "advancedVocab",
+    title: "Analysis of Vocabulary",
+    description: "We analyze and classify your vocabulary in your speech.",
+  },
+  {
+    src: feature6,
+    alt: "grammarErrors",
+    title: "Detailed Grammar Analysis",
+    description:
+      "We analyze your speech and identify grammar mistakes, suggest better versions",
   },
   {
     src: feature3,
@@ -69,7 +84,7 @@ export function Feature({
 
 export default function PowerfulFeatures() {
   return (
-    <section className=" w-full flex flex-col items-center justify-center p-8 py-10 lg:px-20 xl:px-42 lg:py-20 gap-10 lg:gap-20">
+    <section className=" w-full flex flex-col items-center justify-center p-8 lg:p-20 gap-10 lg:gap-20 max-w-[1400px] mx-auto">
       <header className="space-y-2 lg:space-y-4">
         <h1 className="font-bold text-3xl lg:text-5xl text-gray-800 text-center leading-[1.3]">
           Powerful Test <br className="lg:block hiddden" />
@@ -83,7 +98,7 @@ export default function PowerfulFeatures() {
           mistakes.
         </p>
       </header>
-      <main className="flex flex-col gap-8 lg:gap-24 lg:w-full lg:justify-items-center lg:grid lg:grid-cols-2">
+      <main className="flex flex-col gap-8 lg:gap-16 lg:w-full lg:justify-items-center lg:grid lg:grid-cols-2">
         {powerful.map((item, index) => (
           <Feature key={index} {...item} />
         ))}

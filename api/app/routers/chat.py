@@ -32,6 +32,7 @@ async def chat_websocket(
     thread_id = str(uuid.uuid4())
     config: RunnableConfig = {"configurable": {"thread_id": thread_id}}
     input_message = {"role": "user", "content": ""}
+    delete_audio_list = []
 
     try:
         await websocket.accept()
@@ -39,6 +40,8 @@ async def chat_websocket(
         while True:
             full_text_response = ""
             data: dict = await websocket.receive_json()
+
+            print("RECIEVED A MESSAGE")
 
             if data["part"] == 1:
                 if data["type"] != "userResponse":
@@ -53,11 +56,13 @@ async def chat_websocket(
                     ai_chunk: AIMessageChunk = chunk[0]
                     if isinstance(ai_chunk, AIMessageChunk):
                         if (
-                            hasattr(ai_chunk, "tool_calls")
-                            and len(ai_chunk.tool_calls) > 0
+                            hasattr(ai_chunk, "tool_call_chunks")
+                            and len(ai_chunk.tool_call_chunks) > 0
                         ):
-                            call_args = ai_chunk.tool_calls[0]
+                            print("IDENTIFIED A TOOL CALL")
+                            call_args = ai_chunk.tool_call_chunks[0]
                             if call_args["name"] == "conclude_part1":
+                                print("CONCLUDING PART 1")
                                 await websocket.send_json(
                                     {
                                         "type": "switchToPart2",
@@ -68,22 +73,35 @@ async def chat_websocket(
 
                         full_text_response += str(ai_chunk.content)
             elif data["part"] == 3:
-                if data["type"] != "userResponse":
+                if (
+                    data["type"] != "userResponse"
+                    and data["type"] != "part2QuestionCard"
+                ):
                     raise WebSocketException(
                         code=status.WS_1003_UNSUPPORTED_DATA, reason="No text data"
                     )
-                input_message["content"] = data["text"]
+                print("Recieved a part 3 message: ", data)
+                if data["type"] == "part2QuestionCard":
+                    content = f"Part 2 questions:\n{data["questionCard"]}\nTest taker input:\n{data["text"]}"
+                    input_message["content"] = content
+                    print("Input message to part 3 agent: ", input_message)
+
+                else:
+                    input_message["content"] = data["text"]
+
                 async for chunk in agent_part3.astream(
                     {"messages": [input_message]}, config, stream_mode="messages"
                 ):
                     ai_chunk: AIMessageChunk = chunk[0]
                     if isinstance(ai_chunk, AIMessageChunk):
                         if (
-                            hasattr(ai_chunk, "tool_calls")
-                            and len(ai_chunk.tool_calls) > 0
+                            hasattr(ai_chunk, "tool_call_chunks")
+                            and len(ai_chunk.tool_call_chunks) > 0
                         ):
-                            call_args = ai_chunk.tool_calls[0]
+                            print("IDENTIFIED TOOL CALL")
+                            call_args = ai_chunk.tool_call_chunks[0]
                             if call_args["name"] == "conclude_part3":
+                                print("CONCLUDING PART3")
                                 await websocket.send_json(
                                     {
                                         "type": "endTest",
@@ -93,9 +111,10 @@ async def chat_websocket(
                                 break
 
                         full_text_response += str(ai_chunk.content)
+                print("Part 3 response: ", full_text_response)
 
-                    # websocket.send_json({"response": event["messages"][-1]})
             if full_text_response:
+                print("Generating tts")
                 voice_id = ""
                 tts_filename = f"tts-files/test-{uuid.uuid4()}.mp3"
                 if data["assistant"] == AssistantEnumSchema.Kate:
@@ -118,6 +137,15 @@ async def chat_websocket(
                     Body=byte_body,
                 )
 
+                print(
+                    "Sending tts to client:\n",
+                    {
+                        "type": "ttsFileName",
+                        "filename": tts_filename,
+                        "text": full_text_response,
+                    },
+                )
+
                 await websocket.send_json(
                     {
                         "type": "ttsFileName",
@@ -126,11 +154,20 @@ async def chat_websocket(
                     }
                 )
 
+                delete_audio_list.append({"Key": tts_filename})
                 full_text_response = ""
+
     except WebSocketDisconnect:
         pass
-
     except Exception as e:
+        print(e)
         raise WebSocketException(
             code=status.WS_1011_INTERNAL_ERROR, reason=f"Server error: {e}"
         )
+
+    finally:
+        if len(delete_audio_list) > 0:
+            await s3_client.delete_objects(
+                Bucket=bucket_name,
+                Delete={"Objects": delete_audio_list, "Quiet": False},
+            )

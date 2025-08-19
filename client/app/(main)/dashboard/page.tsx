@@ -14,8 +14,7 @@ import { useRouter } from "next/navigation";
 
 export default function Page() {
   const setUserData = useUserStore((state) => state.setUserData);
-  const router = useRouter();
-  const { data, isLoading, error } = useQuery({
+  useQuery({
     queryKey: ["user"],
     queryFn: () =>
       axios
@@ -40,7 +39,6 @@ export default function Page() {
           return user;
         })
         .catch((error) => {
-          router.replace("/login");
           console.error(error);
         }),
   });

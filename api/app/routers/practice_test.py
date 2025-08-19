@@ -156,6 +156,12 @@ async def update_test(
                         detail="Could not find a practice test",
                     )
 
+                if update_obj.test_duration:
+                    practice_test.test_duration = update_obj.test_duration
+
+                if update_obj.status:
+                    practice_test.status = update_obj.status
+
                 if update_obj.result:
                     practice_test.result = Result(**update_obj.result.model_dump())
 
@@ -193,6 +199,8 @@ async def update_test(
                         )
 
                     practice_test.part_two_card = card_two
+
+                return {"status": "success"}
 
             except Exception as e:
                 raise HTTPException(

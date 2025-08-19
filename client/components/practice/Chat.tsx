@@ -10,19 +10,6 @@ import {
 } from "lucide-react";
 import React from "react";
 
-const chatMessages: ChatMessageType[] = [
-  {
-    role: "Assistant",
-    messageId: "123",
-    text: "Hello, my name is Ron and I will be your test examiner today! Can you please start by introducing yourself",
-  },
-  {
-    role: "User",
-    messageId: "456",
-    text: "Click the microphone to start speaking",
-  },
-];
-
 export function ChatMessage({
   message,
   prev,
@@ -68,7 +55,7 @@ export default function Chat() {
   const chatMessages = useChatStore((state) => state.messages);
   return (
     <section className="p-6 py-0 max-w-[600px] lg:px-0">
-      <div className="p-4 pb-6 rounded-xl border border-gray-200 space-y-4 bg-white">
+      <div className="p-4 pb-6 rounded-xl border border-gray-200 space-y-4 bg-white sixth-step">
         <header className="p-2 flex flex-row items-center gap-2">
           <MessageSquareText className="size-6 text-indigo-600" />
           <h3 className="font-semibold text-gray-800 text-lg">

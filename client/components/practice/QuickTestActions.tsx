@@ -9,7 +9,7 @@ import {
   Zap,
 } from "lucide-react";
 import Link from "next/link";
-import { ForwardRefExoticComponent, RefAttributes } from "react";
+import { ForwardRefExoticComponent, RefAttributes, useCallback } from "react";
 
 function getColor(color: string): [string, string] {
   return [`bg-${color}-50`, `text-${color}-600`];
@@ -53,11 +53,20 @@ const actions: Action[] = [
   },
 ];
 
-export function TestAction({ action }: { action: Action }) {
+export function TestAction({
+  action,
+  callback,
+}: {
+  action: Action;
+  callback: () => void;
+}) {
   const Icon = action.icon;
   const styles = getColor(action.color);
   return (
-    <div className="flex flex-row gap-3 items-center justify-start py-1.5 px-2 rounded-lg hover:bg-gray-50 active:bg-gray-50">
+    <div
+      className="flex flex-row gap-3 items-center justify-start py-1.5 px-2 rounded-lg hover:bg-gray-50 active:bg-gray-50 select-none"
+      onClick={callback}
+    >
       <div className={clsx("p-2 rounded-lg shrink-0 box-content", styles[0])}>
         <Icon className={clsx("size-4.5", styles[1])} />
       </div>
@@ -85,10 +94,27 @@ export function TestAction({ action }: { action: Action }) {
   );
 }
 
-export default function QuickTestActions() {
+export default function QuickTestActions({
+  instructionsAduio,
+  audioFile,
+}: {
+  instructionsAduio: React.RefObject<HTMLAudioElement | null>;
+  audioFile: React.RefObject<HTMLAudioElement | null>;
+}) {
+  const replayInstructions = useCallback(() => {
+    if (instructionsAduio.current && instructionsAduio.current.paused) {
+      instructionsAduio.current.play();
+    }
+  }, [instructionsAduio]);
+
+  const replayQuestion = useCallback(() => {
+    if (audioFile.current && audioFile.current.paused) {
+      audioFile.current.play();
+    }
+  }, [audioFile]);
   return (
     <section className="p-6 py-0 max-w-[600px] lg:px-0">
-      <div className="p-6 w-full flex flex-col gap-5 bg-white rounded-lg border border-gray-200">
+      <div className="p-6 w-full flex flex-col gap-5 bg-white rounded-lg border border-gray-200 seventh-step">
         <header className="w-full flex flex-row justify-between items-center px-1">
           <header className="flex flex-row items-center gap-2">
             <Zap className="size-6 text-indigo-600" />
@@ -104,7 +130,17 @@ export default function QuickTestActions() {
         </header>
         <div className="space-y-2 lg:space-y-3">
           {actions.map((item, index) => (
-            <TestAction key={index} action={item} />
+            <TestAction
+              callback={
+                index === 0
+                  ? replayInstructions
+                  : index === 2
+                  ? replayQuestion
+                  : () => null
+              }
+              key={index}
+              action={item}
+            />
           ))}
         </div>
       </div>

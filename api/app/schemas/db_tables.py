@@ -115,8 +115,11 @@ class Transcription(Base):
         GUID, ForeignKey("user_table.id"), index=True
     )
     user: Mapped[User] = relationship(back_populates="transcriptions")
-    user_responses: Mapped[list[str]] = mapped_column(ARRAY(String))
-    assistant_responses: Mapped[list[str]] = mapped_column(ARRAY(String))
+    # user_responses: Mapped[list[str]] = mapped_column(ARRAY(String))
+    # assistant_responses: Mapped[list[str]] = mapped_column(ARRAY(String))
+    part_one: Mapped[list[dict]] = mapped_column(JSONB)
+    part_two: Mapped[list[dict]] = mapped_column(JSONB)
+    part_three: Mapped[list[dict]] = mapped_column(JSONB)
     test_id: Mapped[UUID_ID] = mapped_column(GUID, ForeignKey("practice_test_table.id"))
     practice_test: Mapped["PracticeTest"] = relationship(back_populates="transcription")
 

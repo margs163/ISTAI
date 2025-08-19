@@ -13,6 +13,7 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import {
   NewTestFormData,
   NewTestFormSchema,
+  PracticeTestSchema,
   PracticeTestType,
   TestSessionType,
 } from "@/lib/types";
@@ -24,6 +25,7 @@ import { useTestSessionStore } from "@/lib/testSessionStore";
 import { useUserStore } from "@/lib/userStorage";
 import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
+import { useLocalPracticeTestStore } from "@/lib/practiceTestStore";
 
 type PostResponse = {
   status: string;
@@ -31,6 +33,9 @@ type PostResponse = {
 };
 
 export default function NewTest({ children }: { children: React.ReactNode }) {
+  const setLocalPracticeTest = useLocalPracticeTestStore(
+    (state) => state.setTestData
+  );
   const router = useRouter();
   const firstName = useUserStore((state) => state.firstName);
   const lastName = useUserStore((state) => state.lastName);
@@ -45,7 +50,11 @@ export default function NewTest({ children }: { children: React.ReactNode }) {
   });
 
   const mutation = useMutation({
-    mutationFn: (data: { assistant: "Ron" | "Emma"; practice_name: string }) =>
+    mutationFn: (data: {
+      assistant: "Ron" | "Emma";
+      practice_name: string;
+      status: "Ongoing" | "Cancelled" | "Finished";
+    }) =>
       axios
         .post<PostResponse>("http://localhost:8000/practice_test/new", data, {
           headers: {
@@ -53,15 +62,24 @@ export default function NewTest({ children }: { children: React.ReactNode }) {
           },
           withCredentials: true,
         })
-        .then((response) => response.data)
+        .then((response) => {
+          const validate = PracticeTestSchema.safeParse(response.data.data);
+          if (!validate.success) {
+            console.error("Could not validate data:", response.data.data);
+          }
+          setLocalPracticeTest(validate.data as PracticeTestType);
+          console.log("Validated and set the test!");
+        })
         .catch((error) => console.error(error)),
   });
 
   const onSubmit: SubmitHandler<NewTestFormData> = (data) => {
-    mutation.mutate({
+    const createdTest = mutation.mutate({
       assistant: data.assisstant,
       practice_name: data.testName,
+      status: "Ongoing",
     });
+    console.log(createdTest);
     const session: TestSessionType = {
       testName: data.testName,
       assistant: data.assisstant,
@@ -71,9 +89,10 @@ export default function NewTest({ children }: { children: React.ReactNode }) {
         hour: "numeric",
         minute: "numeric",
       }),
-      duration: "11-14 min",
+      duration: 0,
       user: firstName + " " + lastName,
     };
+
     setSessionData(session);
     router.replace("/practice");
     setOpen(false);

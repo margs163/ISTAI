@@ -1,6 +1,6 @@
 import React from "react";
-import result1 from "@/assets/images/editedPhone3.png";
-import result2 from "@/assets/images/phoneEdited2.png";
+import result1 from "@/assets/images/phoneResult1.png";
+import result2 from "@/assets/images/phoneResult2.png";
 import Image from "next/image";
 import { BookMarked, BookOpen, Megaphone, Mic } from "lucide-react";
 import Criteria from "./Criteria";
@@ -34,7 +34,7 @@ const criteria = [
 
 export default function FeedbackInfo() {
   return (
-    <section className="w-full flex flex-col items-center p-8 gap-8 lg:flex-row lg:p-20 lg:px-20 xl:px-42 lg:gap-12 xl:gap-20">
+    <section className="w-full flex flex-col items-center p-8 lg:p-20 gap-8 lg:flex-row lg:gap-12 xl:gap-20 max-w-[1400px] mx-auto">
       <div className="grad-bg p-6 lg:p-2 rounded-3xl lg:rounded-4xl h-[300px] lg:h-[500px] lg:max-w-[580px] overflow-hidden flex flex-row justify-center gap-0 lg:flex-1/2 xl:flex-1/2 lg:pt-12">
         <Image
           src={result2}

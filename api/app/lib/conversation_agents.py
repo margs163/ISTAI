@@ -40,11 +40,12 @@ async def get_questions():
         async with session.begin():
             result = await session.scalars(
                 select(QuestionCard)
-                .where(QuestionCard.part == TestPartEnum.PART_ONE)
+                .where(QuestionCard.part == 1)
                 .order_by(func.random())
                 .limit(1)
             )
             question_card = result.first()
+            print("Got a question card: ", question_card)
             if question_card:
                 return {
                     "Topic": question_card.topic,
@@ -56,7 +57,7 @@ async def get_questions():
 
 checkpointer1 = InMemorySaver()
 checkpointer3 = InMemorySaver()
-llm = ChatGroq(model="qwen/qwen3-32b")
+llm = ChatGroq(model="llama-3.3-70b-versatile")
 
 
 # prompt_part1 = ChatPromptTemplate([("system", system_prompt_part1)])

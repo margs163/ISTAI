@@ -140,6 +140,7 @@ class PracticeTestSchema(BaseModel):
     result: Result | None = Field(default=None)
     practice_name: str = Field(max_length=200)
     assistant: str = Field()
+    status: str = Field()
     transcription: TranscriptionSchema | None = Field(default=None)
     part_one_card_id: str | None = Field(default=None)
     part_two_card_id: str | None = Field(default=None)
@@ -147,8 +148,9 @@ class PracticeTestSchema(BaseModel):
 
 
 class PracticeTestUpdateSchema(BaseModel):
-    result: Result | None = Field()
-    transcription: TranscriptionSchema | None = Field()
-    part_one_card_id: str | None = Field()
-    part_two_card_id: str | None = Field()
-    test_duration: int | None = Field()
+    result: Result | None = Field(default=None)
+    transcription: TranscriptionSchema | None = Field(default=None)
+    part_one_card_id: str | None = Field(default=None)
+    part_two_card_id: str | None = Field(default=None)
+    test_duration: int | None = Field(default=None)
+    status: str | None = Field(default=None)

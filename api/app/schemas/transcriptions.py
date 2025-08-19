@@ -11,8 +11,14 @@ from pydantic import BaseModel, Field
 #     test_id: Mapped[UUID_ID] = mapped_column(GUID, ForeignKey("practice_test_table.id"))
 #     practice_test: Mapped["PracticeTest"] = relationship(back_populates="transcription")
 
+
+class TranscriptionMessage(BaseModel):
+    name: str
+    text: str
+
+
 class TranscriptionSchema(BaseModel):
     test_id: str = Field(description="Id of the test")
-    user_responses: list[str] = Field(min_length=1)
-    assistant_responses: list[str] = Field(min_length=1)
-
+    part_one: list[TranscriptionMessage]
+    part_two: list[TranscriptionMessage]
+    part_three: list[TranscriptionMessage]
