@@ -53,7 +53,7 @@ export default function QuestionCard({
             {parseTime(partTwoTime)}
           </div>
         </div>
-        <h3 className="text-lg font-semibold text-gray-800">
+        <h3 className="text-base font-semibold text-gray-800">
           {currentPart === 2 && card
             ? card.topic
             : "Part 2 Question Card will be here"}

@@ -4,39 +4,47 @@ export const tourSteps = [
     content:
       "This is a 'Test Session' component, where you can track info about the current practice test.",
     title: "Test Session",
+    placement: "auto",
+    disableBeacon: true,
   },
   {
     target: ".second-step",
     content:
       "In this 'Test Progress' component you can see your test progress.",
     title: "Test Progress",
+    placement: "top",
   },
   {
     target: ".third-step",
     content: "Here you can read the description of individual test parts.",
     title: "Test Info",
+    placement: "auto",
   },
   {
     target: ".fourth-step",
     content:
       "Once you get to the second part of the test, a question card will be displayed here",
     title: "Part 2 Question",
+    placement: "auto",
   },
   {
     target: ".fifth-step",
     content:
       "Here you can control your audio input. Whenever you want to answer the question, press the record button. If you wish to pause or cancell the test, press the pause or cancell buttons, respectively",
     title: "Test Controls",
+    placement: "auto",
   },
   {
     target: ".sixth-step",
     content: "Here you can see the detailed speech transcriptions of the test.",
     title: "Test Transcriptions",
+    placement: "auto",
   },
   {
     target: ".seventh-step",
     content: "In this menu you can try some of the 'Quick Action' options.",
     title: "Quick Actions",
+    placement: "auto",
   },
 ];
 

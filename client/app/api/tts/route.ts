@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
+import {
+  S3Client,
+  GetObjectCommand,
+  PutObjectCommand,
+} from "@aws-sdk/client-s3";
 import dotenv from "dotenv";
+import { v4 as uuidv4 } from "uuid";
 
 dotenv.config();
 
@@ -56,6 +61,48 @@ export async function GET(request: NextRequest) {
     console.error("Error fetching audio from S3 bucket: ", error);
     return NextResponse.json(
       { error: "Failed to fetch audio" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const form = await request.formData();
+    const audioFile = form.get("audio");
+
+    console.log("RECIEVED AUDIO FILE FROM CLIENT");
+
+    if (!audioFile) {
+      return NextResponse.json(
+        { error: "No formdata field audio" },
+        { status: 400 }
+      );
+    }
+
+    const buffer = Buffer.from(await audioFile.arrayBuffer());
+    const filePath = `reading-files/${uuidv4()}.wav`;
+
+    const command = new PutObjectCommand({
+      Bucket: S3_BUCKET_NAME,
+      Key: filePath,
+      Body: buffer,
+      ContentType: "audio/wav",
+    });
+
+    await s3_client.send(command);
+
+    return NextResponse.json(
+      {
+        message: "Audio was uploaded to S3",
+        filePath: filePath,
+      },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json(
+      { error: "Failed to upload an audio file to S3." },
       { status: 500 }
     );
   }

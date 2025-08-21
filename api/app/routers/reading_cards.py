@@ -15,20 +15,15 @@ async def post_questions(readingCards: list[ReadingCardSchema]):
     async for session in get_async_session():
         async with session.begin():
             try:
-                await session.scalars(
-                    insert(ReadingCard),
-                    [
-                        {
-                            "topic": card.topic,
-                            "text": card.text,
-                        }
-                        for card in readingCards
-                    ],
-                )
-
+                reading_cards = [
+                    ReadingCard(topic=card.topic, text=card.text)
+                    for card in readingCards
+                ]
+                session.add_all(reading_cards)
                 return {"status": "Success"}
 
             except Exception as e:
+                await session.rollback()
                 raise HTTPException(
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                     detail=f"Failed to create a record: {e}",
@@ -37,8 +32,8 @@ async def post_questions(readingCards: list[ReadingCardSchema]):
 
 @router.get("/")
 async def get_reading_card(
-    cardId: Annotated[str | None, Query()],
-    random: Annotated[bool | None, Query()],
+    cardId: Annotated[str | None, Query()] = None,
+    random: Annotated[bool | None, Query()] = None,
     count: Annotated[int, Query(ge=1, le=3)] = 1,
 ):
 
@@ -59,7 +54,7 @@ async def get_reading_card(
                     query = query.order_by(func.random()).limit(count)
 
                 result = await session.scalars(query)
-                return {"status": "success", "cards": result.all()}
+                return {"cards": result.all()}
 
             except Exception as e:
                 raise HTTPException(

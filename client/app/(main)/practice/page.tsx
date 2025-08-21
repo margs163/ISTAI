@@ -13,6 +13,7 @@ import {
   ChatSocketMessage,
   ChatSocketResponseSchema,
   QuestionCardType,
+  ReadingCardType,
   TranscribedMessage,
 } from "@/lib/types";
 import React, { useCallback, useEffect, useRef, useState } from "react";
@@ -27,6 +28,29 @@ import axios from "axios";
 import { useLocalPracticeTestStore } from "@/lib/practiceTestStore";
 import { toast } from "sonner";
 
+function sendReadingCardSpeech(audioBlobs: Blob): string | undefined {
+  const formData = new FormData();
+  formData.append("audio", audioBlobs, `recording-${Date.now()}.wav`);
+  let filePath = "";
+  axios
+    .post("/api/tts", formData)
+    .then((response) => {
+      const result: { message: string; filePath: string } = response.data;
+      filePath = result.filePath;
+    })
+    .catch((error) => {
+      toast("Error while sending reading speech", {
+        description: "Could not upload audio to S3 storage",
+        action: {
+          label: "Log",
+          onClick: () => console.log(error),
+        },
+      });
+    });
+
+  return filePath;
+}
+
 const Joyride = dynamic(() => import("react-joyride"), { ssr: false });
 
 export default function Page() {
@@ -40,34 +64,13 @@ export default function Page() {
   const part2Question = useLocalPracticeTestStore(
     (state) => state.part_two_card
   );
+  const setReadingCard = useLocalPracticeTestStore(
+    (state) => state.setReadingCards
+  );
   const testStatus = useLocalPracticeTestStore((state) => state.status);
   const setStatus = useLocalPracticeTestStore((state) => state.setStatus);
   const transcribeWebsocketRef = useRef<WebSocket>(null);
   const chatWebsocketRef = useRef<WebSocket>(null);
-
-  useQuery({
-    queryKey: ["question-card"],
-    queryFn: () =>
-      axios
-        .get<{ questions: QuestionCardType[] }>(
-          "http://localhost:8000/questions/?part=2",
-          {
-            headers: {
-              "Content-Type": "application/json",
-            },
-            withCredentials: true,
-          }
-        )
-        .then((response) => {
-          if (response.status === 200) {
-            const question = response.data.questions[0];
-            setPart2Question(question);
-            console.log("WE SET THE QUESTION: ", question);
-            return question;
-          }
-        })
-        .catch((error) => console.error(error)),
-  });
 
   const mediaStream = useRef<MediaStream>(null);
   const mediaRecorder = useRef<MediaRecorder>(null);
@@ -76,6 +79,7 @@ export default function Page() {
   const audioBlobs = useRef<Blob>(null);
   const animationId = useRef<number>(null);
   const audioAnalyzer = useRef<AnalyserNode>(null);
+  const readingCardSpeechFileName = useRef<string>(null);
 
   const volumeSlider = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -89,20 +93,93 @@ export default function Page() {
   const [controlsDialogOpen, setControlsDialogOpen] = useState(false);
   const [timerActive, setTimerActive] = useState(false);
   const [isAnsweringQuestion, setIsAnsweringQuestion] = useState(false);
+  const [greetingPlayed, setGreetingPlayed] = useState(false);
+  const [openReadingCard, setOpenReadingCard] = useState(false);
 
-  const playTTSAudio = useCallback((fileKey: string) => {
-    fetch(`/api/tts?fileKey=${fileKey}`)
-      .then((response) => {
+  useQuery({
+    queryKey: ["question-card"],
+    queryFn: async () => {
+      try {
+        const response = await axios.get<{ questions: QuestionCardType[] }>(
+          "http://localhost:8000/questions/?part=2",
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+            withCredentials: true,
+          }
+        );
+        const question = response.data.questions[0];
+        setPart2Question(question);
+        return question;
+      } catch (error) {
+        toast("No Question Card", {
+          description: "No Part 2 question card found",
+          action: {
+            label: "Log",
+            onClick: () => console.log(error),
+          },
+        });
+      }
+    },
+  });
+
+  useQuery({
+    queryKey: ["reading-card"],
+    queryFn: async () => {
+      try {
+        const response = await axios.get<{ cards: ReadingCardType[] }>(
+          "http://localhost:8000/reading_cards/?random=true&count=1",
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+            withCredentials: true,
+          }
+        );
+        const readingCard = response.data.cards[0];
+        setReadingCard([readingCard]);
+        return readingCard;
+      } catch (error) {
+        toast("No Reading Card", {
+          description: "Could not fetch a reading card",
+          action: {
+            label: "Log",
+            onClick: () => console.log(error),
+          },
+        });
+      }
+    },
+  });
+
+  const playTTSAudio = useCallback(
+    async (fileKey: string) => {
+      try {
+        const response = await fetch(`/api/tts?fileKey=${fileKey}`);
         if (!response.ok) {
-          console.error("Could not fetch an audio.");
+          throw new Error("Could not fetch audio");
         }
-        return response.blob();
-      })
-      .then((blob) => {
+        const blob = await response.blob();
         const url = URL.createObjectURL(blob);
-        audioFile.current = new Audio();
-        audioFile.current.src = url;
-        audioFile.current.play();
+        if (audioFile.current) {
+          audioFile.current.src = url;
+        } else {
+          audioFile.current = new Audio(url);
+        }
+
+        audioFile.current.oncanplaythrough = () => {
+          if (
+            instructionsAudio.current &&
+            !instructionsAudio.current?.paused &&
+            sessionState.currentPart === 2
+          ) {
+            instructionsAudio.current.onended = () => {
+              audioFile.current?.play();
+            };
+          } else {
+            audioFile.current?.play();
+          }
+        };
 
         audioFile.current.onplay = () => {
           if (videoRef.current) {
@@ -119,27 +196,43 @@ export default function Page() {
             }
           }
         };
-      })
-      .catch((error) => console.error(error));
-  }, []);
+      } catch {
+        toast("Failed TTS fetch", {
+          description: "Could not fetch TTS blobs",
+          action: {
+            label: "Log",
+            onClick: () => console.log("Could not fetch TTS blobs"),
+          },
+        });
+      }
+    },
+    [sessionState.currentPart]
+  );
 
   const playInstructionsAudioWithVideo = useCallback(
-    (src: "part2switch.mp3" | "part3switch.mp3" | "greeting.mp3") => {
+    (
+      src:
+        | "part2switch.mp3"
+        | "part3switch.mp3"
+        | "greeting.mp3"
+        | "reading.mp3"
+    ) => {
       if (instructionsAudio.current) {
         instructionsAudio.current.src = src;
       } else {
         instructionsAudio.current = new Audio(src);
       }
+
       instructionsAudio.current.oncanplaythrough = () => {
         instructionsAudio.current?.play();
         if (videoRef.current) {
           videoRef.current.play();
-          videoRef.current.muted = false;
+          videoRef.current.muted = true;
         }
       };
 
       instructionsAudio.current.ontimeupdate = () => {
-        if (audioFile.current?.ended) {
+        if (instructionsAudio.current?.ended) {
           if (videoRef.current) {
             videoRef.current.pause();
             videoRef.current.currentTime = 0;
@@ -201,17 +294,7 @@ export default function Page() {
       addMessage(userMessage);
       let chatSocketMessage: null | ChatSocketMessage = null;
 
-      if (!part2Question) {
-        toast("Question card absence", {
-          description: "No Part 2 question card found",
-          action: {
-            label: "Log",
-            onClick: () => console.log("No Part 2 question card found"),
-          },
-        });
-        return;
-      }
-      if (sessionState.currentPart === 2) {
+      if (sessionState.currentPart === 2 && part2Question) {
         chatSocketMessage = {
           type: "part2QuestionCard",
           part: 3,
@@ -266,6 +349,7 @@ export default function Page() {
 
           addMessage(assistantMessage);
           if (data.filename) {
+            console.log("PLAYING TTS");
             playTTSAudio(data.filename);
           }
           break;
@@ -279,11 +363,8 @@ export default function Page() {
           break;
 
         case "endTest":
-          const copySession2 = { ...sessionState };
-          copySession2.status = "inactive";
-          setSession(copySession2);
-          setStatus("Finished");
-          setDialogOpen(true);
+          playInstructionsAudioWithVideo("reading.mp3");
+          setOpenReadingCard(true);
       }
     },
     [
@@ -292,9 +373,74 @@ export default function Page() {
       playTTSAudio,
       sessionState,
       setSession,
-      setStatus,
     ]
   );
+
+  const recorderStopHandler = useCallback(() => {
+    audioBlobs.current = new Blob(audioChunks.current, { type: "audio/webm" });
+
+    if (openReadingCard) {
+      console.log("SENT READING CARD SPEECH to API");
+      const filePath = sendReadingCardSpeech(audioBlobs.current);
+      console.log("RECIEVED A FILE PATH FROM SERVER", filePath);
+      if (filePath) {
+        readingCardSpeechFileName.current = filePath;
+      }
+    } else {
+      const reader = new FileReader();
+      reader.readAsArrayBuffer(audioBlobs.current);
+
+      reader.onloadend = () => {
+        if (transcribeWebsocketRef.current && reader.result) {
+          transcribeWebsocketRef.current.send(reader.result);
+        }
+      };
+    }
+    audioBlobs.current = null;
+  }, [openReadingCard]);
+
+  const initializeMediaRecorder = useCallback(async () => {
+    if (navigator.mediaDevices && !mediaStream.current) {
+      try {
+        mediaStream.current = await navigator.mediaDevices.getUserMedia({
+          audio: true,
+        });
+        mediaRecorder.current = new MediaRecorder(mediaStream.current);
+
+        audioContext.current = new AudioContext();
+        const audioSource = audioContext.current.createMediaStreamSource(
+          mediaStream.current
+        );
+
+        audioAnalyzer.current = audioContext.current.createAnalyser();
+        audioSource.connect(audioAnalyzer.current);
+
+        mediaRecorder.current.ondataavailable = (event: BlobEvent) => {
+          if (event.data.size > 0) {
+            audioChunks.current.push(event.data);
+          }
+        };
+
+        mediaRecorder.current.addEventListener("stop", recorderStopHandler);
+      } catch (error) {
+        toast("Failed to capture microphone", {
+          description: "Could not initialize media stream",
+          action: {
+            label: "Log",
+            onClick: () => console.log(error),
+          },
+        });
+      }
+    } else {
+      toast("Browser does not support Media Devices", {
+        description: "Could not initialize media stream",
+        action: {
+          label: "Log",
+          onClick: () => console.log("Browser does not support Media Devices"),
+        },
+      });
+    }
+  }, [recorderStopHandler]);
 
   useEffect(() => {
     if (!transcribeWebsocketRef.current && !chatWebsocketRef.current) {
@@ -302,213 +448,71 @@ export default function Page() {
         "ws://localhost:8000/stt/ws"
       );
       chatWebsocketRef.current = new WebSocket("ws://localhost:8000/chat/ws");
-
-      transcribeWebsocketRef.current.onmessage = (event: MessageEvent) => {
-        const message = JSON.parse(event.data);
-        const result = TranscribedMessage.safeParse(message);
-        if (!result.success) {
-          console.error(`Could not parse stt websocket data: ${result.error}`);
-          return;
-        }
-        const text = result.data.text;
-        const metadata = {
-          no_speech_prob: result.data.no_speech_prob,
-          avg_logprob: result.data.avg_logprob,
-          compression_ratio: result.data.compression_ratio,
-          count: 1,
-        };
-        setMetadata(metadata);
-
-        const userMessage: ChatMessageType = {
-          role: "User",
-          messageId: uuidv4(),
-          text: text,
-        };
-
-        addMessage(userMessage);
-
-        if (sessionState.currentPart !== 2) {
-          const chatSocketMessage: ChatSocketMessage = {
-            type: "userResponse",
-            part: sessionState.currentPart as 1 | 2 | 3,
-            assistant: sessionState.assistant as string,
-            text: text,
-          };
-
-          if (chatWebsocketRef.current) {
-            chatWebsocketRef.current.send(JSON.stringify(chatSocketMessage));
-          }
-        } else {
-          const copySession = { ...sessionState };
-          copySession.currentPart = 3;
-          if (instructionsAudio.current) {
-            instructionsAudio.current.src = "/part3switch.mp3";
-          } else {
-            instructionsAudio.current = new Audio("/part3switch.mp3");
-          }
-          if (!part2Question) {
-            console.error("No question card found");
-          } else {
-            const chatSocketMessage: ChatSocketMessage = {
-              type: "part2QuestionCard",
-              part: 3,
-              assistant: sessionState.assistant as string,
-              text: "Start part 3.",
-              questionCard: {
-                topic: part2Question.topic,
-                questions: part2Question.questions,
-              },
-            };
-            chatWebsocketRef.current?.send(JSON.stringify(chatSocketMessage));
-          }
-          setSession(copySession);
-          setTimeout(() => {
-            setDialogOpen(true);
-          }, 0);
-          instructionsAudio.current.oncanplaythrough = () => {
-            instructionsAudio.current?.play();
-          };
-        }
-      };
-
-      chatWebsocketRef.current.onmessage = (event: MessageEvent) => {
-        const message = JSON.parse(event.data);
-        const parsed = ChatSocketResponseSchema.safeParse(message);
-
-        if (!parsed.success) {
-          console.error("Could not parse the message");
-          return;
-        }
-
-        const data = parsed.data;
-
-        if (data.type === "ttsFileName" && data.filename) {
-          const assistantMessage: ChatMessageType = {
-            role: "Assistant",
-            messageId: uuidv4(),
-            text: data.text,
-          };
-
-          addMessage(assistantMessage);
-          playTTSAudio(data.filename);
-        } else if (data.type === "switchToPart2") {
-          if (instructionsAudio.current) {
-            instructionsAudio.current.src = "/part2switch.mp3";
-          } else {
-            instructionsAudio.current = new Audio("/part2switch.mp3");
-          }
-          const updatedSession = { ...sessionState };
-          updatedSession.currentPart = 2;
-          setSession(updatedSession);
-          setTimeout(() => {
-            setDialogOpen(true);
-          }, 0);
-          instructionsAudio.current.oncanplaythrough = () => {
-            instructionsAudio.current?.play();
-          };
-        } else if (data.type === "endTest") {
-          const updatedSession = { ...sessionState };
-          updatedSession.status = "inactive";
-          setSession(updatedSession);
-          setStatus("Finished");
-          setTimeout(() => {
-            setDialogOpen(true);
-          }, 0);
-        }
-      };
     }
 
-    if (
-      navigator.mediaDevices &&
-      navigator.mediaDevices.getUserMedia &&
-      mediaStream.current === null
-    ) {
-      navigator.mediaDevices
-        .getUserMedia({ audio: true })
-        .then((stream) => {
-          mediaStream.current = stream;
-          mediaRecorder.current = new MediaRecorder(mediaStream.current);
+    initializeMediaRecorder();
 
-          audioContext.current = new AudioContext();
-          const audioSource = audioContext.current.createMediaStreamSource(
-            mediaStream.current
-          );
-
-          audioAnalyzer.current = audioContext.current.createAnalyser();
-          audioSource.connect(audioAnalyzer.current);
-
-          mediaRecorder.current.ondataavailable = (event: BlobEvent) => {
-            if (event.data.size > 0) {
-              audioChunks.current.push(event.data);
-            }
-          };
-
-          mediaRecorder.current.onstop = (event: Event) => {
-            const recordedBlob = new Blob(audioChunks.current, {
-              type: "audio/webm",
-            });
-            audioBlobs.current = recordedBlob;
-
-            const reader = new FileReader();
-            reader.readAsArrayBuffer(audioBlobs.current);
-
-            reader.onloadend = () => {
-              if (transcribeWebsocketRef.current && reader.result) {
-                transcribeWebsocketRef.current.send(reader.result);
-              }
-            };
-            audioBlobs.current = null;
-          };
-        })
-        .catch((error) => console.error("Could not access user media:", error));
-    } else {
-      console.error("Browser does not support media devices");
-    }
-
-    if (!runTour && !dialogOpen && sessionState.currentPart === 1) {
-      instructionsAudio.current = new Audio("/greeting.mp3");
-      instructionsAudio.current.oncanplaythrough = () => {
-        instructionsAudio.current?.play();
-      };
-    }
-
-    if (instructionsAudio.current) {
-      instructionsAudio.current.onplay = () => {
-        if (videoRef.current) {
-          videoRef.current.play();
-          videoRef.current.muted = true;
-        }
-      };
-
-      instructionsAudio.current.ontimeupdate = () => {
-        if (audioFile.current?.ended) {
-          if (videoRef.current) {
-            videoRef.current.pause();
-            videoRef.current.currentTime = 0;
-          }
-        }
-      };
-    }
     return () => {
-      if (transcribeWebsocketRef.current?.OPEN && !part2Question) {
+      if (transcribeWebsocketRef.current?.OPEN) {
         transcribeWebsocketRef.current.close();
         transcribeWebsocketRef.current = null;
       }
-      if (chatWebsocketRef.current?.OPEN && !part2Question) {
+      if (chatWebsocketRef.current?.OPEN) {
         chatWebsocketRef.current.close();
         chatWebsocketRef.current = null;
       }
       if (mediaStream.current) {
+        mediaStream.current.getTracks().forEach((track) => track.stop());
         mediaStream.current = null;
       }
       if (mediaRecorder.current) {
+        mediaRecorder.current.stop();
+        mediaRecorder.current.removeEventListener("stop", recorderStopHandler);
         mediaRecorder.current = null;
       }
       if (audioContext.current) {
         audioContext.current = null;
       }
     };
-  }, [runTour, dialogOpen, part2Question]);
+  }, [initializeMediaRecorder, recorderStopHandler]);
+
+  useEffect(() => {
+    if (transcribeWebsocketRef.current) {
+      transcribeWebsocketRef.current.addEventListener(
+        "message",
+        transcribeSocketMessageHandler
+      );
+    }
+
+    if (chatWebsocketRef.current) {
+      chatWebsocketRef.current.addEventListener(
+        "message",
+        chatWebsocketMessageHandler
+      );
+    }
+
+    return () => {
+      if (transcribeWebsocketRef.current) {
+        transcribeWebsocketRef.current.removeEventListener(
+          "message",
+          transcribeSocketMessageHandler
+        );
+      }
+      if (chatWebsocketRef.current) {
+        chatWebsocketRef.current.removeEventListener(
+          "message",
+          chatWebsocketMessageHandler
+        );
+      }
+    };
+  }, [
+    chatWebsocketMessageHandler,
+    transcribeSocketMessageHandler,
+    dialogOpen,
+    greetingPlayed,
+    playInstructionsAudioWithVideo,
+    runTour,
+  ]);
 
   const optimizedUpdateVisualSlider = useCallback(function updateVisualSlider(
     analyzer: AnalyserNode
@@ -535,18 +539,27 @@ export default function Page() {
 
   const optimizedStartRecoring = useCallback(() => {
     if (mediaRecorder.current && audioAnalyzer.current) {
-      if (sessionState.currentPart === 2) {
-        setIsAnsweringQuestion(false);
-      }
       mediaRecorder.current.start();
       optimizedUpdateVisualSlider(audioAnalyzer.current);
     }
-  }, [optimizedUpdateVisualSlider, sessionState.currentPart]);
+  }, [optimizedUpdateVisualSlider]);
 
   const optimizedStopRecording = useCallback(() => {
     if (mediaRecorder.current && mediaRecorder.current.state === "recording") {
       mediaRecorder.current.stop();
-      // mediaStream.current?.getTracks().forEach((track) => track.stop());
+    }
+
+    if (sessionState.currentPart === 2) {
+      setIsAnsweringQuestion(false);
+    }
+
+    if (openReadingCard) {
+      const copySession2 = { ...sessionState };
+      copySession2.status = "inactive";
+      setSession(copySession2);
+      setDialogOpen(true);
+      setStatus("Finished");
+      setOpenReadingCard(false);
     }
 
     audioChunks.current = [];
@@ -555,14 +568,28 @@ export default function Page() {
       animationId.current = null;
       volumeSlider.current.style.width = "10%";
     }
-  }, []);
+  }, [openReadingCard, sessionState, setSession, setStatus]);
 
   useEffect(() => {
+    const staringdialogClosed = !runTour && !dialogOpen;
+    if (staringdialogClosed && !greetingPlayed) {
+      playInstructionsAudioWithVideo("greeting.mp3");
+      setGreetingPlayed(true);
+    }
+
     if (isAnsweringQuestion && !isRecording) {
       optimizedStartRecoring();
       setIsRecording(true);
     }
-  }, [isAnsweringQuestion, isRecording, optimizedStartRecoring]);
+  }, [
+    isAnsweringQuestion,
+    isRecording,
+    optimizedStartRecoring,
+    runTour,
+    dialogOpen,
+    playInstructionsAudioWithVideo,
+    greetingPlayed,
+  ]);
 
   return (
     <div className="w-full min-h-screen flex flex-col gap-6 bg-gray-50 py-6 font-geist lg:grid lg:grid-cols-[0.5fr_0.8fr_0.5fr] xl:grid-cols-[0.38fr_0.84fr_0.38fr] lg:justify-items-stretch lg:items-stretch lg:gap-6 lg:w-full max-w-[1420px] mx-auto xl:py-8">
@@ -578,10 +605,7 @@ export default function Page() {
           showSkipButton={true}
           callback={(data) => {
             if (data.status === "finished" || data.status === "skipped") {
-              instructionsAudio.current = new Audio("/greeting.mp3");
-              instructionsAudio.current.oncanplaythrough = () => {
-                instructionsAudio.current?.play();
-              };
+              playInstructionsAudioWithVideo("greeting.mp3");
               setRunTour(false);
             }
           }}
@@ -597,7 +621,6 @@ export default function Page() {
                 transition: "opacity 0.3s ease-in-out",
               },
             },
-            autoOpen: true,
           }}
           tooltipComponent={CustomTooltip}
         />
@@ -607,6 +630,8 @@ export default function Page() {
           <PartInfo currentPart={1} />
         </div>
         <CharacterSection
+          openReadingCard={openReadingCard}
+          setOpenReadingCard={setOpenReadingCard}
           setControlsDialogOpen={setControlsDialogOpen}
           setPartTwoTime={setPartTwoTime}
           partTwoTime={partTwoTime}

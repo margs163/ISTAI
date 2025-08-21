@@ -156,7 +156,7 @@ class ReadingCard(Base):
     topic: Mapped[str] = mapped_column(String(128))
     text: Mapped[str] = mapped_column(Text)
     practice_id: Mapped[UUID_ID] = mapped_column(
-        ForeignKey("practice_test_table.id"), index=True
+        ForeignKey("practice_test_table.id"), index=True, nullable=True
     )
     practice_test: Mapped["PracticeTest"] = relationship(back_populates="reading_cards")
 

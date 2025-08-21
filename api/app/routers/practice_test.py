@@ -1,20 +1,18 @@
-from datetime import date, datetime
+from datetime import datetime
 from typing import Annotated, Any
 from fastapi import APIRouter, Depends, Body, HTTPException, Path, Query, status
 from pydantic import BaseModel
 
 from api.app.lib.auth_db import get_async_session
 from api.app.schemas.db_tables import (
-    AssistantEnum,
     PracticeTest,
     QuestionCard,
     Result,
-    TestStatusEnum,
     Transcription,
     User,
 )
 from ..schemas.practice_test import PracticeTestSchema, PracticeTestUpdateSchema
-from sqlalchemy import insert, select
+from sqlalchemy import select
 from sqlalchemy.orm import joinedload, selectinload
 from ..dependencies import current_active_user
 

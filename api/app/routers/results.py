@@ -43,6 +43,7 @@ async def post_results(
     transcription: Annotated[TranscriptionSchema, Body()],
     score_treshold: Annotated[float, Query()] = 0.5,
 ):
+    local_path = None
     try:
         async for session in get_async_session():
             async with session:
@@ -56,9 +57,7 @@ async def post_results(
                         detail="Could not find a test with specified id",
                     )
 
-                parsed_transcriptions = construct_input(
-                    transcription.user_responses, transcription.assistant_responses
-                )
+                parsed_transcriptions = construct_input(transcription)
 
                 general_state = await general_app.ainvoke(
                     {"transcriptions": parsed_transcriptions}
@@ -212,12 +211,21 @@ async def post_results(
 
                 session.add(end_result)
 
+                if os.path.exists(local_path):
+                    os.remove(local_path)
+
                 return {"data": end_result, "status": "success"}
 
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Could not post results: {e}",
+        )
+
+    finally:
+        await s3_client.delete_objects(
+            Bucket=bucket_name,
+            Delete={"Objects": [reading_audio_path], "Quiet": False},
         )
 
 

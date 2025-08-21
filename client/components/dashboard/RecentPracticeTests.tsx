@@ -54,7 +54,7 @@ const tests: Test[] = [
 
 export function PracticeTest({ test }: { test: Test }) {
   return (
-    <div className="border border-gray-100 rounded-lg w-full px-5 py-2.5 flex flex-row justify-between items-center hover:bg-slate-50 transition-colors active:bg-slate-50">
+    <div className="border border-gray-100 rounded-lg w-full px-5 py-3 lg:py-3.5 flex flex-row justify-between items-center hover:bg-slate-50 transition-colors active:bg-slate-50">
       <Link href={"#"} className="flex flex-row gap-3 items-center">
         <div className="p-2 rounded-lg bg-indigo-100">
           <BookText className="size-5 text-indigo-600 shrink-0" />

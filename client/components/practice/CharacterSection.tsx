@@ -3,12 +3,12 @@
 import { Mic, Pause, RotateCcw, X } from "lucide-react";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import PartInfo from "./PartInfo";
-import QuickActions from "../dashboard/QuickActions";
-import QuickTestActions from "./QuickTestActions";
+import Floater from "react-floater";
 import { cn } from "@/lib/utils";
 import QuestionCard from "./QuestionCard";
 import { useTestSessionStore } from "@/lib/testSessionStore";
 import { useLocalPracticeTestStore } from "@/lib/practiceTestStore";
+import ReadingCard from "./ReadingCard";
 
 export default function CharacterSection({
   activePart = 1,
@@ -25,6 +25,8 @@ export default function CharacterSection({
   partTwoTime,
   setControlsDialogOpen,
   setIsAnsweringQuestion,
+  openReadingCard,
+  setOpenReadingCard,
 }: {
   activePart?: 1 | 2 | 3;
   timerActive: boolean;
@@ -40,6 +42,8 @@ export default function CharacterSection({
   partTwoTime: number;
   setControlsDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
   setIsAnsweringQuestion: React.Dispatch<React.SetStateAction<boolean>>;
+  openReadingCard: boolean;
+  setOpenReadingCard: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
   const questionCard = useLocalPracticeTestStore(
     (state) => state.part_two_card
@@ -59,7 +63,11 @@ export default function CharacterSection({
             setIsAnsweringQuestion={setIsAnsweringQuestion}
           />
         </div>
-        <Character videoRef={videoRef} />
+        <Character
+          videoRef={videoRef}
+          openReadingCard={openReadingCard}
+          setOpenReadingCard={setOpenReadingCard}
+        />
         <TestControls
           volumeSliderRef={volumeSliderRef}
           isRecording={isRecording}
@@ -104,13 +112,14 @@ export function TestControls({
     } else {
       startRecording();
     }
-    setIsRecording((prev) => !prev);
+    setIsRecording((prev) => {
+      console.log("Toggled recording: ", isRecording);
+      return !prev;
+    });
 
     if (audioContext.current?.state !== "running") {
       await audioContext.current?.resume();
     }
-
-    console.log("Toggled recording: ", isRecording);
   }, [
     isRecording,
     startRecording,
@@ -134,9 +143,7 @@ export function TestControls({
             className="p-3 rounded-[50%] hover:bg-gray-100 active:bg-gray-100 transition-colors"
             onClick={() => {
               setStatus("inactive");
-              setTimeout(() => {
-                setControlsDialogOpen(true);
-              }, 0);
+              setControlsDialogOpen(true);
             }}
           >
             <Pause size={22} className=" text-neutral-600" />
@@ -149,7 +156,7 @@ export function TestControls({
                   ? "p-4 rounded-[50%] transition-colors hover:bg-red-600 bg-red-500 text-gray-50 cursor-pointer"
                   : "p-4 rounded-[50%] transition-colors hover:bg-indigo-600 text-indigo-600 bg-indigo-50 hover:text-indigo-50 curor-pointer",
                 timerActive &&
-                  "bg-gray-50 text-gray-500 hover:bg-gray-50 hover:text-gray-500 cursor-not-allowed"
+                  "bg-gray-100 text-gray-500 hover:bg-gray-100 hover:text-gray-500 cursor-not-allowed"
               )}
             >
               <Mic
@@ -161,7 +168,6 @@ export function TestControls({
             </button>
           ) : (
             <button
-              disabled={timerActive}
               className={cn(
                 isRecording
                   ? "p-4 rounded-[50%] transition-colors hover:bg-red-600 bg-red-500 text-gray-50 cursor-pointer"
@@ -170,12 +176,7 @@ export function TestControls({
                   "bg-gray-100 text-gray-500 hover:bg-gray-50 hover:text-gray-500 cursor-not-allowed"
               )}
             >
-              <Mic
-                size={30}
-                aria-disabled={timerActive}
-                className="sm:w-8"
-                onClick={ToggleRecording}
-              />
+              <Mic size={30} className="sm:w-8" onClick={ToggleRecording} />
             </button>
           )}
           <button
@@ -192,11 +193,31 @@ export function TestControls({
 
 export function Character({
   videoRef,
+  openReadingCard,
+  setOpenReadingCard,
 }: {
   videoRef: React.RefObject<HTMLVideoElement | null>;
+  openReadingCard: boolean;
+  setOpenReadingCard: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
   return (
     <div className="relative -bottom-4 lg:-bottom-12 xl:-bottom-6 flex justify-center items-center">
+      <Floater
+        component={ReadingCard}
+        open={openReadingCard}
+        placement="center"
+        styles={{
+          floater: {
+            borderRadius: 10,
+          },
+          arrow: {
+            color: "#fff",
+          },
+        }}
+        callback={(action, props) => {
+          if (action === "close") setOpenReadingCard(false);
+        }}
+      />
       <video
         src={"/assisstant.mp4"}
         ref={videoRef}

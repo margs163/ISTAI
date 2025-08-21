@@ -53,7 +53,15 @@ export default function PauseDialog({
         ),
   });
   return (
-    <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+    <Dialog
+      open={dialogOpen}
+      onOpenChange={() => {
+        if (status === "inactive") {
+          setTestStatus("active");
+        }
+        setDialogOpen((prev) => !prev);
+      }}
+    >
       <DialogContent className="font-geist">
         <DialogHeader className="items-start text-left">
           <DialogTitle className="text-base text-gray-800 font-semibold">
