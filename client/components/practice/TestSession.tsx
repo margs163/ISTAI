@@ -1,4 +1,5 @@
 import { useTestSessionStore } from "@/lib/testSessionStore";
+import { parseTimeInt } from "@/lib/utils";
 import {
   Bot,
   CircleCheck,
@@ -10,32 +11,21 @@ import {
 } from "lucide-react";
 import { useEffect } from "react";
 
-function parseTime(time: number) {
-  const minutes = Math.floor(time / 60);
-  const seconds = time - minutes * 60;
-
-  return `${minutes < 10 ? 0 : ""}${minutes}:${
-    seconds < 10 ? 0 : ""
-  }${seconds}`;
-}
-
 export default function TestSession() {
   const testSessionState = useTestSessionStore((state) => state);
-  const setTestSession = useTestSessionStore((state) => state.setSessionData);
+  const setDuration = useTestSessionStore((state) => state.setDuration);
 
   useEffect(() => {
     if (testSessionState.status === "active") {
       const intervalId = setInterval(() => {
-        const copySession = { ...testSessionState };
-        copySession.duration += 1;
-        setTestSession(copySession);
+        setDuration(1);
       }, 1000);
 
       return () => {
         clearInterval(intervalId);
       };
     }
-  }, [testSessionState]);
+  }, [testSessionState.status, setDuration]);
 
   return (
     <section className="p-6 py-0 max-w-[600px] lg:px-0">
@@ -81,7 +71,7 @@ export default function TestSession() {
                 <p className="text-sm font-medium text-gray-600">Duration</p>
               </div>
               <h3 className="text-gray-800 text-sm font-medium rounded-md">
-                {parseTime(testSessionState.duration)}
+                {parseTimeInt(testSessionState.duration)}
               </h3>
             </div>
           </div>

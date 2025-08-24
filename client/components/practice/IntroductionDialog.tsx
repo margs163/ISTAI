@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import ButtonPrimary from "../home/ButtonPrimary";
 import MainButton from "../MainButton";
+import Link from "next/link";
 
 export default function IntroductionDialog({
   dialogOpen,
@@ -68,11 +69,17 @@ export default function IntroductionDialog({
           ) : (
             <div className="flex flex-row gap-2 items-start justify-end">
               <DialogClose asChild>
-                <button className="px-4 py-2 rounded-sm bg-gray-200 text-gray-800 font-medium text-xs hover:bg-gray-400 active:bg-gray-300 transition-colors">
-                  {status === "Finished"
-                    ? dialogInfo[3].options[0]
-                    : dialogInfo[currentPart - 1].options[0]}
-                </button>
+                {status === "Finished" ? (
+                  <Link href={"/results"} replace>
+                    <button className="px-4 py-2 rounded-sm bg-gray-200 text-gray-800 font-medium text-xs hover:bg-gray-400 active:bg-gray-300 transition-colors">
+                      {dialogInfo[3].options[0]}
+                    </button>
+                  </Link>
+                ) : (
+                  <button className="px-4 py-2 rounded-sm bg-gray-200 text-gray-800 font-medium text-xs hover:bg-gray-400 active:bg-gray-300 transition-colors">
+                    {dialogInfo[currentPart - 1].options[0]}
+                  </button>
+                )}
               </DialogClose>
             </div>
           )}

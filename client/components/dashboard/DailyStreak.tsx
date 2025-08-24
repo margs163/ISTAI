@@ -1,8 +1,10 @@
+import { useAnalyticsStore } from "@/lib/userStorage";
 import { cn } from "@/lib/utils";
 import { Flame } from "lucide-react";
 import React from "react";
 
 export default function DailyStreak({ className }: { className?: string }) {
+  const daysStreak = useAnalyticsStore((state) => state.streak_days);
   return (
     <div
       className={cn(
@@ -17,7 +19,7 @@ export default function DailyStreak({ className }: { className?: string }) {
       <div className="">
         <p className="text-xs lg:text-sm text-gray-600">Daily Streak</p>
         <h3 className="text-base lg:text-lg lg:leading-[1.45] font-semibold text-gray-800">
-          0 Days Streak
+          {daysStreak} Days Streak
         </h3>
       </div>
     </div>

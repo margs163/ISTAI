@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from "uuid";
 type ChatStore = {
   messages: ChatMessageType[];
   addMessage: (message: ChatMessageType) => void;
+  restoreMessages: () => void;
 };
 
 export const useChatStore = create<ChatStore>((set) => ({
@@ -12,7 +13,7 @@ export const useChatStore = create<ChatStore>((set) => ({
     {
       role: "Assistant",
       messageId: uuidv4(),
-      text: "Hello, my name is Ron and I will be your test examiner today! Can you please start by introducing yourself",
+      text: "Hello, welcome to the Speaking Test! Press the microphone button to start speaking.",
     },
     {
       role: "User",
@@ -22,4 +23,19 @@ export const useChatStore = create<ChatStore>((set) => ({
   ],
   addMessage: (message: ChatMessageType) =>
     set((state) => ({ messages: [...state.messages, message] })),
+  restoreMessages: () =>
+    set({
+      messages: [
+        {
+          role: "Assistant",
+          messageId: uuidv4(),
+          text: "Hello, welcome to the Speaking Test! Press the microphone button to start speaking.",
+        },
+        {
+          role: "User",
+          messageId: uuidv4(),
+          text: "Click the microphone to start speaking",
+        },
+      ],
+    }),
 }));

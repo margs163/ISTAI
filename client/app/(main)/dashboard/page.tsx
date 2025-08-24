@@ -6,41 +6,31 @@ import QuickActions from "@/components/dashboard/QuickActions";
 import RadarChart from "@/components/dashboard/RadarChart";
 import RecentPracticeTests from "@/components/dashboard/RecentPracticeTests";
 import StatisticsCards from "@/components/dashboard/StatisticsCards";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { UserData, UserDataServer, useUserStore } from "@/lib/userStorage";
+import {
+  useAnalyticsStore,
+  UserData,
+  UserDataServer,
+  useUserStore,
+} from "@/lib/userStorage";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import { fetchAnalytics, fetchUser } from "@/lib/queries";
+import { useLocalPracticeTestStore } from "@/lib/practiceTestStore";
 
 export default function Page() {
   const setUserData = useUserStore((state) => state.setUserData);
+  const setAnalytics = useAnalyticsStore((state) => state.setAnalyticsData);
+
   useQuery({
     queryKey: ["user"],
-    queryFn: () =>
-      axios
-        .get<UserDataServer>("http://localhost:8000/users/me", {
-          withCredentials: true,
-          headers: {
-            "Content-Type": "application/json",
-          },
-        })
-        .then((response) => {
-          const data = response.data;
-          const user = {
-            id: data.id,
-            email: data.email,
-            isActive: data.is_active,
-            isVerified: data.is_verified,
-            isSuperuser: data.is_superuser,
-            firstName: data.first_name,
-            lastName: data.last_name,
-          };
-          setUserData(user);
-          return user;
-        })
-        .catch((error) => {
-          console.error(error);
-        }),
+    queryFn: async () => await fetchUser(setUserData),
+  });
+
+  useQuery({
+    queryKey: ["get-analytics"],
+    queryFn: async () => await fetchAnalytics(setAnalytics),
   });
 
   return (

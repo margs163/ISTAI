@@ -4,12 +4,14 @@ from pydantic import BaseModel, Field
 class PronunciationMistake(BaseModel):
     word: str
     accuracy: int = Field(ge=0, le=100)
-    phonemes: str
+    mistake_type: str
+    user_phonemes: str
+    correct_phonemes: str
 
 
 class PronunciationAnalysis(BaseModel):
-    pronunciationScore: float = Field(ge=2, le=9, multiple_of=0.5)
-    pronunciationStrongPoints: list[str]
-    pronunciationWeakSides: list[str]
-    pronunciationMistakes: list[PronunciationMistake]
-    pronunciationTips: list[str]
+    pronunciation_score: float = Field(ge=2, le=9, multiple_of=0.5)
+    pronunciation_strong_points: list[str]
+    pronunciation_weak_sides: list[str]
+    pronunciation_mistakes: list[PronunciationMistake]
+    pronunciation_tips: list[str]

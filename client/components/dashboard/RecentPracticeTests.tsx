@@ -1,10 +1,23 @@
 "use client";
-import { cn } from "@/lib/utils";
+import { useGlobalPracticeTestsStore } from "@/lib/practiceTestStore";
+import { fetchPracticeTests } from "@/lib/queries";
+import { cn, getPreciseTimeAgo } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
 import { BookText, Bot, ChartColumn, Ellipsis } from "lucide-react";
 import Link from "next/link";
-import React from "react";
+import React, { useState } from "react";
+import LoadingSmallUI from "../loadingSmallUI";
+import PracticeTestDialogInfo from "./PracticeTestDialogInfo";
+import { PracticeTestType } from "@/lib/types";
+
+function parseTime(time: number) {
+  const minutes = Math.floor(time / 60);
+  const seconds = time - minutes * 60;
+
+  return `${minutes < 10 ? 0 : ""}${minutes}:${
+    seconds < 10 ? 0 : ""
+  }${seconds}`;
+}
 
 type Test = {
   name: string;
@@ -52,26 +65,32 @@ const tests: Test[] = [
   },
 ];
 
-export function PracticeTest({ test }: { test: Test }) {
+export function PracticeTest({ test }: { test: PracticeTestType }) {
   return (
     <div className="border border-gray-100 rounded-lg w-full px-5 py-3 lg:py-3.5 flex flex-row justify-between items-center hover:bg-slate-50 transition-colors active:bg-slate-50">
-      <Link href={"#"} className="flex flex-row gap-3 items-center">
+      <Link
+        href={`/dashboard/practice-tests/${test.id}`}
+        className="flex flex-row gap-3 items-center"
+      >
         <div className="p-2 rounded-lg bg-indigo-100">
           <BookText className="size-5 text-indigo-600 shrink-0" />
         </div>
         <div>
-          <h3 className="font-medium text-gray-800 text-sm">{test.name}</h3>
+          <h3 className="font-medium text-gray-800 text-sm">
+            {test.practice_name}
+          </h3>
           <p className="text-xs font-normal text-gray-600 hidden lg:block">
-            {test.timeAgo} • {test.duration}
+            {getPreciseTimeAgo(test.test_date)} •{" "}
+            {parseTime(test.test_duration ?? 1200)}
           </p>
         </div>
       </Link>
       <div
         className={cn(
           "px-2.5 py-1 rounded-xl border hidden lg:inline-block",
-          test.band > 6.0
+          test.result?.overall_score > 6.0
             ? "border-green-300 bg-green-50"
-            : test.band >= 4.5
+            : test.result?.overall_score >= 4.5
             ? "border-yellow-300 bg-yellow-50"
             : "border-red-300 bg-red-50"
         )}
@@ -79,14 +98,14 @@ export function PracticeTest({ test }: { test: Test }) {
         <p
           className={cn(
             "text-xs font-medium",
-            test.band > 6.0
+            test.result?.overall_score > 6.0
               ? "text-green-600"
-              : test.band >= 4.5
+              : test.result?.overall_score >= 4.5
               ? "text-yellow-600"
               : "text-red-600"
           )}
         >
-          Band {test.band.toFixed(1)}
+          Band {test.result?.overall_score.toFixed(1)}
         </p>
       </div>
       <h3 className="text-sm font-medium text-gray-800 flex-row items-center gap-1 hidden lg:flex">
@@ -106,32 +125,15 @@ export function PracticeTest({ test }: { test: Test }) {
 }
 
 export default function RecentPracticeTests() {
+  const setGlobalPracticeTests = useGlobalPracticeTestsStore(
+    (state) => state.setPracticeTests
+  );
   const { data, isLoading, error } = useQuery({
     queryKey: ["practice-tests"],
-    queryFn: () =>
-      fetch("http://localhost:8000/practice_test?user_id=true", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-      })
-        .then((response) => {
-          if (!response.ok) {
-            console.error("Could not fetch");
-          }
-          return response.json();
-        })
-        .then((data) => data)
-        .catch((error) => console.error(error)),
+    queryFn: async () => await fetchPracticeTests(setGlobalPracticeTests),
   });
 
-  if (isLoading)
-    return (
-      <h1 className="text-sm text-center font-medium text-gray-800">
-        Loading...
-      </h1>
-    );
+  if (isLoading) return <LoadingSmallUI />;
 
   if (error)
     return (
@@ -140,7 +142,15 @@ export default function RecentPracticeTests() {
       </h1>
     );
 
-  console.log(data);
+  if (!data) return <LoadingSmallUI />;
+
+  const recentTests = data.filter((item) => item.result);
+  console.log(recentTests);
+  const lastFive =
+    recentTests.length > 5
+      ? recentTests.slice(recentTests.length - 10, recentTests.length - 5)
+      : recentTests;
+
   return (
     <section className="px-6 lg:pr-0 w-full flex flex-col gap-6">
       <div className="p-5 w-full flex flex-col gap-6 bg-white rounded-lg border border-gray-200/80">
@@ -158,7 +168,7 @@ export default function RecentPracticeTests() {
           </Link>
         </header>
         <div className="space-y-3">
-          {tests.map((item, index) => (
+          {lastFive.map((item, index) => (
             <PracticeTest key={index} test={item} />
           ))}
         </div>

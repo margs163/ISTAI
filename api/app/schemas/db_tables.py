@@ -132,12 +132,13 @@ class Analytics(Base):
         GUID, ForeignKey("user_table.id"), index=True
     )
     user: Mapped[User] = relationship(back_populates="analytics")
-    practice_time: Mapped[timedelta] = mapped_column(Integer, default=0)
+    practice_time: Mapped[int] = mapped_column(Integer, default=0)
     tests_completed: Mapped[int] = mapped_column(Integer)
     current_bandscore: Mapped[float] = mapped_column(Float)
     average_band_scores: Mapped[dict[str, float]] = mapped_column(JSONB)
     average_band: Mapped[float] = mapped_column(Float)
     common_mistakes: Mapped[dict[str, Any]] = mapped_column(JSONB)
+    streak_days: Mapped[int] = mapped_column(Integer, default=0)
 
 
 class QuestionCard(Base):

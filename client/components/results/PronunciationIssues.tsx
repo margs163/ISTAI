@@ -1,26 +1,16 @@
+import { useLocalPracticeTestStore } from "@/lib/practiceTestStore";
 import { Info, Mic, Volume2 } from "lucide-react";
 import React from "react";
-
-const pronunMistakes = [
-  {
-    word: "comfortable",
-    issue: "Missing syllable",
-    correction: "COM-for-ta-ble",
-  },
-  {
-    word: "specific",
-    issue: "Wrong stress",
-    correction: "spe-CI-fic",
-  },
-];
 
 export function PronunMistake({
   mistake,
 }: {
   mistake: {
     word: string;
-    issue: string;
-    correction: string;
+    accuracy: number;
+    mistake_type: string;
+    user_phonemes: string;
+    correct_phonemes: string;
   };
 }) {
   return (
@@ -35,13 +25,13 @@ export function PronunMistake({
         <div className="text-red-600 flex flex-row gap-2 justify-start items-center">
           <Info className="size-4" />
           <p className="font-normal text-sm lg:text-base">
-            Issue: {mistake.issue}
+            Issue: {mistake.user_phonemes}
           </p>
         </div>
         <div className="text-green-600 flex flex-row gap-2 justify-start items-center">
           <Info className="size-4" />
           <p className="font-normal text-sm lg:text-base">
-            Correct: {mistake.correction}
+            Correct: {mistake.correct_phonemes}
           </p>
         </div>
       </div>
@@ -50,6 +40,9 @@ export function PronunMistake({
 }
 
 export default function PronunciationIssues() {
+  const pronunIssues = useLocalPracticeTestStore(
+    (state) => state.result?.pronunciation_issues
+  );
   return (
     <section className="w-full px-6 lg:px-20 xl:px-36">
       <div className="p-6 lg:p-8 border border-gray-200 rounded-lg bg-white flex flex-col gap-6 shadow-none">
@@ -60,7 +53,7 @@ export default function PronunciationIssues() {
           </h3>
         </header>
         <main className="flex flex-col gap-4 lg:flex-row lg:gap-6">
-          {pronunMistakes.map((item, index) => (
+          {pronunIssues?.map((item, index) => (
             <PronunMistake mistake={item} key={index} />
           ))}
         </main>

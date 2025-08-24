@@ -1,3 +1,5 @@
+"use client";
+import { useLocalPracticeTestStore } from "@/lib/practiceTestStore";
 import { cn } from "@/lib/utils";
 import {
   BookA,
@@ -19,36 +21,68 @@ type CriterionScore = {
     Omit<LucideProps, "ref"> & React.RefAttributes<SVGSVGElement>
   >;
 };
-const scores: CriterionScore[] = [
-  {
-    band: 7.5,
-    title: "Fluency",
-    level: "Advanced",
-    code: "C1",
-    icon: MessageSquare,
+const scores = {
+  2.0: {
+    level: "Beginner",
+    code: "A1",
   },
-  {
-    band: 7.0,
-    title: "Lexical Resource",
-    level: "Advanced",
-    code: "C1",
-    icon: BookOpen,
+  2.5: {
+    level: "Beginner",
+    code: "A1",
   },
-  {
-    band: 6.5,
-    title: "Grammatical Range",
+  3.0: {
+    level: "Elementary",
+    code: "A2",
+  },
+  3.5: {
+    level: "Elementary",
+    code: "A2",
+  },
+  4.0: {
+    level: "Intermediate",
+    code: "B1",
+  },
+  4.5: {
+    level: "Intermediate",
+    code: "B1",
+  },
+  5.0: {
+    level: "Intermediate",
+    code: "B1",
+  },
+  5.5: {
     level: "Upper Intermediate",
     code: "B2",
-    icon: Brain,
   },
-  {
-    band: 7.0,
-    title: "Pronunciation",
+  6.0: {
+    level: "Upper Intermediate",
+    code: "B2",
+  },
+  6.5: {
+    level: "Upper Intermediate",
+    code: "B2",
+  },
+  7.0: {
     level: "Advanced",
     code: "C1",
-    icon: Volume2,
   },
-];
+  7.5: {
+    level: "Advanced",
+    code: "C1",
+  },
+  8.0: {
+    level: "Advanced",
+    code: "C1",
+  },
+  8.5: {
+    level: "Proficient",
+    code: "C2",
+  },
+  9.0: {
+    level: "Proficient",
+    code: "C2",
+  },
+};
 
 export function CriterionBand({ score }: { score: CriterionScore }) {
   const band = score.band;
@@ -101,6 +135,36 @@ export function CriterionBand({ score }: { score: CriterionScore }) {
 }
 
 export default function CriterionScores() {
+  const criteria = useLocalPracticeTestStore((state) => {
+    return state.result?.criterion_scores;
+  });
+  const criterionScores: CriterionScore[] = [
+    {
+      ...scores[criteria?.fluency],
+      band: criteria?.fluency,
+      title: "Fluency",
+      icon: MessageSquare,
+    },
+    {
+      ...scores[criteria?.grammar],
+      band: criteria?.grammar,
+      title: "Grammar",
+      icon: BookOpen,
+    },
+    {
+      ...scores[criteria?.lexis],
+      band: criteria?.lexis,
+      title: "Lexis",
+      icon: Brain,
+    },
+    {
+      ...scores[criteria?.pronunciation],
+      band: criteria?.pronunciation,
+      title: "Pronunciation",
+      icon: Volume2,
+    },
+  ];
+
   return (
     <section className="w-full px-6 lg:px-20 xl:px-36">
       <div className="p-6 lg:p-8 border border-gray-200 rounded-lg bg-white flex flex-col gap-6 shadow-none">
@@ -111,7 +175,7 @@ export default function CriterionScores() {
           </h3>
         </header>
         <main className="flex flex-col lg:flex-row gap-4">
-          {scores.map((item, index) => (
+          {criterionScores.map((item, index) => (
             <CriterionBand score={item} key={index} />
           ))}
         </main>

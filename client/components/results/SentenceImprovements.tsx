@@ -1,3 +1,5 @@
+import { useLocalPracticeTestStore } from "@/lib/practiceTestStore";
+import { ImprovementType } from "@/lib/types";
 import {
   CircleCheck,
   CircleX,
@@ -57,8 +59,9 @@ export function Improvement({
   improvement,
 }: {
   improvement: {
-    original: string;
-    improved: string;
+    original_sentence: string;
+    suggested_improvement: string;
+    identified_issues: string[];
     explanation: string;
   };
 }) {
@@ -72,7 +75,7 @@ export function Improvement({
           </h5>
         </div>
         <p className="text-sm lg:text-sm font-normal italic text-gray-600">
-          <q>{improvement.original}</q>
+          <q>{improvement.original_sentence}</q>
         </p>
       </div>
       <div className="bg-green-50 border-l-2 border-green-300 rounded-r-md p-4 flex flex-col items-start gap-1 lg:gap-2">
@@ -83,7 +86,7 @@ export function Improvement({
           </h5>
         </div>
         <p className="text-sm lg:text-sm font-normal italic text-gray-600">
-          <q>{improvement.improved}</q>
+          <q>{improvement.suggested_improvement}</q>
         </p>
       </div>
       <div className="bg-blue-50 border-l-2 border-blue-300 rounded-r-md p-4 flex flex-col items-start gap-1 lg:gap-2">
@@ -102,6 +105,13 @@ export function Improvement({
 }
 
 export default function SentenceImprovements() {
+  const senteces = useLocalPracticeTestStore(
+    (state) => state.result?.sentence_improvements
+  );
+  const copySentences = {
+    grammar: [...senteces?.grammar_enhancements],
+    vocabulary: [...senteces?.vocabulary_enhancements],
+  };
   return (
     <section className="w-full px-6 lg:px-20 xl:px-36">
       <div className="p-6 lg:p-8 border border-gray-200 rounded-lg bg-white flex flex-col gap-6 shadow-none">
@@ -116,8 +126,8 @@ export default function SentenceImprovements() {
             <p className="text-sm font-medium px-2 py-1 rounded-md border border-indigo-200 text-indigo-600">
               Grammar
             </p>
-            <div className="flex flex-col gap-3 lg:flex-row lg:gap-6">
-              {improvements.grammar.map((item, index) => (
+            <div className="flex flex-col gap-3 lg:grid lg:grid-cols-3 lg:gap-6">
+              {copySentences.grammar.map((item, index) => (
                 <Improvement improvement={item} key={index} />
               ))}
             </div>
@@ -126,8 +136,8 @@ export default function SentenceImprovements() {
             <p className="text-sm font-medium px-2 py-1 rounded-md border border-indigo-200 text-indigo-600">
               Vocabulary
             </p>
-            <div className="flex flex-col gap-3 lg:flex-row lg:gap-6">
-              {improvements.vocabulary.map((item, index) => (
+            <div className="flex flex-col gap-3 lg:grid lg:grid-cols-3 lg:gap-6">
+              {copySentences.vocabulary.map((item, index) => (
                 <Improvement improvement={item} key={index} />
               ))}
             </div>

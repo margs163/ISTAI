@@ -51,7 +51,11 @@ export function ChatMessage({
   );
 }
 
-export default function Chat() {
+export default function Chat({
+  chatRef,
+}: {
+  chatRef: React.RefObject<HTMLDivElement | null>;
+}) {
   const chatMessages = useChatStore((state) => state.messages);
   return (
     <section className="p-6 py-0 max-w-[600px] lg:px-0">
@@ -62,7 +66,10 @@ export default function Chat() {
             Test Transcription
           </h3>
         </header>
-        <main className="flex flex-col gap-2 items-center max-h-[250px] overflow-y-scroll px-3">
+        <main
+          className="flex flex-col gap-2 items-center max-h-[250px] overflow-y-scroll px-3"
+          ref={chatRef}
+        >
           {chatMessages.map((item, index) => (
             <ChatMessage
               message={item}

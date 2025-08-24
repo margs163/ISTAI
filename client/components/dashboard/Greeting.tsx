@@ -1,6 +1,5 @@
 import { ExternalLink, File, FileInput, Flame } from "lucide-react";
 import React from "react";
-import ButtonSecondary from "../home/ButtonSecondary";
 import MainButton from "../MainButton";
 import DailyStreak from "./DailyStreak";
 

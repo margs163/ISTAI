@@ -24,7 +24,10 @@ async def create_db_and_tables():
 
 async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
     async with async_session_maker() as session:
-        yield session
+        try:
+            yield session
+        finally:
+            pass
 
 
 async def get_user_db(session: AsyncSession = Depends(get_async_session)):

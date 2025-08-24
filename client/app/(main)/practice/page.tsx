@@ -12,9 +12,8 @@ import {
   ChatMessageType,
   ChatSocketMessage,
   ChatSocketResponseSchema,
-  QuestionCardType,
-  ReadingCardType,
   TranscribedMessage,
+  TranscriptionMessageType,
 } from "@/lib/types";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
@@ -24,38 +23,39 @@ import { tourSteps, dialogInfo } from "@/lib/metadata";
 import dynamic from "next/dynamic";
 import PauseDialog from "@/components/practice/PauseDialog";
 import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
 import { useLocalPracticeTestStore } from "@/lib/practiceTestStore";
 import { toast } from "sonner";
-
-function sendReadingCardSpeech(audioBlobs: Blob): string | undefined {
-  const formData = new FormData();
-  formData.append("audio", audioBlobs, `recording-${Date.now()}.wav`);
-  let filePath = "";
-  axios
-    .post("/api/tts", formData)
-    .then((response) => {
-      const result: { message: string; filePath: string } = response.data;
-      filePath = result.filePath;
-    })
-    .catch((error) => {
-      toast("Error while sending reading speech", {
-        description: "Could not upload audio to S3 storage",
-        action: {
-          label: "Log",
-          onClick: () => console.log(error),
-        },
-      });
-    });
-
-  return filePath;
-}
+import { useTestTranscriptionStore } from "@/lib/testTranscriptionStore";
+import Confetti from "react-confetti";
+import {
+  fetchPart2QuestionCard,
+  fetchReadingCard,
+  sendReadingCardSpeech,
+} from "@/lib/queries";
+import { useWindowSize } from "react-use";
+import { getSecondsDifference } from "@/lib/utils";
 
 const Joyride = dynamic(() => import("react-joyride"), { ssr: false });
 
 export default function Page() {
+  const { width, height } = useWindowSize();
   const setMetadata = useMetadataStore((state) => state.setMetadataData);
+  const addTranscriptionsLocal = useLocalPracticeTestStore(
+    (state) => state.setTranscriptions
+  );
+  const setTestDuration = useLocalPracticeTestStore(
+    (state) => state.setTestDuration
+  );
+  const addTranscription = useTestTranscriptionStore(
+    (state) => state.addTranscription
+  );
+  const startDatetime = useLocalPracticeTestStore(
+    (state) => state.startDatetime
+  );
+  const restoreChatMessages = useChatStore((state) => state.restoreMessages);
+  const transcriptionsState = useTestTranscriptionStore((state) => state);
   const addMessage = useChatStore((state) => state.addMessage);
+  const messages = useChatStore((state) => state.messages);
   const sessionState = useTestSessionStore((state) => state);
   const setSession = useTestSessionStore((state) => state.setSessionData);
   const setPart2Question = useLocalPracticeTestStore(
@@ -66,6 +66,9 @@ export default function Page() {
   );
   const setReadingCard = useLocalPracticeTestStore(
     (state) => state.setReadingCards
+  );
+  const setReadingAudioPath = useLocalPracticeTestStore(
+    (state) => state.setReadingAudioPath
   );
   const testStatus = useLocalPracticeTestStore((state) => state.status);
   const setStatus = useLocalPracticeTestStore((state) => state.setStatus);
@@ -79,12 +82,12 @@ export default function Page() {
   const audioBlobs = useRef<Blob>(null);
   const animationId = useRef<number>(null);
   const audioAnalyzer = useRef<AnalyserNode>(null);
-  const readingCardSpeechFileName = useRef<string>(null);
 
   const volumeSlider = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const audioFile = useRef<HTMLAudioElement>(null);
   const instructionsAudio = useRef<HTMLAudioElement>(null);
+  const chatRef = useRef<HTMLDivElement>(null);
 
   const [isRecording, setIsRecording] = useState(false);
   const [partTwoTime, setPartTwoTime] = useState(20);
@@ -95,61 +98,16 @@ export default function Page() {
   const [isAnsweringQuestion, setIsAnsweringQuestion] = useState(false);
   const [greetingPlayed, setGreetingPlayed] = useState(false);
   const [openReadingCard, setOpenReadingCard] = useState(false);
+  const [runConfetti, setRunConfetti] = useState(false);
 
   useQuery({
     queryKey: ["question-card"],
-    queryFn: async () => {
-      try {
-        const response = await axios.get<{ questions: QuestionCardType[] }>(
-          "http://localhost:8000/questions/?part=2",
-          {
-            headers: {
-              "Content-Type": "application/json",
-            },
-            withCredentials: true,
-          }
-        );
-        const question = response.data.questions[0];
-        setPart2Question(question);
-        return question;
-      } catch (error) {
-        toast("No Question Card", {
-          description: "No Part 2 question card found",
-          action: {
-            label: "Log",
-            onClick: () => console.log(error),
-          },
-        });
-      }
-    },
+    queryFn: async () => await fetchPart2QuestionCard(setPart2Question),
   });
 
   useQuery({
     queryKey: ["reading-card"],
-    queryFn: async () => {
-      try {
-        const response = await axios.get<{ cards: ReadingCardType[] }>(
-          "http://localhost:8000/reading_cards/?random=true&count=1",
-          {
-            headers: {
-              "Content-Type": "application/json",
-            },
-            withCredentials: true,
-          }
-        );
-        const readingCard = response.data.cards[0];
-        setReadingCard([readingCard]);
-        return readingCard;
-      } catch (error) {
-        toast("No Reading Card", {
-          description: "Could not fetch a reading card",
-          action: {
-            label: "Log",
-            onClick: () => console.log(error),
-          },
-        });
-      }
-    },
+    queryFn: async () => await fetchReadingCard(setReadingCard),
   });
 
   const playTTSAudio = useCallback(
@@ -171,7 +129,7 @@ export default function Page() {
           if (
             instructionsAudio.current &&
             !instructionsAudio.current?.paused &&
-            sessionState.currentPart === 2
+            sessionState.currentPart === 3
           ) {
             instructionsAudio.current.onended = () => {
               audioFile.current?.play();
@@ -289,8 +247,21 @@ export default function Page() {
         role: "User",
         messageId: uuidv4(),
         text: text,
+        time: getSecondsDifference(startDatetime, new Date()),
       };
 
+      const transcription: TranscriptionMessageType = {
+        name: sessionState.user as string,
+        text: text,
+        time: getSecondsDifference(startDatetime, new Date()),
+      };
+      const part =
+        sessionState.currentPart === 1
+          ? "partOne"
+          : sessionState.currentPart === 2
+          ? "partTwo"
+          : "partThree";
+      addTranscription(part, transcription);
       addMessage(userMessage);
       let chatSocketMessage: null | ChatSocketMessage = null;
 
@@ -313,10 +284,13 @@ export default function Page() {
       sendChatWebsocketMessage(chatSocketMessage);
     },
     [
+      startDatetime,
       addMessage,
+      addTranscription,
       part2Question,
       sendChatWebsocketMessage,
       sessionState.currentPart,
+      sessionState.user,
       setMetadata,
       sessionState.assistant,
     ]
@@ -340,13 +314,30 @@ export default function Page() {
       const data = result.data;
 
       switch (data.type) {
+        case "endTest":
+          playInstructionsAudioWithVideo("reading.mp3");
+          setOpenReadingCard(true);
+          break;
+
         case "ttsFileName":
           const assistantMessage: ChatMessageType = {
             role: "Assistant",
             messageId: uuidv4(),
             text: data.text,
+            time: getSecondsDifference(startDatetime, new Date()),
           };
-
+          const transcription: TranscriptionMessageType = {
+            name: sessionState.assistant as "Ron" | "Emma",
+            text: data.text,
+            time: getSecondsDifference(startDatetime, new Date()),
+          };
+          const part =
+            sessionState.currentPart === 1
+              ? "partOne"
+              : sessionState.currentPart === 2
+              ? "partTwo"
+              : "partThree";
+          addTranscription(part, transcription);
           addMessage(assistantMessage);
           if (data.filename) {
             console.log("PLAYING TTS");
@@ -361,31 +352,28 @@ export default function Page() {
           setSession(copySession);
           setDialogOpen(true);
           break;
-
-        case "endTest":
-          playInstructionsAudioWithVideo("reading.mp3");
-          setOpenReadingCard(true);
       }
     },
     [
       addMessage,
+      startDatetime,
       playInstructionsAudioWithVideo,
+      addTranscription,
       playTTSAudio,
       sessionState,
       setSession,
     ]
   );
 
-  const recorderStopHandler = useCallback(() => {
+  const recorderStopHandler = useCallback(async () => {
     audioBlobs.current = new Blob(audioChunks.current, { type: "audio/webm" });
 
     if (openReadingCard) {
-      console.log("SENT READING CARD SPEECH to API");
-      const filePath = sendReadingCardSpeech(audioBlobs.current);
-      console.log("RECIEVED A FILE PATH FROM SERVER", filePath);
+      const filePath = await sendReadingCardSpeech(audioBlobs.current);
       if (filePath) {
-        readingCardSpeechFileName.current = filePath;
+        setReadingAudioPath(filePath);
       }
+      setOpenReadingCard(false);
     } else {
       const reader = new FileReader();
       reader.readAsArrayBuffer(audioBlobs.current);
@@ -397,7 +385,7 @@ export default function Page() {
       };
     }
     audioBlobs.current = null;
-  }, [openReadingCard]);
+  }, [openReadingCard, setReadingAudioPath]);
 
   const initializeMediaRecorder = useCallback(async () => {
     if (navigator.mediaDevices && !mediaStream.current) {
@@ -420,8 +408,6 @@ export default function Page() {
             audioChunks.current.push(event.data);
           }
         };
-
-        mediaRecorder.current.addEventListener("stop", recorderStopHandler);
       } catch (error) {
         toast("Failed to capture microphone", {
           description: "Could not initialize media stream",
@@ -440,7 +426,7 @@ export default function Page() {
         },
       });
     }
-  }, [recorderStopHandler]);
+  }, []);
 
   useEffect(() => {
     if (!transcribeWebsocketRef.current && !chatWebsocketRef.current) {
@@ -467,14 +453,13 @@ export default function Page() {
       }
       if (mediaRecorder.current) {
         mediaRecorder.current.stop();
-        mediaRecorder.current.removeEventListener("stop", recorderStopHandler);
         mediaRecorder.current = null;
       }
       if (audioContext.current) {
         audioContext.current = null;
       }
     };
-  }, [initializeMediaRecorder, recorderStopHandler]);
+  }, [initializeMediaRecorder]);
 
   useEffect(() => {
     if (transcribeWebsocketRef.current) {
@@ -491,6 +476,10 @@ export default function Page() {
       );
     }
 
+    if (mediaRecorder.current) {
+      mediaRecorder.current.addEventListener("stop", recorderStopHandler);
+    }
+
     return () => {
       if (transcribeWebsocketRef.current) {
         transcribeWebsocketRef.current.removeEventListener(
@@ -504,6 +493,9 @@ export default function Page() {
           chatWebsocketMessageHandler
         );
       }
+      if (mediaRecorder.current) {
+        mediaRecorder.current.removeEventListener("stop", recorderStopHandler);
+      }
     };
   }, [
     chatWebsocketMessageHandler,
@@ -511,6 +503,7 @@ export default function Page() {
     dialogOpen,
     greetingPlayed,
     playInstructionsAudioWithVideo,
+    recorderStopHandler,
     runTour,
   ]);
 
@@ -559,7 +552,29 @@ export default function Page() {
       setSession(copySession2);
       setDialogOpen(true);
       setStatus("Finished");
-      setOpenReadingCard(false);
+      const finalTranscriptions = {
+        part_one: transcriptionsState.partOne,
+        part_two: [
+          {
+            name: "Assistant",
+            text: `Now I'm going to give you a topic and I'd like you to talk about it for one to two minutes. Here's your topic card. - ${
+              part2Question?.topic
+            }. You should say:\n${part2Question?.questions.reduce(
+              (prev, current) => prev + "\n" + current,
+              ""
+            )}`,
+            time: getSecondsDifference(startDatetime, new Date()),
+          },
+          ...transcriptionsState.partTwo,
+        ],
+        part_three: transcriptionsState.partThree,
+      };
+      setRunConfetti(true);
+      addTranscriptionsLocal(finalTranscriptions);
+      setTestDuration(sessionState.duration);
+      console.log(finalTranscriptions);
+      restoreChatMessages();
+      transcriptionsState.restoreTranscriptions();
     }
 
     audioChunks.current = [];
@@ -568,7 +583,18 @@ export default function Page() {
       animationId.current = null;
       volumeSlider.current.style.width = "10%";
     }
-  }, [openReadingCard, sessionState, setSession, setStatus]);
+  }, [
+    startDatetime,
+    part2Question,
+    openReadingCard,
+    sessionState,
+    setSession,
+    setStatus,
+    addTranscriptionsLocal,
+    restoreChatMessages,
+    transcriptionsState,
+    setTestDuration,
+  ]);
 
   useEffect(() => {
     const staringdialogClosed = !runTour && !dialogOpen;
@@ -581,6 +607,11 @@ export default function Page() {
       optimizedStartRecoring();
       setIsRecording(true);
     }
+
+    chatRef.current?.scrollTo({
+      top: chatRef.current.scrollHeight,
+      behavior: "smooth",
+    });
   }, [
     isAnsweringQuestion,
     isRecording,
@@ -589,6 +620,7 @@ export default function Page() {
     dialogOpen,
     playInstructionsAudioWithVideo,
     greetingPlayed,
+    messages,
   ]);
 
   return (
@@ -649,7 +681,7 @@ export default function Page() {
         />
       </div>
       <div className="space-y-6">
-        <Chat />
+        <Chat chatRef={chatRef} />
         <QuickTestActions
           audioFile={audioFile}
           instructionsAduio={instructionsAudio}
@@ -666,6 +698,7 @@ export default function Page() {
           dialogOpen={controlsDialogOpen}
           setDialogOpen={setControlsDialogOpen}
         />
+        <Confetti run={runConfetti} width={width} height={height} />
       </div>
     </div>
   );

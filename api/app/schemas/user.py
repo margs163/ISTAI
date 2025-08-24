@@ -1,13 +1,17 @@
 import uuid
 import datetime
 from pydantic import Field
-from typing import Optional
+from typing import Any, Optional
 from fastapi_users import schemas
+
+from api.app.schemas.analytics import AnalyticsSchema
 
 
 class UserRead(schemas.BaseUser[uuid.UUID]):
     first_name: str
     last_name: str
+    updatedAt: datetime.datetime
+    createdAt: datetime.datetime
 
 
 class UserCreate(schemas.BaseUserCreate):

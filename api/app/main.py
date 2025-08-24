@@ -9,7 +9,9 @@ from .schemas.user import UserRead, UserCreate, UserUpdate
 from .routers.transcriptions import router as transcription_router
 from .routers.practice_test import router as practice_router
 from .routers.reading_cards import router as reading_cards_router
+from .routers.results import router as result_router
 from .routers.stt_ws import router as stt_router
+from .routers.analytics import router as analytics_router
 from .routers.chat import router as chat_router
 
 app = FastAPI()
@@ -68,6 +70,10 @@ app.include_router(
 app.include_router(stt_router, prefix="/stt", tags=["stt"])
 
 app.include_router(chat_router, prefix="/chat", tags=["chat"])
+
+app.include_router(result_router, prefix="/results", tags=["results"])
+
+app.include_router(analytics_router, prefix="/analytics", tags=["analytics"])
 
 
 @app.get("/")

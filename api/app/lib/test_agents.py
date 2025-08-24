@@ -10,7 +10,9 @@ import time
 import boto3
 import botocore
 from botocore.exceptions import ClientError
+import json
 from dotenv import load_dotenv
+from pydub import AudioSegment
 
 load_dotenv()
 import uuid
@@ -26,6 +28,17 @@ async def s3():
     except ClientError as e:
         pprint(e)
     # client.Object(bucket_name, "test.txt").upload_file(Filename="./app/lib/test.txt")
+
+
+async def download():
+    bucket_name = os.getenv("S3_BUCKET_NAME")
+    local_path = f"./app/data/pronunciation-{uuid.uuid4()}.wav"
+    reading_audio_path = "reading-files/9899464e-2436-4203-881d-f4f0428c58ff.wav"
+    async for s3_client in get_s3_client():
+        await s3_client.download_file(
+            Bucket=bucket_name, Key=reading_audio_path, Filename=local_path
+        )
+    print("DOWNLOADED SUCCESSFULLY!")
 
 
 async def polly():
@@ -52,21 +65,25 @@ async def azure_stt():
     azure_region = os.getenv("AZURE_REGION")
     azure_api_key = os.getenv("AZURE_SUBSCRIPTION_KEY")
 
-    reference_text = "My first attempt at baking chocolate chip cookies was absolutely catastrophic. I carefully measured all the ingredients: flour, sugar, butter, eggs, and vanilla extract. However, I accidentally confused salt with sugar and added three tablespoons instead of three teaspoons. When I tasted the raw batter, it was incredibly salty and completely inedible. I threw everything away and started over, this time reading the recipe more carefully. The second batch turned out perfectly golden brown and deliciously sweet. My family couldn't believe the difference between my first disaster and final success."
-
-    pronunciation_assessment_config = speechsdk.PronunciationAssessmentConfig(
-        reference_text=reference_text,
-        grading_system=speechsdk.PronunciationAssessmentGradingSystem.HundredMark,
-        granularity=speechsdk.PronunciationAssessmentGranularity.Phoneme,
-        enable_miscue=True,
-    )
+    reference_text = "Yesterday my mother and I went shopping at the mall. We needed to buy some new clothes for school and some shoes for my brother. First, we stopped at the department store where my mother tried on several dresses. She chose a beautiful blue one with white flowers. Then we went to the shoe store where we found the perfect pair of sneakers for my brother. They were red and black with white laces. After shopping, we were hungry, so we ate lunch at the food court. It was a wonderful day spent together."
 
     speech_config = speechsdk.SpeechConfig(
-        subscription=azure_api_key, region=azure_region
+        subscription=azure_api_key,
+        region=azure_region,
+        speech_recognition_language="en-US",
     )
-    speech_config.speech_recognition_language = "en-GB"
 
-    audio_config = speechsdk.audio.AudioConfig(filename="./app/data/test.wav")
+    audio_config = speechsdk.audio.AudioConfig(filename="./app/data/pronun2(2).wav")
+
+    config = {
+        "referenceText": reference_text,
+        "gradingSystem": "HundredMark",
+        "granularity": "Phoneme",
+        "phonemeAlphabet": "IPA",
+    }
+    pronunciation_assessment_config = speechsdk.PronunciationAssessmentConfig(
+        json_string=json.dumps(config)
+    )
 
     recognizer = speechsdk.SpeechRecognizer(
         speech_config=speech_config, audio_config=audio_config
@@ -74,44 +91,61 @@ async def azure_stt():
 
     pronunciation_assessment_config.apply_to(recognizer)
 
-    results = []
+    accuracy = 0
+    transcriptions = []
+    phonemes = []
+    done = False
 
-    def recognize_handle(event):
+    def stop_callback(event):
+        nonlocal done
+        done = True
+        recognizer.stop_continuous_recognition_async()
+
+    def cancell_callback(event):
+        nonlocal done
+        done = True
+
+        print(f"CLOSING ON: {event}")
+        recognizer.stop_continuous_recognition_async()
+
+        if event.cancellation_details.reason == speechsdk.CancellationReason.Error:
+            raise Exception("Cancelled because of error")
+
+    def recognize_handle(event: speechsdk.SpeechRecognitionEventArgs):
         if event.result.reason == speechsdk.ResultReason.RecognizedSpeech:
             pronunciation_result = speechsdk.PronunciationAssessmentResult(event.result)
-            results.append(pronunciation_result)
-            print(f"Recognized: {event.result.text}")
-            print(f"Accuracy Score: {pronunciation_result.accuracy_score}")
-            print(f"Fluency Score: {pronunciation_result.fluency_score}")
-            print(f"Prosody Score: {pronunciation_result.prosody_score}")
+            # pronunciation_assessment_result_json = event.result.properties.get(speechsdk.PropertyId.SpeechServiceResponse_JsonResult)
+
+            global accuracy
+            accuracy = pronunciation_result.accuracy_score
+            transcriptions.append(event.result.text)
+
+            # print(event.result.text)
 
             for word in pronunciation_result.words:
-                print(
-                    f" Word: {word.word}, Accuracy: {word.accuracy_score}, Error: {word.error_type}"
+                phonemes.append(
+                    {
+                        word.word: {
+                            "accuracy": word.accuracy_score,
+                            "phonemes": "".join(
+                                [phone.phoneme for phone in word.phonemes]
+                            ),
+                        }
+                    }
                 )
+            # pprint(phonemes)
 
-    def canceled(event):
-        print(f"Recognition canceled: {event.cancellation_details.reason}")
-        if event.cancellation_details.reason == speechsdk.CancellationReason.Error:
-            print(f"Error details: {event.cancellation_details.error_details}")
-
+    recognizer.session_stopped.connect(stop_callback)
+    recognizer.canceled.connect(cancell_callback)
     recognizer.recognized.connect(recognize_handle)
-    recognizer.canceled.connect(recognize_handle)
 
-    print("Starting continuous recognition...")
-    recognizer.start_continuous_recognition()
+    recognizer.start_continuous_recognition_async()
+    while not done:
+        time.sleep(0.5)
 
-    time.sleep(40)
-
-    recognizer.stop_continuous_recognition()
-    print("Recognition stopped.")
-
-    print("\nSummary of Pronunciation Assessment:")
-    for i, pronunciation_result in enumerate(results):
-        print(f"Segment {i+1}:")
-        print(f"  Accuracy: {pronunciation_result.accuracy_score}")
-        print(f"  Fluency: {pronunciation_result.fluency_score}")
-        print(f"  Prosody: {pronunciation_result.prosody_score}")
+    pprint(
+        f"Accuracy: {accuracy}\nTranscription: {transcriptions}\nPhonemes: {[phonemes]}"
+    )
 
 
 async def main():
@@ -163,5 +197,61 @@ async def main():
     # result3["messages"][-1].pretty_print()
 
 
+async def convert_to_wav():
+    audio = AudioSegment.from_ogg(
+        "./app/data/pronunciation-6aac544f-726a-4fde-ba30-f07d142c1b0d.wav",
+    )
+    audio = audio.set_channels(1).set_sample_width(2).set_frame_rate(16000)
+    audio.export(
+        "./app/data/output.wav",
+        format="wav",
+    )
+
+
+async def convert_to_wav_sub():
+    input_file = "./app/data/pronunciation-6aac544f-726a-4fde-ba30-f07d142c1b0d.wav"
+    output_file = "./app/data/output.wav"
+    command = [
+        "ffmpeg",
+        "-i",
+        input_file,
+        "-ac",
+        "1",  # Mono
+        "-ar",
+        "16000",  # Sample rate
+        "-sample_fmt",
+        "s16",  # Sample width (16-bit = 2 bytes)
+        output_file,
+    ]
+    process = await asyncio.create_subprocess_exec(*command)
+    await process.wait()
+
+
+async def convert_to_wav_aio(input_path: str, output_path: str) -> None:
+    command = [
+        "ffmpeg",
+        "-i",
+        input_path,
+        "-ac",
+        "1",  # Mono
+        "-ar",
+        "16000",  # Sample rate
+        "-sample_fmt",
+        "s16",  # Sample width (16-bit = 2 bytes)
+        output_path,
+    ]
+    process = await asyncio.create_subprocess_exec(
+        *command, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
+    )
+    stdout, stderr = await process.communicate()
+    if process.returncode != 0:
+        raise RuntimeError(f"FFmpeg failed: {stderr.decode()}")
+
+
 if __name__ == "__main__":
-    asyncio.run(azure_stt())
+    asyncio.run(
+        convert_to_wav_aio(
+            "./app/data/pronunciation-6aac544f-726a-4fde-ba30-f07d142c1b0d.wav",
+            "./app/data/damn.wav",
+        )
+    )

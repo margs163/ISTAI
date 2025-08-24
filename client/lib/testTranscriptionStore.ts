@@ -9,6 +9,7 @@ type TestTranscriptionStore = {
     part: "partOne" | "partTwo" | "partThree",
     message: TranscriptionMessageType
   ) => void;
+  restoreTranscriptions: () => void;
 };
 
 export const useTestTranscriptionStore = create<TestTranscriptionStore>(
@@ -18,5 +19,7 @@ export const useTestTranscriptionStore = create<TestTranscriptionStore>(
     partThree: [],
     addTranscription: (part, message) =>
       set((state) => ({ [part]: [...state[part], message] })),
+    restoreTranscriptions: () =>
+      set({ partOne: [], partTwo: [], partThree: [] }),
   })
 );

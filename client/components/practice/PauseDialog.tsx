@@ -16,6 +16,8 @@ import { useMutation } from "@tanstack/react-query";
 import { useLocalPracticeTestStore } from "@/lib/practiceTestStore";
 import axios from "axios";
 import { useRouter } from "next/navigation";
+import { useChatStore } from "@/lib/chatStore";
+import { useTestTranscriptionStore } from "@/lib/testTranscriptionStore";
 
 export default function PauseDialog({
   dialogOpen,
@@ -24,8 +26,13 @@ export default function PauseDialog({
   dialogOpen: boolean;
   setDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
+  const restoreChatMessages = useChatStore((state) => state.restoreMessages);
+  const restoreTranscriptions = useTestTranscriptionStore(
+    (state) => state.restoreTranscriptions
+  );
   const setTestStatus = useTestSessionStore((state) => state.setStatus);
   const status = useTestSessionStore((state) => state.status);
+  const testState = useLocalPracticeTestStore((state) => state.status);
   const testId = useLocalPracticeTestStore((state) => state.id);
   const router = useRouter();
   const quitMutation = useMutation({
@@ -65,12 +72,12 @@ export default function PauseDialog({
       <DialogContent className="font-geist">
         <DialogHeader className="items-start text-left">
           <DialogTitle className="text-base text-gray-800 font-semibold">
-            {status === "inactive"
+            {status === "inactive" && testState !== "Finished"
               ? "Want a break? Test is paused."
               : "Are you sure you want to quit?"}
           </DialogTitle>
           <DialogDescription className="text-sm font-normal">
-            {status === "inactive"
+            {status === "inactive" && testState !== "Finished"
               ? "The test is paused. If you want to continue press the 'resume' button to resume the test."
               : "If you want to cancell the test click on the button below, your progress won't be saved."}
           </DialogDescription>
@@ -81,10 +88,12 @@ export default function PauseDialog({
               <button
                 className="px-4 py-2 rounded-sm bg-gray-200 text-gray-800 font-medium text-xs hover:bg-gray-400 active:bg-gray-300 transition-colors"
                 onClick={() => {
-                  if (status === "inactive") {
+                  if (status === "inactive" && testState !== "Finished") {
                     setTestStatus("active");
                   } else {
                     quitMutation.mutate();
+                    restoreChatMessages();
+                    restoreTranscriptions();
                     router.replace("/dashboard");
                   }
                 }}

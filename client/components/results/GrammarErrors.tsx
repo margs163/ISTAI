@@ -1,3 +1,4 @@
+import { useLocalPracticeTestStore } from "@/lib/practiceTestStore";
 import {
   CircleCheck,
   CircleX,
@@ -28,16 +29,20 @@ export function GrammarError({
   error,
 }: {
   error: {
-    type: string;
-    incorrect: string;
-    correct: string;
+    identified_mistakes: {
+      mistake_type: string;
+      description: string;
+    }[];
+    original_sentence: string;
+    suggested_improvement: string;
     explanation: string;
   };
 }) {
   return (
     <div className="border border-gray-200 bg-red-white rounded-md lg:rounded-md p-5 lg:p-6 flex flex-col gap-2 lg:gap-3 items-start lg:flex-1/2">
       <p className="text-xs font-medium px-2 py-1 rounded-md border border-red-200 text-red-600 flex flex-row gap-1 items-center bg-red-50">
-        <Info className="text-red-500 size-3.5" /> {error.type}
+        <Info className="text-red-500 size-3.5" />{" "}
+        {error.identified_mistakes[0].mistake_type}
       </p>
       <div className="bg-red-50 border border-red-200 rounded-md p-4 lg:p-5 flex flex-col items-start gap-2 lg:gap-2 w-full">
         <div className="flex flex-row gap-1 items-center">
@@ -48,7 +53,7 @@ export function GrammarError({
         </div>
         <p className="text-sm lg:text-sm font-normal text-gray-700 w-full">
           {/* <code className="rounded-sm px-3 py-1.5 bg-white block"> */}
-          {error.incorrect}
+          {error.original_sentence}
           {/* </code> */}
         </p>
       </div>
@@ -61,7 +66,7 @@ export function GrammarError({
         </div>
         <p className="text-sm lg:text-sm font-normal text-gray-600 w-full">
           {/* <code className="rounded-sm px-2 py-1 bg-white block"> */}
-          {error.correct}
+          {error.suggested_improvement}
           {/* </code> */}
         </p>
       </div>
@@ -81,6 +86,10 @@ export function GrammarError({
 }
 
 export default function GrammarErrors() {
+  const grammar = useLocalPracticeTestStore(
+    (state) => state.result?.grammar_errors
+  );
+
   return (
     <section className="w-full px-6 lg:px-20 xl:px-36">
       <div className="p-6 lg:p-8 border border-gray-200 rounded-lg bg-white flex flex-col gap-6 shadow-none">
@@ -91,8 +100,8 @@ export default function GrammarErrors() {
           </h3>
         </header>
         <main className="flex flex-col gap-8">
-          <div className="flex flex-col gap-4 lg:flex-row lg:gap-6">
-            {errors.map((item, index) => (
+          <div className="flex flex-col gap-4 lg:grid lg:grid-cols-2 lg:gap-6">
+            {grammar?.grammar_analysis.map((item, index) => (
               <GrammarError error={item} key={index} />
             ))}
           </div>

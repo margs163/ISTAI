@@ -1,3 +1,4 @@
+import { useLocalPracticeTestStore } from "@/lib/practiceTestStore";
 import { BookOpen, Star } from "lucide-react";
 import React from "react";
 
@@ -28,9 +29,9 @@ export function Phrase({
   usage,
 }: {
   usage: {
-    phrase: string;
-    info: string;
-    level: string;
+    word_or_phrase: string;
+    // info: string;
+    cefr_level: string;
   };
 }) {
   return (
@@ -40,18 +41,23 @@ export function Phrase({
       </div>
       <div className="">
         <h3 className="text-sm lg:text-base font-medium text-gray-800">
-          {usage.phrase}
+          {usage.word_or_phrase}
         </h3>
-        <p className="text-xs lg:text-sm text-gray-600">{usage.info}</p>
+        <p className="text-xs lg:text-sm text-gray-600">
+          {"Used appropriately in a formal context"}
+        </p>
       </div>
       <h3 className="text-green-700 bg-green-50 text-sm  font-medium px-2 py-1 rounded-md ml-auto">
-        {usage.level}
+        {usage.cefr_level}
       </h3>
     </div>
   );
 }
 
 export default function AdvancedVocabulary() {
+  const vocabulary = useLocalPracticeTestStore(
+    (state) => state.result?.vocabulary_usage
+  );
   return (
     <section className="w-full px-6 lg:px-0">
       <div className="p-6 lg:p-8 border border-gray-200 rounded-lg bg-white flex flex-col gap-6 shadow-none">
@@ -62,7 +68,7 @@ export default function AdvancedVocabulary() {
           </h3>
         </header>
         <main className="flex flex-col gap-2 lg:gap-3">
-          {vocabUsage.map((item, index) => (
+          {vocabulary?.map((item, index) => (
             <Phrase key={index} usage={item} />
           ))}
         </main>

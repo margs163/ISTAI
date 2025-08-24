@@ -26,11 +26,8 @@ import { useUserStore } from "@/lib/userStorage";
 import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
 import { useLocalPracticeTestStore } from "@/lib/practiceTestStore";
-
-type PostResponse = {
-  status: string;
-  data: PracticeTestType;
-};
+import { createPracticeTest } from "@/lib/queries";
+import { toast } from "sonner";
 
 export default function NewTest({ children }: { children: React.ReactNode }) {
   const setLocalPracticeTest = useLocalPracticeTestStore(
@@ -50,27 +47,19 @@ export default function NewTest({ children }: { children: React.ReactNode }) {
   });
 
   const mutation = useMutation({
-    mutationFn: (data: {
-      assistant: "Ron" | "Emma";
-      practice_name: string;
-      status: "Ongoing" | "Cancelled" | "Finished";
-    }) =>
-      axios
-        .post<PostResponse>("http://localhost:8000/practice_test/new", data, {
-          headers: {
-            "Content-Type": "application/json",
-          },
-          withCredentials: true,
-        })
-        .then((response) => {
-          const validate = PracticeTestSchema.safeParse(response.data.data);
-          if (!validate.success) {
-            console.error("Could not validate data:", response.data.data);
-          }
-          setLocalPracticeTest(validate.data as PracticeTestType);
-          console.log("Validated and set the test!");
-        })
-        .catch((error) => console.error(error)),
+    mutationFn: createPracticeTest,
+    onSuccess: (data: PracticeTestType) => {
+      setLocalPracticeTest(data);
+    },
+    onError: (error: Error) => {
+      toast("Failed Creating Practice Test", {
+        description: "Could not create a practice test",
+        action: {
+          label: "Log",
+          onClick: () => console.log(error),
+        },
+      });
+    },
   });
 
   const onSubmit: SubmitHandler<NewTestFormData> = (data) => {

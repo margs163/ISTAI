@@ -1,3 +1,4 @@
+import { useAnalyticsStore } from "@/lib/userStorage";
 import clsx from "clsx";
 import {
   Clock,
@@ -6,27 +7,6 @@ import {
   TrendingUp,
 } from "lucide-react";
 import React, { ForwardRefExoticComponent, RefAttributes } from "react";
-
-const stats: Stat[] = [
-  {
-    icon: Clock,
-    stat: "24hrs",
-    description: "Practice Time",
-    color: "blue",
-  },
-  {
-    icon: LaptopMinimalCheck,
-    stat: "12 tests",
-    description: "Tests Completed",
-    color: "green",
-  },
-  {
-    icon: TrendingUp,
-    stat: "7.0",
-    description: "Current Band Score",
-    color: "purple",
-  },
-];
 
 type Stat = {
   icon: ForwardRefExoticComponent<
@@ -71,6 +51,38 @@ export function StatisticCard({ stat }: { stat: Stat }) {
 }
 
 export default function StatisticsCards() {
+  const practiceTime = Math.floor(
+    useAnalyticsStore((state) => state.practice_time) / 60
+  );
+  const testsCompleted = useAnalyticsStore((state) => state.tests_completed);
+  const currentBandScore = useAnalyticsStore(
+    (state) => state.current_bandscore
+  );
+
+  const stats: Stat[] = [
+    {
+      icon: Clock,
+      stat: `${
+        Math.floor(practiceTime / 60) >= 1
+          ? Math.floor(practiceTime / 60) + " hrs"
+          : practiceTime + " mins"
+      }`,
+      description: "Practice Time",
+      color: "blue",
+    },
+    {
+      icon: LaptopMinimalCheck,
+      stat: `${testsCompleted} tests`,
+      description: "Tests Completed",
+      color: "green",
+    },
+    {
+      icon: TrendingUp,
+      stat: `${currentBandScore ?? 0}`,
+      description: "Current Band Score",
+      color: "purple",
+    },
+  ];
   return (
     <section className="flex flex-col lg:flex-col flex-wrap gap-2 lg:gap-3 px-6 lg:pr-0">
       {stats.map((item, index) => (

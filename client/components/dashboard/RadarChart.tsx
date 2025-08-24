@@ -9,6 +9,9 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import Link from "next/link";
+import { useAnalyticsStore } from "@/lib/userStorage";
+import LoadingUI from "../loadingUI";
+import LoadingSmallUI from "../loadingSmallUI";
 
 const chartData = [
   { criterion: "Fluency", score: 7.0 },
@@ -26,6 +29,17 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 export default function RadarChart() {
+  const criterionScores = useAnalyticsStore(
+    (state) => state.average_band_scores
+  );
+
+  const chartData = [
+    { criterion: "Fluency", score: criterionScores?.fluency },
+    { criterion: "Cohesion", score: criterionScores?.fluency },
+    { criterion: "Pronunciation", score: criterionScores?.pronunciation },
+    { criterion: "Grammatical Range", score: criterionScores?.grammar },
+    { criterion: "Lexical Resource", score: criterionScores?.lexis },
+  ];
   return (
     <section className="px-6 lg:pl-0 w-full flex flex-col gap-4">
       <div className=" w-full flex flex-col gap-2 lg:gap-6 bg-white rounded-lg border border-gray-200">

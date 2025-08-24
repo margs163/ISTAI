@@ -1,8 +1,12 @@
+import json
+import math
+import time
 from typing import Annotated
 from fastapi import APIRouter, Body, Depends, HTTPException, Path, Query, status
 from aioboto3.session import Session
 import asyncio
 from sqlalchemy import select
+from pathlib import Path as OSPath
 
 from api.app.dependencies import get_s3_client, current_active_user
 from api.app.lib.auth_db import get_async_session
@@ -27,6 +31,33 @@ import azure.cognitiveservices.speech as speechsdk
 from dotenv import load_dotenv
 import os
 
+load_dotenv()
+
+
+async def convert_to_wav(input_path: str, output_path: str) -> None:
+    command = [
+        "ffmpeg",
+        "-i",
+        input_path,
+        "-ac",
+        "1",  # Mono
+        "-ar",
+        "16000",  # Sample rate
+        "-sample_fmt",
+        "s16",  # Sample width (16-bit = 2 bytes)
+        output_path,
+    ]
+    process = await asyncio.create_subprocess_exec(
+        *command, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
+    )
+    stdout, stderr = await process.communicate()
+    if process.returncode != 0:
+        raise RuntimeError(f"FFmpeg failed: {stderr.decode()}")
+
+
+def round_to_half(value: float) -> float:
+    return math.floor(value * 2 + 0.5) / 2
+
 
 router = APIRouter()
 bucket_name = os.getenv("S3_BUCKET_NAME")
@@ -46,7 +77,7 @@ async def post_results(
     local_path = None
     try:
         async for session in get_async_session():
-            async with session:
+            async with session.begin():
                 test = await session.scalars(
                     select(PracticeTest).where(PracticeTest.id == transcription.test_id)
                 )
@@ -67,26 +98,42 @@ async def post_results(
                     {"transcriptions": parsed_transcriptions}
                 )
 
-                local_path = f"../data/pronunciation-{uuid4()}.wav"
+                print("General and sentences state graphes were run.")
+
+                local_path = f"./data/pronunciation-{uuid4()}.wav"
                 await s3_client.download_file(
                     Bucket=bucket_name, Key=reading_audio_path, Filename=local_path
                 )
 
+                print("Downloaded the file:", local_path)
+
+                output_path = f"./data/pronunciation-{uuid4()}.wav"
+
+                await convert_to_wav(local_path, output_path)
+
+                print("Converted to the right format.")
+
                 reference_text = readingCard.text
 
-                pronunciation_assessment_config = speechsdk.PronunciationAssessmentConfig(
-                    reference_text=reference_text,
-                    grading_system=speechsdk.PronunciationAssessmentGradingSystem.HundredMark,
-                    granularity=speechsdk.PronunciationAssessmentGranularity.Phoneme,
-                    enable_miscue=True,
-                )
-
                 speech_config = speechsdk.SpeechConfig(
-                    subscription=azure_api_key, region=azure_region
+                    subscription=azure_api_key,
+                    region=azure_region,
+                    speech_recognition_language="en-US",
                 )
-                speech_config.speech_recognition_language = "en-GB"
 
-                audio_config = speechsdk.audio.AudioConfig(filename=local_path)
+                audio_config = speechsdk.audio.AudioConfig(filename=output_path)
+
+                config = {
+                    "referenceText": reference_text,
+                    "gradingSystem": "HundredMark",
+                    "granularity": "Phoneme",
+                    "phonemeAlphabet": "IPA",
+                }
+                pronunciation_assessment_config = (
+                    speechsdk.PronunciationAssessmentConfig(
+                        json_string=json.dumps(config)
+                    )
+                )
 
                 recognizer = speechsdk.SpeechRecognizer(
                     speech_config=speech_config, audio_config=audio_config
@@ -94,30 +141,24 @@ async def post_results(
 
                 pronunciation_assessment_config.apply_to(recognizer)
 
-                results = []
+                print("Applied config to a recognizer")
+
+                accuracy = 0
                 transcriptions = []
                 phonemes = []
+                done = False
 
-                def recognize_handle(event):
-                    if event.result.reason == speechsdk.ResultReason.RecognizedSpeech:
-                        pronunciation_result = speechsdk.PronunciationAssessmentResult(
-                            event.result
-                        )
-                        results.append(pronunciation_result)
-                        transcriptions.append(event.result.text)
+                def stop_callback(event):
+                    recognizer.stop_continuous_recognition_async()
+                    nonlocal done
+                    done = True
 
-                        for word in pronunciation_result.words:
-                            phonemes.append(
-                                {
-                                    word.word: {
-                                        "accuracy": word.accuracy_score,
-                                        "phonemes": str(word.phonemes),
-                                    }
-                                }
-                            )
+                def cancell_callback(event):
+                    print(f"CLOSING ON: {event}")
+                    recognizer.stop_continuous_recognition_async()
 
-                def cancel_handle(event):
-                    print(f"Recognition canceled: {event.cancellation_details.reason}")
+                    nonlocal done
+                    done = True
                     if (
                         event.cancellation_details.reason
                         == speechsdk.CancellationReason.Error
@@ -127,16 +168,47 @@ async def post_results(
                             detail=f"Reason: {event.cancellation_details.error_details}",
                         )
 
-                recognizer.recognized.connect(recognize_handle)
-                recognizer.canceled.connect(cancel_handle)
+                def recognize_handle(event):
+                    if event.result.reason == speechsdk.ResultReason.RecognizedSpeech:
+                        pronunciation_result = speechsdk.PronunciationAssessmentResult(
+                            event.result
+                        )
 
-                recognizer.start_continuous_recognition()
-                await asyncio.sleep(20)
-                recognizer.stop_continuous_recognition()
+                        nonlocal accuracy
+                        accuracy = pronunciation_result.accuracy_score
+                        transcriptions.append(event.result.text)
+
+                        for word in pronunciation_result.words:
+                            phonemes.append(
+                                {
+                                    word.word: {
+                                        "accuracy": word.accuracy_score,
+                                        "phonemes": "".join(
+                                            [phone.phoneme for phone in word.phonemes]
+                                        ),
+                                    }
+                                }
+                            )
+
+                recognizer.session_stopped.connect(stop_callback)
+                recognizer.canceled.connect(cancell_callback)
+                recognizer.recognized.connect(recognize_handle)
+
+                recognizer.start_continuous_recognition_async()
+                while not done:
+                    time.sleep(0.5)
+
+                print("Transcribed audio for pronunciation assessment.")
 
                 state = await pronunciation_app.ainvoke(
-                    {"transcriptions": " ".join(transcriptions), "phonemes": phonemes}
+                    {
+                        "transcriptions": transcriptions,
+                        "phonemes": phonemes,
+                        "accuracy": accuracy,
+                    }
                 )
+
+                print("Pronunciation agent run successfully.")
 
                 pronunciation_score = state["pronunciation_score"]
                 pronunciation_strong_points = state["pronunciation_strong_points"]
@@ -153,17 +225,21 @@ async def post_results(
 
                 scores = CriteriaScores(
                     fluency=general_state["fluency_score"],
-                    grammar=general_state["grammar_state"],
+                    grammar=general_state["grammar_score"],
                     lexis=general_state["lexis_score"],
                     pronunciation=pronunciation_score,
                 )
 
-                overall_score = (
-                    scores.fluency
-                    + scores.grammar
-                    + scores.lexis
-                    + scores.pronunciation
-                ) / 4 + score_treshold
+                overall_score = round_to_half(
+                    (
+                        scores.fluency
+                        + scores.grammar
+                        + scores.lexis
+                        + scores.pronunciation
+                    )
+                    / 4
+                    + score_treshold
+                )
 
                 weak_sides = WeakSides(
                     fluency=general_state["fluency_weak_sides"],
@@ -180,8 +256,8 @@ async def post_results(
                 )
 
                 sentence_improvements = SentenceImprovements(
-                    grammarEnhancements=sentences_state["grammar_enhancement"],
-                    vocabularyEnhancements=sentences_state["vocabulary_enhancements"],
+                    grammar_enhancements=sentences_state["grammar_enhancements"],
+                    vocabulary_enhancements=sentences_state["vocabulary_enhancements"],
                 )
 
                 grammar_errors = GrammarAnalysis(
@@ -189,12 +265,12 @@ async def post_results(
                 )
 
                 vocabulary_usage = VocabAnalysis(
-                    advancedVocabulary=sentences_state["advanced_vocabulary"],
+                    advanced_vocabulary=sentences_state["advanced_vocabulary"],
                     repetitions=sentences_state["repetitions"],
                 )
 
                 end_result = Result(
-                    practice_test=test,
+                    practice_test_id=test.id,
                     overall_score=overall_score,
                     criterion_scores=scores.model_dump(),
                     weak_sides=weak_sides.model_dump(),
@@ -202,7 +278,7 @@ async def post_results(
                     sentence_improvements=sentence_improvements.model_dump(),
                     grammar_errors=grammar_errors.model_dump(),
                     vocabulary_usage=vocabulary_usage.model_dump()[
-                        "advancedVocabulary"
+                        "advanced_vocabulary"
                     ],
                     repeated_words=vocabulary_usage.model_dump()["repetitions"],
                     pronunciation_issues=pronunciation_mistakes,
@@ -210,11 +286,15 @@ async def post_results(
                 )
 
                 session.add(end_result)
+                print("Results object was added to the session.")
 
-                if os.path.exists(local_path):
-                    os.remove(local_path)
+                if OSPath(local_path).exists():
+                    OSPath(local_path).unlink()
 
-                return {"data": end_result, "status": "success"}
+                if OSPath(output_path).exists():
+                    OSPath(output_path).unlink()
+
+                return {"data": end_result}
 
     except Exception as e:
         raise HTTPException(
@@ -223,16 +303,14 @@ async def post_results(
         )
 
     finally:
-        await s3_client.delete_objects(
-            Bucket=bucket_name,
-            Delete={"Objects": [reading_audio_path], "Quiet": False},
-        )
+        pass
+        # await s3_client.delete_object(Bucket=bucket_name, Key=reading_audio_path)
 
 
 @router.get("/{test_id}")
 async def get_results(
     user: Annotated[User, Depends(current_active_user)],
-    test_id: Annotated[str | None, Path()] = None,
+    test_id: Annotated[str | None, Path()],
     result_id: Annotated[str | None, Query()] = None,
 ):
     try:

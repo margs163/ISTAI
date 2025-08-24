@@ -1,7 +1,15 @@
+"use client";
 import { ArrowLeft, Clock, FileInput, Share2 } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 import MainButton from "../MainButton";
+
+function clearSessionStorage() {
+  const item = sessionStorage.getItem("local-practice-test");
+  if (item) {
+    sessionStorage.removeItem("local-practice-test");
+  }
+}
 
 export default function ResultsHeader() {
   return (
@@ -9,6 +17,7 @@ export default function ResultsHeader() {
       <div className="w-full flex flex-row gap-3 lg:gap-12 px-6 lg:px-20 xl:px-24 py-2.5 lg:py-3 items-center justify-start">
         <Link
           href={"/dashboard"}
+          onClick={clearSessionStorage}
           className="p-1 lg:p-2 rounded-md hover:bg-gray-50 active:bg-gray-50 flex flex-row items-center gap-2"
         >
           <ArrowLeft className="size-4.5  shrink-0 box-content transition-colors" />

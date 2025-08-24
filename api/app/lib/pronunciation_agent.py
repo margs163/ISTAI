@@ -1,17 +1,19 @@
 from operator import add
+from pprint import pprint
 from typing import Annotated, TypedDict, Dict, List
 import asyncio
 from dotenv import load_dotenv
 from langgraph.graph import StateGraph, START, END
 from langchain_groq import ChatGroq
 from langchain.prompts import ChatPromptTemplate
+from pydantic_core import from_json
 
 from api.app.schemas.pronunciation import PronunciationAnalysis
 from .prompts import pronunciation_system_prompt, human_input_pronunciation
 
 load_dotenv()
 
-llm = ChatGroq(model="llama-3.3-70b-versatile", temperature=0.5)
+llm = ChatGroq(model="llama3-70b-8192", temperature=0.5)
 
 pronunciation_prompt = ChatPromptTemplate(
     [
@@ -26,6 +28,7 @@ class PronunciationState(TypedDict):
     metadata_id: str
     transcriptions: List
     phonemes: List
+    accuracy: str
     # criteria
     pronunciation_score: float
     pronunciation_strong_points: List[str]
@@ -35,18 +38,21 @@ class PronunciationState(TypedDict):
 
 
 async def agent_invoke(state: PronunciationState) -> Dict:
-    chain = pronunciation_system_prompt | llm.with_structured_output(
-        PronunciationAnalysis
-    )
-    response: PronunciationAnalysis = await chain.ainvoke(
+    chain = pronunciation_prompt | llm
+    response = await chain.ainvoke(
         {"transcriptions": state["transcriptions"], "phonemes": state["phonemes"]}
     )
+    result = from_json(str(response.content), allow_partial=True)
+    pprint(result)
+    serialized = PronunciationAnalysis(**result)
     return {
-        "pronunciation_score": response.pronunciationScore,
-        "pronunciation_strong_points": response.pronunciationStrongPoints,
-        "pronunciation_weak_sides": response.pronunciationWeakSides,
-        "pronunciation_tips": response.pronunciationTips,
-        "pronunciation_mistakes": response.pronunciationMistakes,
+        "pronunciation_score": serialized.pronunciation_score,
+        "pronunciation_strong_points": serialized.pronunciation_strong_points,
+        "pronunciation_weak_sides": serialized.pronunciation_weak_sides,
+        "pronunciation_tips": serialized.pronunciation_tips,
+        "pronunciation_mistakes": [
+            mistake.model_dump() for mistake in serialized.pronunciation_mistakes
+        ],
     }
 
 

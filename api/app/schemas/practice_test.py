@@ -38,63 +38,67 @@ class StrongPoints(BaseModel):
 
 
 class SentenceImprovement(BaseModel):
-    originalSentence: str = Field(
+    original_sentence: str = Field(
         ...,
         description="The extracted original sentence (string, including part reference).",
     )
-    identifiedMistake: list[str] = Field(
+    identified_issues: list[str] = Field(
         ...,
         description="An array of 1–3 strings describing vocabulary issues (e.g., 'Basic word 'good' could be more precise').",
     )
-    suggestedImprovement: str = Field(..., description="The revised sentence (string)")
+    suggested_improvement: str = Field(..., description="The revised sentence (string)")
     explanation: str = Field(..., description="Explanation to improvements")
 
 
 class SentenceImprovements(BaseModel):
-    grammarEnhancements: list[SentenceImprovement] = Field(
+    grammar_enhancements: list[SentenceImprovement] = Field(
         ...,
         description="An array of 3–5 objects, each representing a grammar-focused enhancement",
     )
-    vocabularyEnhancements: list[SentenceImprovement] = Field(
+    vocabulary_enhancements: list[SentenceImprovement] = Field(
         ...,
         description="An array of 3–5 objects, each representing a vocabulary-focused enhancement",
     )
 
 
 class ErrorMistake(BaseModel):
-    originalSentence: str = Field(..., description="The extracted original sentence")
-    identifiedMistake: list[dict] = Field(
+    original_sentence: str = Field(..., description="The extracted original sentence")
+    identified_mistakes: list[dict] = Field(
         ...,
-        description="An array of 1–2 objects, each with mistakeType and mistakeDescription",
+        description="An array of 1–2 objects, each with mistake_type and mistake_description",
     )
-    suggestedImprovement: str = Field(..., description="The revised sentence (string)")
+    suggested_improvement: str = Field(..., description="The revised sentence (string)")
     explanation: str = Field(
         ..., description="A concise explanation of improvements to improvements"
     )
 
 
 class VocabUsage(BaseModel):
-    wordOrPhrase: str = Field(..., description="The extracted word or phrase (string).")
-    cefrLevel: str = Field(
+    word_or_phrase: str = Field(
+        ..., description="The extracted word or phrase (string)."
+    )
+    cefr_level: str = Field(
         ...,
         description="The CEFR classification level (string: 'B1', 'B2', 'C1', or 'C2').",
     )
 
 
 class VocabRepetition(BaseModel):
-    wordOrPhrase: str = Field(..., description="The extracted word or phrase (string).")
+    word_or_phrase: str = Field(
+        ..., description="The extracted word or phrase (string)."
+    )
     count: int = Field(
         ...,
         description="The CEFR classification level (string: 'B1', 'B2', 'C1', or 'C2",
     )
-    suggestedSynonyms: list[str] = Field(
+    suggested_synonyms: list[str] = Field(
         ...,
         description="A list of 2–4 strings with synonyms or alternatives (e.g., ['beneficial', 'advantageous', 'helpful', 'valuable']).",
     )
 
 
 class VocabAnalysis(BaseModel):
-    advancedVocabulary: list[VocabUsage] = Field(
+    advanced_vocabulary: list[VocabUsage] = Field(
         ..., description="An array of 3–5 objects, each for an advanced vocabulary"
     )
     repetitions: list[VocabRepetition] = Field(

@@ -69,6 +69,7 @@ export const ChatMessage = z.object({
   role: z.enum(["Assistant", "User"]),
   messageId: z.string(),
   text: z.string(),
+  time: z.number(),
 });
 
 export type ChatMessageType = z.infer<typeof ChatMessage>;
@@ -76,6 +77,7 @@ export type ChatMessageType = z.infer<typeof ChatMessage>;
 export const TranscriptionMessage = z.object({
   name: z.string(),
   text: z.string(),
+  time: z.number(),
 });
 
 export type TranscriptionMessageType = z.infer<typeof TranscriptionMessage>;
@@ -105,6 +107,13 @@ const CriterionScoresSchema = z.object({
   pronunciation: z.float32().multipleOf(0.5),
 });
 
+const AverageBandScores = z.object({
+  fluency: z.float32(),
+  grammar: z.float32(),
+  lexis: z.float32(),
+  pronunciation: z.float32(),
+});
+
 const StrongPointsSchema = z.object({
   fluency: z.array(z.string()),
   grammar: z.array(z.string()),
@@ -127,62 +136,69 @@ const GeneralTipSchema = z.object({
 });
 
 const ImprovementSchema = z.object({
-  originalSentence: z.string(),
-  identifiedMistake: z.array(z.string()),
-  suggestedImprovement: z.string(),
+  original_sentence: z.string(),
+  identified_issues: z.array(z.string()),
+  suggested_improvement: z.string(),
   explanation: z.string(),
 });
 
 const SenetenceImprovementsSchema = z.object({
-  grammarEnhancements: z.array(ImprovementSchema),
-  vocabularyEnhancements: z.array(ImprovementSchema),
+  grammar_enhancements: z.array(ImprovementSchema),
+  vocabulary_enhancements: z.array(ImprovementSchema),
 });
 
 const MistakeSchema = z.object({
-  mistakeType: z.string(),
-  mistakeDescription: z.string(),
+  mistake_type: z.string(),
+  description: z.string(),
 });
 
 const GrammarErrorSchema = z.object({
-  originalSentence: z.string(),
-  identifiedMistake: z.array(MistakeSchema),
-  suggestedImprovement: z.string(),
+  original_sentence: z.string(),
+  identified_mistakes: z.array(MistakeSchema),
+  suggested_improvement: z.string(),
   explanation: z.string(),
 });
 
 const VocabUsageSchema = z.object({
-  wordOrPhrase: z.string(),
-  cefrLevel: z.string(),
+  word_or_phrase: z.string(),
+  cefr_level: z.string(),
 });
 
 const VocabRepetitionSchema = z.object({
-  wordOrPhrase: z.string(),
+  word_or_phrase: z.string(),
   count: z.number(),
-  suggestedSynonyms: z.array(z.string()),
+  suggested_synonyms: z.array(z.string()),
 });
 
 const PronunciationErrorSchema = z.object({
   word: z.string(),
   accuracy: z.number().min(0).max(100),
-  phonemes: z.string(),
+  mistake_type: z.string(),
+  user_phonemes: z.string(),
+  correct_phonemes: z.string(),
 });
 
-const ResultSchema = z.object({
-  id: z.string(),
+const GrammarAnalysis = z.object({
+  grammar_analysis: z.array(GrammarErrorSchema),
+});
+
+export const ResultSchema = z.object({
+  id: z.string().optional().nullable(),
+  practice_test_id: z.string().optional().nullable(),
   overall_score: z.float32().multipleOf(0.5),
   criterion_scores: CriterionScoresSchema,
   weak_sides: WeakSidesSchema,
   strong_points: StrongPointsSchema,
   sentence_improvements: SenetenceImprovementsSchema,
-  grammar_errors: z.array(GrammarErrorSchema),
+  grammar_errors: GrammarAnalysis,
   vocabulary_usage: z.array(VocabUsageSchema),
   repeated_words: z.array(VocabRepetitionSchema),
   pronunciation_issues: z.array(PronunciationErrorSchema),
-  general_tips: z.array(GeneralTipSchema),
+  general_tips: GeneralTipSchema,
 });
 
 const TestTranscriptionsSchema = z.object({
-  id: z.string(),
+  id: z.string().optional(),
   part_one: z.array(TranscriptionMessage),
   part_two: z.array(TranscriptionMessage),
   part_three: z.array(TranscriptionMessage),
@@ -242,15 +258,56 @@ const PronunciationTestSchema = z.object({
   pronunciation_tips: z.array(z.string()),
 });
 
-const UserSchema = z.object({
+// class AnalyticsSchema(BaseModel):
+//     id: str | None = Field(default=None)
+//     user_id: UUID
+//     practice_time: int
+//     tests_completed: int
+//     current_bandscore: float
+//     average_band_scores: AverageBandScores
+//     average_band: float
+//     common_mistakes: dict[str, Any]
+//     streak_days: int
+
+// id: Mapped[UUID_ID] = mapped_column(GUID, primary_key=True, default=uuid.uuid4)
+// user_id: Mapped[UUID_ID] = mapped_column(
+//     GUID, ForeignKey("user_table.id"), index=True
+// )
+// user: Mapped[User] = relationship(back_populates="analytics")
+// practice_time: Mapped[int] = mapped_column(Integer, default=0)
+// tests_completed: Mapped[int] = mapped_column(Integer)
+// current_bandscore: Mapped[float] = mapped_column(Float)
+// average_band_scores: Mapped[dict[str, float]] = mapped_column(JSONB)
+// average_band: Mapped[float] = mapped_column(Float)
+// common_mistakes: Mapped[dict[str, Any]] = mapped_column(JSONB)
+// streak_days: Mapped[int] = mapped_column(Integer, default=0)a
+
+export const AnalyticsSchema = z.object({
   id: z.string(),
+  user_id: z.string(),
+  practice_time: z.number().int(),
+  tests_completed: z.number().int(),
+  current_bandscore: z.float32(),
+  average_band_scores: AverageBandScores,
+  average_band: z.float32(),
+  common_mistakes: objectSchema.optional(),
+  streak_days: z.number().int(),
+});
+
+export const UserSchema = z.object({
+  id: z.string(),
+  email: z.email(),
+  is_verified: z.boolean().default(false),
+  is_active: z.boolean().default(false),
+  is_superuser: z.boolean().default(false),
+  password: z.string().optional(),
   first_name: z.string(),
-  last_name: z.string().nullable(),
-  createdAt: z.date(),
-  updatedAt: z.date().nullable(),
+  last_name: z.string().optional(),
+  createdAt: z.coerce.date(),
+  updatedAt: z.coerce.date(),
   subscription: objectSchema.optional(),
   practice_tests: z.array(PracticeTestSchema).optional(),
-  analytics: objectSchema.optional(),
+  analytics: AnalyticsSchema.optional(),
   notificates: objectSchema.optional(),
   transcriptions: z.array(TestTranscriptionsSchema).optional(),
   pronunciation_tests: z.array(PronunciationTestSchema).optional(),
@@ -276,3 +333,5 @@ export type WeakSidesType = z.infer<typeof WeakSidesSchema>;
 export type StrongPointsType = z.infer<typeof StrongPointsSchema>;
 export type CriterionScoresType = z.infer<typeof CriterionScoresSchema>;
 export type ResultType = z.infer<typeof ResultSchema>;
+export type AnalyticsType = z.infer<typeof AnalyticsSchema>;
+export type GrammarAnalysisType = z.infer<typeof GrammarAnalysis>;

@@ -18,7 +18,7 @@ class TranscriptionMessage(BaseModel):
 
 
 class TranscriptionSchema(BaseModel):
-    test_id: str = Field(description="Id of the test")
+    test_id: str | None = Field(description="Id of the test", default=None)
     part_one: list[TranscriptionMessage]
     part_two: list[TranscriptionMessage]
     part_three: list[TranscriptionMessage]

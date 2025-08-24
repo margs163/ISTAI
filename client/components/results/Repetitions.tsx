@@ -1,3 +1,4 @@
+import { useLocalPracticeTestStore } from "@/lib/practiceTestStore";
 import {
   BookOpen,
   CaseSensitive,
@@ -38,9 +39,9 @@ export function Repetition({
   repetition,
 }: {
   repetition: {
-    phrase: string;
-    times: string;
-    synonyms: string[];
+    word_or_phrase: string;
+    count: number;
+    suggested_synonyms: string[];
   };
 }) {
   return (
@@ -50,16 +51,16 @@ export function Repetition({
           <LetterText className="text-orange-600 size-5 shrink-0" />
         </div>
         <h3 className="text-base lg:text-lg font-medium text-gray-800">
-          {repetition.phrase}
+          {repetition.word_or_phrase}
         </h3>
         <h3 className="text-orange-700 bg-white text-xs font-medium px-2 py-1 rounded-md ml-auto border border-orange-200">
-          {repetition.times} times
+          {repetition.count} times
         </h3>
       </div>
       <div className="space-y-2">
         <p className="text-sm text-gray-600">Alternatives:</p>
         <div className="flex flex-row gap-1 items-center justify-start">
-          {repetition.synonyms.map((item, index) => (
+          {repetition.suggested_synonyms.map((item, index) => (
             <Alternative word={item} key={index} />
           ))}
         </div>
@@ -69,6 +70,9 @@ export function Repetition({
 }
 
 export default function RepeatedWords() {
+  const repetitions = useLocalPracticeTestStore(
+    (state) => state.result?.repeated_words
+  );
   return (
     <section className="w-full px-6 lg:px-0">
       <div className="p-6 lg:p-8 border border-gray-200 rounded-lg bg-white flex flex-col gap-6 shadow-none">
@@ -79,7 +83,7 @@ export default function RepeatedWords() {
           </h3>
         </header>
         <main className="flex flex-col gap-2 lg:gap-3">
-          {repeatedWordsList.map((item, index) => (
+          {repetitions?.map((item, index) => (
             <Repetition key={index} repetition={item} />
           ))}
         </main>

@@ -4,9 +4,10 @@ import { TestSessionType } from "./types";
 type TestSessionStore = {
   setSessionData: (data: TestSessionType) => void;
   setStatus: (status: "active" | "inactive") => void;
+  setDuration: (time: number) => void;
 } & TestSessionType;
 
-export const useTestSessionStore = create<TestSessionStore>((set) => ({
+export const useTestSessionStore = create<TestSessionStore>()((set) => ({
   testName: "",
   status: "active",
   currentPart: 1,
@@ -16,4 +17,6 @@ export const useTestSessionStore = create<TestSessionStore>((set) => ({
   user: null,
   setSessionData: (data: TestSessionType) => set({ ...data }),
   setStatus: (status) => set({ status: status }),
+  setDuration: (time: number) =>
+    set((state) => ({ duration: state.duration + time })),
 }));

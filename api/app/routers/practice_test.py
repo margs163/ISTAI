@@ -112,12 +112,16 @@ async def get_practice_test(
             detail="Specify one of the parameters",
         )
 
-    query = select(PracticeTest).options(
-        joinedload(PracticeTest.result),
-        joinedload(PracticeTest.transcription),
-        joinedload(PracticeTest.part_one_card),
-        joinedload(PracticeTest.part_two_card),
-        selectinload(PracticeTest.reading_cards),
+    query = (
+        select(PracticeTest)
+        .options(
+            joinedload(PracticeTest.result),
+            joinedload(PracticeTest.transcription),
+            joinedload(PracticeTest.part_one_card),
+            joinedload(PracticeTest.part_two_card),
+            selectinload(PracticeTest.reading_cards),
+        )
+        .order_by(PracticeTest.test_date.desc())
     )
     if user_id:
         query = query.where(PracticeTest.user_id == user.id)
@@ -127,7 +131,7 @@ async def get_practice_test(
         async with session.begin():
             try:
                 practice_test = await session.scalars(query)
-                return {"status": "success", "results": practice_test.all()}
+                return {"data": practice_test.all()}
             except Exception as e:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,

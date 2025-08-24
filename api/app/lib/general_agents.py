@@ -1,6 +1,8 @@
 from operator import add
+from pprint import pprint
 from typing import Annotated, TypedDict, Dict, List
 import asyncio
+from pydantic_core import from_json
 from dotenv import load_dotenv
 from langgraph.graph import StateGraph, START, END
 from langchain_groq import ChatGroq
@@ -15,7 +17,7 @@ from .prompts import (
 
 load_dotenv()
 
-llm = ChatGroq(model="llama-3.3-70b-versatile", temperature=0.5)
+llm = ChatGroq(model="llama3-70b-8192", temperature=0.5)
 
 fluency_prompt = ChatPromptTemplate(
     [
@@ -41,7 +43,7 @@ class GeneralState(TypedDict):
     # metadata
     metadata_id: str
     speech_metadata: Dict[str, float]
-    transcriptions: List
+    transcriptions: str
     # criteria
     fluency_score: float
     fluency_strong_points: List[str]
@@ -58,41 +60,47 @@ class GeneralState(TypedDict):
 
 
 async def fluency_invoke(state: GeneralState) -> Dict:
-    chain = fluency_prompt | llm.with_structured_output(FluencyEvaluation)
-    response: FluencyEvaluation = await chain.ainvoke(
-        {"transcriptions": state["transcriptions"]}
-    )
+    chain = fluency_prompt | llm
+    response = await chain.ainvoke({"transcriptions": state["transcriptions"]})
+    result = from_json(str(response.content), allow_partial=True)
+    pprint(result)
+    serialized = FluencyEvaluation(**result)
+
     return {
-        "fluency_score": response.fluencyScore,
-        "fluency_strong_points": response.fluencyStrongPoints,
-        "fluency_weak_sides": response.fluencyWeakSide,
-        "fluency_tips": response.fluencyTips,
+        "fluency_score": serialized.fluency_score,
+        "fluency_strong_points": serialized.fluency_strong_points,
+        "fluency_weak_sides": serialized.fluency_weak_sides,
+        "fluency_tips": serialized.fluency_tips,
     }
 
 
 async def grammar_invoke(state: GeneralState) -> Dict:
-    chain = grammar_prompt | llm.with_structured_output(GrammaticalEvaluation)
-    response: FluencyEvaluation = await chain.ainvoke(
-        {"transcriptions": state["transcriptions"]}
-    )
+    chain = grammar_prompt | llm
+    response = await chain.ainvoke({"transcriptions": state["transcriptions"]})
+    result = from_json(str(response.content), allow_partial=True)
+    pprint(result)
+    serialized = GrammaticalEvaluation(**result)
+
     return {
-        "grammar_score": response.fluencyScore,
-        "grammar_strong_points": response.fluencyStrongPoints,
-        "grammar_weak_sides": response.fluencyWeakSide,
-        "grammar_tips": response.fluencyTips,
+        "grammar_score": serialized.grammatical_score,
+        "grammar_strong_points": serialized.grammatical_strong_points,
+        "grammar_weak_sides": serialized.grammatical_weak_sides,
+        "grammar_tips": serialized.grammatical_tips,
     }
 
 
 async def lexis_invoke(state: GeneralState) -> Dict:
-    chain = lexis_prompt | llm.with_structured_output(LexicalEvaluation)
-    response: LexicalEvaluation = await chain.ainvoke(
-        {"transcriptions": state["transcriptions"]}
-    )
+    chain = lexis_prompt | llm
+    response = await chain.ainvoke({"transcriptions": state["transcriptions"]})
+    result = from_json(str(response.content), allow_partial=True)
+    pprint(result)
+    serialized = LexicalEvaluation(**result)
+
     return {
-        "lexis_score": response.lexicalScore,
-        "lexis_strong_points": response.lexicalStrongPoints,
-        "lexis_weak_sides": response.lexicalWeakSide,
-        "lexis_tips": response.lexicalTips,
+        "lexis_score": serialized.lexical_score,
+        "lexis_strong_points": serialized.lexical_strong_points,
+        "lexis_weak_sides": serialized.lexical_weak_sides,
+        "lexis_tips": serialized.lexical_tips,
     }
 
 
