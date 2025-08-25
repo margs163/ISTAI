@@ -5,7 +5,10 @@ from fastapi_users.authentication import (
 )
 from fastapi_users import UUIDIDMixin, BaseUserManager, FastAPIUsers
 from fastapi_mail import ConnectionConfig, MessageSchema, FastMail, MessageType
-from .lib.auth_db import User, get_user_db
+
+from api.app.schemas.analytics import AnalyticsSchema, AverageBandScores
+from api.app.schemas.db_tables import Analytics
+from .lib.auth_db import User, get_async_session, get_user_db
 from fastapi import Request, Depends
 from typing import Optional
 import uuid
@@ -52,6 +55,29 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
             subtype=MessageType.html,
         )
 
+        async for session in get_async_session():
+            try:
+                new_analytics = AnalyticsSchema(
+                    user_id=str(user.id),
+                    practice_time=0,
+                    tests_completed=0,
+                    current_bandscore=0,
+                    average_band_scores=AverageBandScores(
+                        fluency=0, grammar=0, lexis=0, pronunciation=0
+                    ),
+                    average_band=0,
+                    common_mistakes={"prop": None},
+                    streak_days=0,
+                )
+                analytics_record = Analytics(**new_analytics.model_dump())
+                session.add(analytics_record)
+                await session.commit()
+            except Exception as e:
+                await session.rollback()
+                print(
+                    f"Could not create analytics record after registering.\nError: {e}"
+                )
+
         fm = FastMail(conf)
         await fm.send_message(message=message)
         print(f"User {user.id} has registered.")
@@ -59,7 +85,20 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
     async def on_after_forgot_password(
         self, user: User, token: str, request: Optional[Request] = None
     ):
-        html = f"<p>Hi, you have requested a password reset. Here is your reset token - <strong>{token}</strong></p>"
+        html = f"""<!DOCTYPE html>
+                <html lang="en">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>Password Reset</title>
+                </head>
+                <body>
+                    <div>
+                        <h1>Password Reset</h1> 
+                        <p>Hi, you have requested a password reset. Click on the following link to set a new password: http://localhost:3000/new-password/{token}</p>
+                    </div>
+                </body>
+                </html>"""
 
         message = MessageSchema(
             subject="Password Reset in AIELTSTalk",
@@ -75,7 +114,20 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
     async def on_after_request_verify(
         self, user: User, token: str, request: Optional[Request] = None
     ):
-        html = f"<p>Hi, you have requested an account verification. Here is your verification token - <strong>{token}</strong></p>"
+        html = f"""<!DOCTYPE html>
+                <html lang="en">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>Account Verification</title>
+                </head>
+                <body>
+                    <div>
+                        <h1>Email verification</h1> 
+                        <p>Hi, you have to verify your email to continue. Click on the following link to verify your e: http://localhost:3000/verify/{token}</p>
+                    </div>
+                </body>
+                </html>"""
 
         message = MessageSchema(
             subject="Account Verification in AIELTSTalk",
@@ -93,7 +145,7 @@ cookie_transport = CookieTransport(cookie_max_age=259200, cookie_name="account-s
 
 
 def get_jwt_strategy() -> JWTStrategy:
-    return JWTStrategy(secret=SECRET, lifetime_seconds=3600)
+    return JWTStrategy(secret=SECRET, lifetime_seconds=259200)
 
 
 auth_backend = AuthenticationBackend(

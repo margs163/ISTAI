@@ -6,7 +6,7 @@ export default function LoadingSmallUI() {
   return (
     <div className="mx-auto w-full flex-col items-center justify-center gap-2 font-geist flex py-6">
       <BeatLoader
-        className="text-indigo-500 scale-150 size-28 self-center text-center flex items-center justify-center"
+        className="text-indigo-500 scale-120 size-20 self-center text-center flex items-center justify-center"
         color="#4f39f6"
         aria-label="Loading"
         cssOverride={{

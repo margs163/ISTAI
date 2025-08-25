@@ -3,12 +3,18 @@ import { useGlobalPracticeTestsStore } from "@/lib/practiceTestStore";
 import { fetchPracticeTests } from "@/lib/queries";
 import { cn, getPreciseTimeAgo } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
-import { BookText, Bot, ChartColumn, Ellipsis } from "lucide-react";
+import {
+  BookText,
+  Bot,
+  BriefcaseBusiness,
+  ChartColumn,
+  Ellipsis,
+} from "lucide-react";
 import Link from "next/link";
-import React, { useState } from "react";
+import React from "react";
 import LoadingSmallUI from "../loadingSmallUI";
-import PracticeTestDialogInfo from "./PracticeTestDialogInfo";
 import { PracticeTestType } from "@/lib/types";
+import RecentTestsFallback from "./RecentTestsFallback";
 
 function parseTime(time: number) {
   const minutes = Math.floor(time / 60);
@@ -20,47 +26,57 @@ function parseTime(time: number) {
 }
 
 type Test = {
-  name: string;
+  practice_name: string;
   timeAgo: string;
   duration: number;
   band: number;
   assistant: "Ron" | "Kate";
 };
 
-const tests: Test[] = [
+const tests = [
   {
-    name: "Speaking Test 1",
-    timeAgo: "2 hours ago",
+    practice_name: "Speaking Test 1",
+    test_date: new Date().toISOString(),
     duration: 11,
-    band: 7.0,
+    result: {
+      overall_score: 7.5,
+    },
     assistant: "Ron",
   },
   {
-    name: "Speaking Test 2",
-    timeAgo: "6 hours ago",
+    practice_name: "Speaking Test 2",
+    test_date: new Date().toISOString(),
     duration: 12,
-    band: 6.5,
+    result: {
+      overall_score: 6.0,
+    },
     assistant: "Kate",
   },
   {
-    name: "Speaking Test 3",
-    timeAgo: "1 day ago",
+    practice_name: "Speaking Test 3",
+    test_date: new Date().toISOString(),
     duration: 10,
-    band: 7.5,
+    result: {
+      overall_score: 7.0,
+    },
     assistant: "Kate",
   },
   {
-    name: "Speaking Test 4",
-    timeAgo: "2 days ago",
+    practice_name: "Speaking Test 4",
+    test_date: new Date().toISOString(),
     duration: 14,
-    band: 5.5,
+    result: {
+      overall_score: 8.0,
+    },
     assistant: "Ron",
   },
   {
-    name: "Speaking Test 5",
-    timeAgo: "3 days ago",
+    practice_name: "Speaking Test 5",
+    test_date: new Date().toISOString(),
     duration: 12,
-    band: 7.0,
+    result: {
+      overall_score: 6.5,
+    },
     assistant: "Ron",
   },
 ];
@@ -135,28 +151,16 @@ export default function RecentPracticeTests() {
 
   if (isLoading) return <LoadingSmallUI />;
 
-  if (error)
-    return (
-      <h1 className="text-sm text-center font-medium text-red-800">
-        Error: {error.message}
-      </h1>
-    );
-
-  if (!data) return <LoadingSmallUI />;
-
-  const recentTests = data.filter((item) => item.result);
-  console.log(recentTests);
+  const recentTests = data && data.filter((item) => item.result);
   const lastFive =
-    recentTests.length > 5
+    recentTests && recentTests.length > 5
       ? recentTests.slice(recentTests.length - 10, recentTests.length - 5)
       : recentTests;
-
   return (
     <section className="px-6 lg:pr-0 w-full flex flex-col gap-6">
-      <div className="p-5 w-full flex flex-col gap-6 bg-white rounded-lg border border-gray-200/80">
+      <div className="p-5 w-full flex flex-col gap-6 bg-white rounded-lg border border-gray-200/80 min-h-[320px]">
         <header className="w-full flex flex-row justify-between items-center px-1">
           <div className="flex flex-row items-center justify-start gap-2">
-            {/* <BriefcaseBusiness className="size-5 text-gray-700" /> */}
             <h3 className="font-semibold text-lg text-gray-800">
               Recent Tests
             </h3>
@@ -168,9 +172,13 @@ export default function RecentPracticeTests() {
           </Link>
         </header>
         <div className="space-y-3">
-          {lastFive.map((item, index) => (
-            <PracticeTest key={index} test={item} />
-          ))}
+          {data && data.length > 0 && lastFive ? (
+            lastFive.map((item, index) => (
+              <PracticeTest key={index} test={item} />
+            ))
+          ) : (
+            <RecentTestsFallback />
+          )}
         </div>
       </div>
     </section>

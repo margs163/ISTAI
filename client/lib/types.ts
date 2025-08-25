@@ -72,6 +72,26 @@ export const ChatMessage = z.object({
   time: z.number(),
 });
 
+export const NewPasswordSchema = z
+  .object({
+    password: z
+      .string()
+      .min(8, { error: "Password should be at least 8 characters" }),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+  });
+
+export type NewPasswordType = z.infer<typeof NewPasswordSchema>;
+
+export const PasswordResetSchema = z.object({
+  email: z.email({ error: "Invalid email" }),
+});
+
+export type PasswordResetType = z.infer<typeof PasswordResetSchema>;
+
 export type ChatMessageType = z.infer<typeof ChatMessage>;
 
 export const TranscriptionMessage = z.object({

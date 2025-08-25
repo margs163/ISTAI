@@ -175,6 +175,9 @@ export async function fetchPracticeTests(
       "http://localhost:8000/practice_test/?user_id=true",
       { withCredentials: true }
     );
+    if (response.data.data.length === 0) {
+      return [];
+    }
     const validated = await PracticeTestSchema.safeParseAsync(
       response.data.data.at(-1)
     );

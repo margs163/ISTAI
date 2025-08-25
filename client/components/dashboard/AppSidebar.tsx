@@ -87,12 +87,12 @@ const menuItems = [
 const bottomMenuItems = [
   {
     title: "Account Settings",
-    url: "#",
+    url: "/dashboard/profile",
     icon: Settings,
   },
   {
     title: "Help & Support",
-    url: "#",
+    url: "/dashboard/profile",
     icon: HelpCircle,
   },
 ];

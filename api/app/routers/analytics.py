@@ -7,9 +7,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from api.app.schemas import analytics
 import datetime
 
-datetime.datetime.now
-
-
 from api.app.schemas.analytics import (
     AnalyticsSchema,
     AnalyticsUpdateSchema,

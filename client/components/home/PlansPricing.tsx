@@ -17,7 +17,7 @@ const plansAnnual: Plan[] = [
     tier: "Free",
     price: 0,
     description: "Per user/month billed annualy",
-    audience: "For trying our platform",
+    audience: "For testing out our platform and trying out our features.",
     features: [
       "30 test credits",
       "free analysis",
@@ -29,7 +29,7 @@ const plansAnnual: Plan[] = [
     tier: "Starter",
     price: 5,
     description: "Per user/month billed annualy",
-    audience: "Ideal for test preparation",
+    audience: "Ideal for students with regular preparation",
     features: [
       "300 test credits",
       "unlimited analysis",
@@ -44,7 +44,7 @@ const plansAnnual: Plan[] = [
     tier: "Pro",
     price: 11,
     description: "Per user/month billed annualy",
-    audience: "Great for shared/long term use",
+    audience: "Greate for shared users with intensive preparation",
     features: [
       "800 test credits",
       "unlimited analysis",
@@ -62,7 +62,7 @@ const plansMonthly: Plan[] = [
     tier: "Free",
     price: 0,
     description: "Per user/month billed monthly",
-    audience: "For trying our platform",
+    audience: "For testing out our platform and trying out our features.",
     features: [
       "30 test credits",
       "free analysis",
@@ -74,7 +74,7 @@ const plansMonthly: Plan[] = [
     tier: "Starter",
     price: 7,
     description: "Per user/month billed monthly",
-    audience: "Ideal for test preparation",
+    audience: "Ideal for students with regular preparation",
     features: [
       "300 test credits",
       "unlimited analysis",
@@ -89,7 +89,7 @@ const plansMonthly: Plan[] = [
     tier: "Pro",
     price: 14,
     description: "Per user/month billed monthly",
-    audience: "Great for shared/long term use",
+    audience: "Greate for shared users with intensive preparation",
     features: [
       "800 test credits",
       "unlimited analysis",
@@ -102,10 +102,28 @@ const plansMonthly: Plan[] = [
   },
 ];
 
-export function PlanCard({ plan }: { plan: Plan }) {
+export function PlanCard({
+  plan,
+  className,
+}: {
+  plan: Plan;
+  className?: string;
+}) {
   return (
-    <div className="flex flex-col items-start justify-start border-2 bvorder-gray-200 bg-white p-6 gap-8 lg:p-8 rounded-lg w-full">
-      <h3 className="text-xl font-medium text-gray-800">{plan.tier}</h3>
+    <div
+      className={cn(
+        "flex flex-col items-start justify-start border-2 border-slate-200/80 bg-white p-6 gap-6 lg:p-8 rounded-2xl w-full",
+        className
+      )}
+    >
+      <div className="space-y-2 inline-block">
+        <h3 className="text-xl lg:text-2xl font-semibold text-gray-800">
+          {plan.tier}
+        </h3>
+        <p className="text-sm lg:text-sm font-medium text-gray-600">
+          {plan.audience}
+        </p>
+      </div>
       <div className="space-y-2">
         <h2 className="text-4xl lg:text-5xl font-semibold text-gray-800 tracking-wider">
           ${plan.price}
@@ -114,15 +132,16 @@ export function PlanCard({ plan }: { plan: Plan }) {
           {plan.description}
         </p>
       </div>
-      <div className="space-y-4">
-        <h3 className="text-sm lg:text-base font-medium text-gray-800">
-          {plan.audience}
-        </h3>
+      <hr className="w-full h-[1px] bg-slate-100 rounded-xl" />
+      <div className="space-y-4 mb-1">
+        <p className="text-sm lg:text-sm font-medium text-gray-900">
+          What&apos;s included:
+        </p>
         <ul className="space-y-2">
           {plan.features.map((item, index) => (
             <li key={index} className="flex flex-row items-center gap-2">
               <div className="p-1 bg-gray-100 rounded-md flex items-center justify-center">
-                <Check className="size-4 shrink-0 text-gray-500" />
+                <Check className="size-4 shrink-0 text-indigo-500 bg-indigo-50" />
               </div>
               <p className="text-xs lg:text-sm font-medium text-gray-600">
                 {item}
@@ -131,8 +150,8 @@ export function PlanCard({ plan }: { plan: Plan }) {
           ))}
         </ul>
       </div>
-      <button className="w-full text-sm cursor-pointer mt-auto border text-center border-gray-300 bg-white font-medium text-gray-800 py-2 rounded-lg hover:bg-gray-100 active:bg-gray-100 transition-colors">
-        Get Started with {plan.tier}
+      <button className="w-full text-xs lg:text-sm cursor-pointer mt-auto border text-center border-gray-300 bg-slate-100 font-medium text-gray-800 py-2.5 lg:py-3 rounded-md lg:rounded-lg hover:bg-slate-200 active:bg-slate-100 transition-colors">
+        Get Started
       </button>
     </div>
   );
@@ -177,14 +196,38 @@ export default function PlansPricing() {
           </p>
         </div>
       </div>
-      <main className="flex flex-col gap-8 lg:flex-row lg:gap-12 w-full px-2 mt-4 lg:mt-8">
+      <main className="flex flex-col gap-8 lg:grid lg:grid-cols-[0.97fr_1fr_0.97fr] lg:gap-12 w-full px-2 mt-4 lg:mt-8">
         {activeTab === "year"
-          ? plansAnnual.map((plan, index) => (
-              <PlanCard plan={plan} key={index} />
-            ))
-          : plansMonthly.map((plan, index) => (
-              <PlanCard plan={plan} key={index} />
-            ))}
+          ? plansAnnual.map((plan, index) =>
+              index !== 1 ? (
+                <PlanCard plan={plan} key={index} />
+              ) : (
+                <div
+                  key={index}
+                  className="rounded-2xl p-2 pt-4 grad-bg brightness-104 w-full"
+                >
+                  <h3 className="text-xs lg:text-sm tracking-wide text-center mb-2.5 font-semibold text-gray-700">
+                    Recommended for your
+                  </h3>
+                  <PlanCard plan={plan} />
+                </div>
+              )
+            )
+          : plansMonthly.map((plan, index) =>
+              index !== 1 ? (
+                <PlanCard plan={plan} key={index} />
+              ) : (
+                <div
+                  key={index}
+                  className="rounded-2xl p-2 pt-4 grad-bg brightness-104 w-full"
+                >
+                  <h3 className="text-xs lg:text-sm text-center tracking-wide mb-2.5 font-semibold text-gray-700">
+                    Recommended for your
+                  </h3>
+                  <PlanCard plan={plan} />
+                </div>
+              )
+            )}
       </main>
     </section>
   );

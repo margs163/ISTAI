@@ -2,10 +2,12 @@ import { ExternalLink, File, FileInput, Flame } from "lucide-react";
 import React from "react";
 import MainButton from "../MainButton";
 import DailyStreak from "./DailyStreak";
+import { useUserStore } from "@/lib/userStorage";
 
 const currentDate = new Date();
 
 export default function Greeting() {
+  const userFirstName = useUserStore((state) => state.firstName);
   return (
     <section className="w-full px-6 pl-8 flex flex-row justify-between items-center">
       <div>
@@ -18,7 +20,7 @@ export default function Greeting() {
             : currentDate.getHours() > 6 && currentDate.getHours() < 12
             ? "Good Morning!"
             : "Good Evening!"}{" "}
-          John
+          {userFirstName ? userFirstName : "User"}
         </h2>
       </div>
       <div className="flex flex-row gap-4 items-end lg:px-1">

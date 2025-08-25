@@ -1,4 +1,5 @@
-import React from "react";
+"use client";
+import React, { useEffect } from "react";
 import { SidebarTrigger } from "../ui/sidebar";
 import { BadgeCheck, Bell, FolderPlus, Plus, Search } from "lucide-react";
 import {
@@ -12,6 +13,8 @@ import {
 import ProfileLink from "../ProfileLink";
 import NewTest from "./NewTest";
 import MainButton from "../MainButton";
+import { useUserStore } from "@/lib/userStorage";
+import { toast } from "sonner";
 
 export default function DashboardHeader() {
   return (

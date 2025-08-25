@@ -38,6 +38,7 @@ export default function Page() {
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
         },
+        credentials: "include",
       });
 
       if (!response.ok) {
@@ -50,7 +51,7 @@ export default function Page() {
   };
 
   return (
-    <div className="min-h-screen w-full p-6 flex items-center justify-center lg:px-20 xl:px-40 font-geist">
+    <div className="min-h-screen w-full p-6 flex items-start py-10 lg:items-center justify-center lg:px-20 xl:px-40 font-geist">
       <section className=" shadow-md bg-white w-full lg:flex lg:flex-row lg:shadow-lg shadow-slate-200 rounded-lg">
         <div className="flex flex-col p-6 justify-center gap-16 lg:flex-1/2 lg:items-center lg:p-10">
           <div className="flex items-center justify-start gap-2 mb-auto lg:self-start">
@@ -80,7 +81,7 @@ export default function Page() {
               <p className="text-xs font-medium text-gray-500 pb-1">or</p>
               <hr className="h-[2px] text-gray-200 w-1/2" />
             </div>
-            <div className="flex flex-col gap-4 justify-start items-stretch w-full">
+            <div className="flex flex-col gap-0 justify-start items-stretch w-full">
               <div className="space-y-2">
                 <input
                   type="email"
@@ -88,11 +89,9 @@ export default function Page() {
                   {...register("email")}
                   className="text-sm w-full text-gray-700 font-normal border-b-2 border-gray-200 px-2 py-2 focus-within:outline-0 focus-within:border-b-indigo-200 transition-colors"
                 />
-                {errors.email && (
-                  <p className="text-red-700 font-normal text-xs">
-                    {errors.email.message}
-                  </p>
-                )}
+                <p className="text-red-700 font-normal text-xs h-3 mt-0.5">
+                  {errors.email && errors.email.message}
+                </p>
               </div>
               <div className="space-y-2">
                 <input
@@ -101,20 +100,17 @@ export default function Page() {
                   {...register("password")}
                   className="text-sm w-full text-gray-700 font-normal border-b-2 border-gray-200 px-2 py-2 focus-within:outline-0 focus-within:border-b-indigo-200 transition-colors"
                 />
-                {errors.password && (
-                  <p className="text-red-700 font-normal text-xs">
-                    {errors.password.message}
-                  </p>
-                )}
+                <p className="text-red-700 font-normal text-xs h-3 mt-0.5 mb-2">
+                  {errors.password && errors.password.message}
+                </p>
               </div>
-
-              <Link href={"/password-reset"} className="ml-auto">
+              <Link href={"/password-reset"} className="ml-auto mt-1">
                 <p className="text-xs text-gray-600 hover:text-gray-800 transition-colors">
                   Forgot password
                 </p>
               </Link>
             </div>
-            <div className="w-full space-y-3 mt-6">
+            <div className="w-full space-y-3 mt-4">
               <button
                 type="submit"
                 disabled={isSubmitting}

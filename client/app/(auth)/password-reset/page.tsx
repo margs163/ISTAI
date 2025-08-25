@@ -1,3 +1,4 @@
+"use client";
 import React from "react";
 import logoIcon from "@/assets/images/logo-icon.png";
 import logoText from "@/assets/images/logo-text2.png";
@@ -7,8 +8,40 @@ import person2 from "@/assets/images/person2.jpg";
 import person3 from "@/assets/images/person3.jpg";
 import Image from "next/image";
 import Link from "next/link";
+import { SubmitHandler, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { PasswordResetSchema, PasswordResetType } from "@/lib/types";
+import axios from "axios";
+import { Check } from "lucide-react";
 
 export default function Page() {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isLoading, isSubmitting, isSubmitted },
+  } = useForm<PasswordResetType>({
+    resolver: zodResolver(PasswordResetSchema),
+  });
+
+  const submit: SubmitHandler<PasswordResetType> = async (
+    data: PasswordResetType
+  ) => {
+    try {
+      console.log(data);
+      const response = await axios.post(
+        "http://localhost:8000/auth/forgot-password",
+        data,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <div className="min-h-screen w-full p-6 flex items-center justify-center lg:px-20 xl:px-40 font-geist">
       <section className=" shadow-md bg-white w-full lg:flex lg:flex-row lg:shadow-lg shadow-slate-200 rounded-lg lg:min-h-[610px]">
@@ -17,33 +50,58 @@ export default function Page() {
             <Image src={logoIcon} alt="iconLogo" className="w-6" />
             <Image src={logoText} alt="iconText" className="w-14" />
           </div>
-          <form className="flex flex-col items-center justify-center gap-8 px-3 pb-6 lg:pb-10 lg:w-3/4 xl:w-[65%] lg:mb-auto">
-            <div className="space-y-1 text-center">
-              <h1 className="font-semibold text-xl text-gray-800">
-                Forgot Password?
-              </h1>
-              <p className="text-xs text-gray-600 font-medium">
-                No worries, We&apos;ll send you reset instructions
-              </p>
-            </div>
-            <div className="flex flex-col gap-4 justify-start items-stretch w-full">
-              <input
-                type="email"
-                name="email"
-                placeholder="Email"
-                className="text-sm text-gray-700 font-normal border-b-2 border-gray-200 px-2 py-2 focus-within:outline-0 focus-within:border-b-indigo-200 transition-colors"
-              />
-            </div>
-            <div className="w-full space-y-3 mt-2">
-              <button className="w-full py-2.5 rounded-md bg-indigo-700 text-white font-medium lg:font-semibold text-xs hover:bg-indigo-600 transition-colors">
-                Reset Password
-              </button>
-              <Link href={"/login"}>
-                <p className="text-center text-xs font-normal text-gray-500 active:text-gray-700 hover:text-gray-700 transition-colors">
-                  Back to Log In
-                </p>
-              </Link>
-            </div>
+          <form
+            onSubmit={handleSubmit(submit)}
+            className="flex flex-col items-center justify-center gap-8 px-3 pb-6 lg:pb-10 lg:w-3/4 xl:w-[65%] lg:mb-auto"
+          >
+            {!isSubmitted ? (
+              <div className="flex flex-col gap-8 w-full">
+                <div className="space-y-1 text-center">
+                  <h1 className="font-semibold text-xl text-gray-800">
+                    Forgot Password?
+                  </h1>
+                  <p className="text-xs text-gray-600 font-medium">
+                    No worries, We&apos;ll send you reset instructions
+                  </p>
+                </div>
+                <div className="flex flex-col gap-4 justify-start items-stretch w-full">
+                  <input
+                    type="email"
+                    placeholder="Email"
+                    {...register("email")}
+                    className="text-sm text-gray-700 font-normal border-b-2 border-gray-200 px-2 py-2 focus-within:outline-0 focus-within:border-b-indigo-200 transition-colors"
+                  />
+                </div>
+                <div className="w-full space-y-3 mt-2">
+                  <button
+                    disabled={isSubmitting}
+                    className="w-full py-2.5 rounded-md disabled:bg-indigo-500 bg-indigo-700 text-white font-medium lg:font-semibold text-xs hover:bg-indigo-600 transition-colors"
+                  >
+                    {isSubmitting ? "Loading..." : "Reset Password"}
+                  </button>
+                  <Link href={"/login"}>
+                    <p className="text-center text-xs font-normal text-gray-500 active:text-gray-700 hover:text-gray-700 transition-colors">
+                      Back to Log In
+                    </p>
+                  </Link>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col space-y-4 items-center">
+                <div className="flex items-center justify-center shrink-0 bg-green-500 rounded-full p-2">
+                  <Check className="size-9 text-white" />
+                </div>
+                <div className="space-y-1 text-center">
+                  <h1 className="font-semibold text-xl text-gray-800">
+                    We have sent you an email to reset your password
+                  </h1>
+                  <p className="text-xs text-gray-600 font-medium">
+                    Following the instructions on the email to reset your
+                    password
+                  </p>
+                </div>
+              </div>
+            )}
           </form>
         </div>
         <div className="lg:flex-1/2 relative hidden lg:block">

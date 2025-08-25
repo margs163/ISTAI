@@ -11,8 +11,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { SignUpFormData, UserSignUpSchema } from "@/lib/types";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { userData, useUserStore } from "@/lib/userStorage";
+import { UserData, useUserStore } from "@/lib/userStorage";
 import { useRouter } from "next/navigation";
+import axios from "axios";
 
 export default function Page() {
   const router = useRouter();
@@ -47,7 +48,19 @@ export default function Page() {
         throw new Error("Could not signup!");
       }
 
-      const json_data: userData = await response.json();
+      const response_verify = await axios.post(
+        "http://localhost:8000/auth/request-verify-token",
+        {
+          email: data.email,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const json_data: UserData = await response.json();
       setUserData(json_data);
       router.replace("/login");
     } catch (error) {
