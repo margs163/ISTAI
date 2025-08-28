@@ -1,6 +1,5 @@
 from pydantic import BaseModel, Field
 
-from api.app.schemas.db_tables import AssistantEnum, QuestionCard
 from api.app.schemas.pronunciation import PronunciationMistake
 from api.app.schemas.transcriptions import TranscriptionSchema
 
@@ -136,8 +135,10 @@ class Result(BaseModel):
 
 
 class ReadingCardSchema(BaseModel):
+    id: str | None = Field(default=None)
     topic: str = Field()
     text: str = Field()
+    practice_id: str | None = Field(default=None)
 
 
 class PracticeTestSchema(BaseModel):
@@ -148,7 +149,7 @@ class PracticeTestSchema(BaseModel):
     transcription: TranscriptionSchema | None = Field(default=None)
     part_one_card_id: str | None = Field(default=None)
     part_two_card_id: str | None = Field(default=None)
-    reading_card_id: str | None = Field(default=None)
+    reading_cards: list[ReadingCardSchema] | None = Field(default=None)
 
 
 class PracticeTestUpdateSchema(BaseModel):
@@ -157,4 +158,5 @@ class PracticeTestUpdateSchema(BaseModel):
     part_one_card_id: str | None = Field(default=None)
     part_two_card_id: str | None = Field(default=None)
     test_duration: int | None = Field(default=None)
+    reading_cards: list[ReadingCardSchema] | None = Field(default=None)
     status: str | None = Field(default=None)

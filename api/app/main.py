@@ -1,9 +1,9 @@
+import os
 from fastapi import FastAPI
-from fastapi_users import FastAPIUsers
+from dotenv import load_dotenv
 from fastapi.middleware.cors import CORSMiddleware
 from .routers.email import router as email_router
 from .routers.questions import router as questions_router
-from .lib.auth_db import User
 from .users import fastapi_users, auth_backend
 from .schemas.user import UserRead, UserCreate, UserUpdate
 from .routers.transcriptions import router as transcription_router
@@ -11,8 +11,18 @@ from .routers.practice_test import router as practice_router
 from .routers.reading_cards import router as reading_cards_router
 from .routers.results import router as result_router
 from .routers.stt_ws import router as stt_router
+from .routers.subscription import router as subscription_router
 from .routers.analytics import router as analytics_router
 from .routers.chat import router as chat_router
+from .routers.avatar import router as avatar_router
+from .routers.notifications import router as notification_router
+from .users import google_oauth_client
+
+load_dotenv()
+
+SECRET = os.getenv("SECRET")
+if not SECRET:
+    raise Exception("Google OAuth Secret empty")
 
 app = FastAPI()
 
@@ -34,6 +44,25 @@ app.include_router(email_router, prefix="/email", tags=["email"])
 app.include_router(
     fastapi_users.get_auth_router(auth_backend), prefix="/auth/jwt", tags=["auth"]
 )
+
+app.include_router(
+    fastapi_users.get_oauth_router(
+        google_oauth_client,
+        auth_backend,
+        SECRET,
+        is_verified_by_default=True,
+        associate_by_email=True,
+    ),
+    prefix="/auth/google",
+    tags=["auth"],
+)
+
+app.include_router(
+    fastapi_users.get_oauth_associate_router(google_oauth_client, UserRead, "SECRET"),
+    prefix="/auth/associate/google",
+    tags=["auth"],
+)
+
 app.include_router(
     fastapi_users.get_register_router(UserRead, UserCreate),
     prefix="/auth",
@@ -67,6 +96,8 @@ app.include_router(
     reading_cards_router, prefix="/reading_cards", tags=["reading_cards"]
 )
 
+app.include_router(avatar_router, prefix="/avatar", tags=["avatar"])
+
 app.include_router(stt_router, prefix="/stt", tags=["stt"])
 
 app.include_router(chat_router, prefix="/chat", tags=["chat"])
@@ -74,6 +105,10 @@ app.include_router(chat_router, prefix="/chat", tags=["chat"])
 app.include_router(result_router, prefix="/results", tags=["results"])
 
 app.include_router(analytics_router, prefix="/analytics", tags=["analytics"])
+
+app.include_router(subscription_router, prefix="/subscription", tags=["subscription"])
+
+app.include_router(notification_router, prefix="/notifications", tags=["notifications"])
 
 
 @app.get("/")

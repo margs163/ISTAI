@@ -7,22 +7,29 @@ import RadarChart from "@/components/dashboard/RadarChart";
 import RecentPracticeTests from "@/components/dashboard/RecentPracticeTests";
 import StatisticsCards from "@/components/dashboard/StatisticsCards";
 import React, { useEffect, useState } from "react";
-import axios from "axios";
-import {
-  useAnalyticsStore,
-  UserData,
-  UserDataServer,
-  useUserStore,
-} from "@/lib/userStorage";
+import { useAnalyticsStore, useUserStore } from "@/lib/userStorage";
 import { useQuery } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
-import { fetchAnalytics, fetchUser } from "@/lib/queries";
-import { useLocalPracticeTestStore } from "@/lib/practiceTestStore";
+import {
+  fetchAnalytics,
+  fetchAvatar,
+  fetchNotifications,
+  fetchSubscription,
+  fetchUser,
+} from "@/lib/queries";
 import { toast } from "sonner";
+import { useSubscriptionStore } from "@/lib/subscriptionStore";
+import { useNotificationsStore } from "@/lib/notificationStore";
 
 export default function Page() {
   const setUserData = useUserStore((state) => state.setUserData);
+  const userId = useUserStore((state) => state.id);
+  const avatarPath = useUserStore((state) => state.avatar_path);
   const setAnalytics = useAnalyticsStore((state) => state.setAnalyticsData);
+  const analyticsId = useAnalyticsStore((state) => state.id);
+  const setSubscription = useSubscriptionStore((state) => state.setSubData);
+  const setNotifications = useNotificationsStore(
+    (state) => state.setNotifications
+  );
 
   const userState = useUserStore((state) => state);
   useEffect(() => {
@@ -31,16 +38,44 @@ export default function Page() {
         description: "We have sent you an account verification email!",
       });
     }
-  }, [userState]);
+  }, []);
 
   useQuery({
     queryKey: ["user"],
     queryFn: async () => await fetchUser(setUserData),
+    staleTime: 1000 * 60 * 2,
   });
 
   useQuery({
     queryKey: ["get-analytics"],
     queryFn: async () => await fetchAnalytics(setAnalytics),
+    staleTime: 1000 * 60 * 2,
+  });
+
+  useQuery({
+    queryKey: ["avatar-fetch", avatarPath],
+    queryFn: async () => {
+      if (!avatarPath) return null;
+      await fetchAvatar(avatarPath, setAvatarUrl);
+    },
+    enabled: !!avatarPath,
+  });
+
+  useQuery({
+    queryKey: ["subscription-fetch"],
+    queryFn: async () => await fetchSubscription(setSubscription),
+    staleTime: 1000 * 60 * 2,
+  });
+
+  useQuery({
+    queryKey: ["notifications"],
+    queryFn: async () => {
+      const data = await fetchNotifications();
+      if (data) {
+        setNotifications(data);
+      }
+      return data;
+    },
   });
 
   return (

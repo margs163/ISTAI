@@ -28,6 +28,7 @@ export default function TestMetadata({
   testAssistant: string;
   userName: string;
 }) {
+  console.log(testDuration);
   return (
     <section className="p-6 rounded-xl border border-slate-200/80 space-y-6 bg-white">
       <div className="flex flex-row items-center gap-2">
@@ -36,7 +37,7 @@ export default function TestMetadata({
         </h3>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 lg:grid-cols-5">
-        <div className="flex flex-row items-center justify-start gap-3 rounded-lg bg-slate-50 p-3">
+        <div className="flex flex-row items-center justify-start gap-3 rounded-lg bg-slate-50 p-3 px-4">
           <Calendar className="text-green-500 size-6" strokeWidth={1.8} />
           <div className="flex flex-col items-start justify-start gap-1">
             <p className="text-sm font-normal text-gray-600">Test Date</p>
@@ -45,7 +46,7 @@ export default function TestMetadata({
             </h3>
           </div>
         </div>
-        <div className="flex flex-row items-center justify-start gap-3 rounded-lg bg-slate-50 p-3">
+        <div className="flex flex-row items-center justify-start gap-3 rounded-lg bg-slate-50 p-3 px-4">
           <Clock className="text-blue-500 size-6" strokeWidth={1.8} />
           <div className="flex flex-col items-start justify-start gap-1">
             <p className="text-sm font-normal text-gray-600">Test Status</p>
@@ -54,7 +55,7 @@ export default function TestMetadata({
             </h3>
           </div>
         </div>
-        <div className="flex flex-row items-center justify-start gap-3 rounded-lg bg-slate-50 p-3">
+        <div className="flex flex-row items-center justify-start gap-3 rounded-lg bg-slate-50 p-3 px-4">
           <User className="text-purple-500 size-6" strokeWidth={1.8} />
           <div className="flex flex-col items-start justify-start gap-1">
             <p className="text-sm font-normal text-gray-600">Test Status</p>
@@ -63,7 +64,7 @@ export default function TestMetadata({
             </h3>
           </div>
         </div>
-        <div className="flex flex-row items-center justify-start gap-3 rounded-lg bg-slate-50 p-3">
+        <div className="flex flex-row items-center justify-start gap-3 rounded-lg bg-slate-50 p-3 px-4">
           <Bot className="text-orange-500 size-6" strokeWidth={1.8} />
           <div className="flex flex-col items-start justify-start gap-1">
             <p className="text-sm font-normal text-gray-600">Test Status</p>
@@ -72,7 +73,7 @@ export default function TestMetadata({
             </h3>
           </div>
         </div>
-        <div className="flex flex-row items-center justify-start gap-3 rounded-lg bg-slate-50 p-3">
+        <div className="flex flex-row items-center justify-start gap-3 rounded-lg bg-slate-50 p-3 px-4">
           <CircleCheck className="text-green-500 size-6" strokeWidth={1.8} />
           <div className="flex flex-col items-start justify-start gap-1">
             <p className="text-sm font-normal text-gray-600">Test Status</p>

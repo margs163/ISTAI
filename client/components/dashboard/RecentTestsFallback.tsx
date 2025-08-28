@@ -1,57 +1,9 @@
 import Image from "next/image";
 import React from "react";
 import illustration from "@/assets/images/testIllustration.jpg";
-import { PracticeTest } from "./RecentPracticeTests";
 import MainButton from "../MainButton";
-import { File, FileText, Plus } from "lucide-react";
-
-const tests = [
-  {
-    practice_name: "Speaking Test 1",
-    test_date: new Date().toISOString(),
-    duration: 11,
-    result: {
-      overall_score: 7.5,
-    },
-    assistant: "Ron",
-  },
-  {
-    practice_name: "Speaking Test 2",
-    test_date: new Date().toISOString(),
-    duration: 12,
-    result: {
-      overall_score: 6.0,
-    },
-    assistant: "Kate",
-  },
-  {
-    practice_name: "Speaking Test 3",
-    test_date: new Date().toISOString(),
-    duration: 10,
-    result: {
-      overall_score: 7.0,
-    },
-    assistant: "Kate",
-  },
-  {
-    practice_name: "Speaking Test 4",
-    test_date: new Date().toISOString(),
-    duration: 14,
-    result: {
-      overall_score: 8.0,
-    },
-    assistant: "Ron",
-  },
-  {
-    practice_name: "Speaking Test 5",
-    test_date: new Date().toISOString(),
-    duration: 12,
-    result: {
-      overall_score: 6.5,
-    },
-    assistant: "Ron",
-  },
-];
+import { Plus } from "lucide-react";
+import NewTest from "./NewTest";
 
 export default function RecentTestsFallback() {
   return (
@@ -69,12 +21,14 @@ export default function RecentTestsFallback() {
           Start your IELTS preparation journey by taking your first practice
           test. Track your progress and improve your band score over time.
         </p>
-        <MainButton className={"ml-0 mt-4"}>
-          <Plus className="size-4" />
-          <span className="text-xs font-medium font-geist">
-            Take your First Test
-          </span>
-        </MainButton>
+        <NewTest>
+          <MainButton className={"ml-0 mt-4"}>
+            <Plus className="size-4" />
+            <span className="text-xs font-medium font-geist">
+              Take your First Test
+            </span>
+          </MainButton>
+        </NewTest>
       </div>
     </div>
   );

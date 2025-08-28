@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from fastapi import Depends
 from fastapi_users.db import SQLAlchemyUserDatabase
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
-from ..schemas.db_tables import User, Base
+from ..schemas.db_tables import OAuthAccount, User, Base
 import os
 
 load_dotenv()
@@ -24,11 +24,8 @@ async def create_db_and_tables():
 
 async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
     async with async_session_maker() as session:
-        try:
-            yield session
-        finally:
-            pass
+        yield session
 
 
 async def get_user_db(session: AsyncSession = Depends(get_async_session)):
-    yield SQLAlchemyUserDatabase(session, User)
+    yield SQLAlchemyUserDatabase(session, User, OAuthAccount)

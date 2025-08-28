@@ -35,6 +35,36 @@ export function getPreciseTimeAgo(dateString: string): string {
   return "just now";
 }
 
+export function getPreciseTimeFuture(dateString: string): string {
+  const now = new Date();
+  const future = new Date(dateString);
+  const diffMs = future - now;
+
+  // Handle future dates
+  if (diffMs < 0) {
+    return "in the future";
+  }
+
+  const units = [
+    { name: "year", ms: 365 * 24 * 60 * 60 * 1000 },
+    { name: "month", ms: 30 * 24 * 60 * 60 * 1000 },
+    { name: "week", ms: 7 * 24 * 60 * 60 * 1000 },
+    { name: "day", ms: 24 * 60 * 60 * 1000 },
+    { name: "hour", ms: 60 * 60 * 1000 },
+    { name: "minute", ms: 60 * 1000 },
+    { name: "second", ms: 1000 },
+  ];
+
+  for (const unit of units) {
+    const count = Math.floor(diffMs / unit.ms);
+    if (count > 0) {
+      return `${count} ${unit.name}${count > 1 ? "s" : ""}`;
+    }
+  }
+
+  return "just now";
+}
+
 export function getLevel(score: number): string {
   return score <= 4
     ? "Elementary"

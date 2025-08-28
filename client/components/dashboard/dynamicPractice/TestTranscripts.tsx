@@ -92,6 +92,7 @@ function TestPart({
   transcriptions: TranscriptionMessageType[];
   title: string;
 }) {
+  console.log(transcriptions.at(1)?.time);
   return (
     <div className="p-5 rounded-lg border border-gray-200/80 bg-white space-y-4">
       <header className="flex flex-row gap-2 items-center">

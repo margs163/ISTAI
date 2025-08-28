@@ -78,7 +78,7 @@ export default function StatisticsCards() {
     },
     {
       icon: TrendingUp,
-      stat: `${currentBandScore ?? 0}`,
+      stat: `${currentBandScore.toFixed(1) ?? 0}`,
       description: "Current Band Score",
       color: "purple",
     },

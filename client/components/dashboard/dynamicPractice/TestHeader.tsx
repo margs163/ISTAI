@@ -12,7 +12,7 @@ export default function TestHeader({
   overallBand: number;
 }) {
   return (
-    <section className="w-full flex flex-row justify-between items-center p-6 lg:px-10 lg:py-8 rounded-lg bg-white border border-slate-200/80">
+    <section className="w-full flex flex-row justify-between items-center p-4 lg:pt-6 rounded-lg bg-transparent border-slate-200/80">
       <div className="space-y-2">
         <h1 className="text-xl lg:text-2xl font-semibold text-gray-800">
           Speaking Test - {testName}

@@ -12,6 +12,7 @@ import {
 import ButtonPrimary from "../home/ButtonPrimary";
 import MainButton from "../MainButton";
 import Link from "next/link";
+import { useLocalPracticeTestStore } from "@/lib/practiceTestStore";
 
 export default function IntroductionDialog({
   dialogOpen,
@@ -32,6 +33,9 @@ export default function IntroductionDialog({
   currentPart: 1 | 2 | 3 | number;
   status: "Finished" | "Cancelled" | "Ongoing" | "Paused";
 }) {
+  const audioPath = useLocalPracticeTestStore(
+    (state) => state.readingAudioPath
+  );
   return (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
       <DialogContent className="font-geist">
@@ -70,9 +74,12 @@ export default function IntroductionDialog({
             <div className="flex flex-row gap-2 items-start justify-end">
               <DialogClose asChild>
                 {status === "Finished" ? (
-                  <Link href={"/results"} replace>
-                    <button className="px-4 py-2 rounded-sm bg-gray-200 text-gray-800 font-medium text-xs hover:bg-gray-400 active:bg-gray-300 transition-colors">
-                      {dialogInfo[3].options[0]}
+                  <Link href={"/results"} aria-disabled={!audioPath} replace>
+                    <button
+                      aria-disabled={!audioPath}
+                      className="px-4 py-2 rounded-sm bg-gray-200 text-gray-800 font-medium text-xs hover:bg-gray-400 active:bg-gray-300 transition-colors"
+                    >
+                      {!audioPath ? "Wait..." : dialogInfo[3].options[0]}
                     </button>
                   </Link>
                 ) : (

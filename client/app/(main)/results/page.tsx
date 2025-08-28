@@ -13,7 +13,11 @@ import SentenceImprovements from "@/components/results/SentenceImprovements";
 import StrongAspects from "@/components/results/StrongAspects";
 import WeakAspects from "@/components/results/WeakAspects";
 import { useLocalPracticeTestStore } from "@/lib/practiceTestStore";
-import { postTestResults, updateAnalytics } from "@/lib/queries";
+import {
+  postTestResults,
+  updateAnalytics,
+  updatePracticeTest,
+} from "@/lib/queries";
 import { ResultType } from "@/lib/types";
 import { useMutation } from "@tanstack/react-query";
 import React, { useEffect, useRef } from "react";
@@ -31,6 +35,20 @@ export default function Page() {
     onError: (error: Error) => {
       toast("Error posting results", {
         description: "Could not post test results",
+        action: {
+          label: "Log",
+          onClick: () => console.error(error),
+        },
+      });
+    },
+  });
+
+  const mutation_test = useMutation({
+    mutationKey: ["test-update"],
+    mutationFn: updatePracticeTest,
+    onError: (error: Error) => {
+      toast("Error updating practice test", {
+        description: "Could not update practice test",
         action: {
           label: "Log",
           onClick: () => console.error(error),
@@ -60,6 +78,17 @@ export default function Page() {
           average_band_scores: data.criterion_scores,
           average_band: data.overall_score,
           streak_days: 1,
+          grammar_common_mistakes: data.grammar_errors.grammar_analysis.map(
+            (item) => ({ ...item, frequency: 1 })
+          ),
+          lexis_common_mistakes:
+            data.sentence_improvements.vocabulary_enhancements.map((item) => ({
+              ...item,
+              frequency: 1,
+            })),
+          pronunciation_common_mistakes: data.pronunciation_issues.map(
+            (item) => ({ ...item, frequency: 1 })
+          ),
         });
       }
     },
@@ -78,9 +107,13 @@ export default function Page() {
     const readingCards = localPracticeTest.reading_cards;
     const audioPath = localPracticeTest.readingAudioPath;
     const transcription = localPracticeTest.transcription;
-    console.log(localPracticeTest);
     const readyParams =
-      readingCards && readingCards.length > 0 && audioPath && transcription;
+      readingCards &&
+      readingCards.length > 0 &&
+      typeof audioPath === "string" &&
+      transcription;
+
+    console.log(audioPath);
 
     const resultSession = sessionStorage.getItem("local-practice-test");
 
@@ -96,6 +129,17 @@ export default function Page() {
         readingCardAudioPath: audioPath,
         transcription: transcription,
         testId: localPracticeTest.id,
+      });
+
+      mutation_test.mutate({
+        data: {
+          transcription: transcription,
+          part_two_card_id: localPracticeTest?.part_two_card?.id,
+          test_duration: localPracticeTest.test_duration,
+          status: localPracticeTest.status,
+          reading_cards: localPracticeTest.reading_cards,
+        },
+        practiceTestId: localPracticeTest.id,
       });
     }
   }, []);

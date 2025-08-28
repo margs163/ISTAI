@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useCallback } from "react";
 import {
   Sidebar,
   SidebarContent,
@@ -44,7 +44,7 @@ import {
   MenubarTrigger,
 } from "../ui/menubar";
 import LogoWithIcon from "../LogoWithIcon";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -54,6 +54,12 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import UpgradePro from "./UpgradePro";
+import { logOutUser } from "@/lib/queries";
+import { useUserStore } from "@/lib/userStorage";
+import { useSubscriptionStore } from "@/lib/subscriptionStore";
+import { useAvatarStore } from "@/lib/avatarStore";
+import Image from "next/image";
+import MainButton from "../MainButton";
 
 const menuItems = [
   {
@@ -72,16 +78,6 @@ const menuItems = [
     url: "/dashboard/analytics",
     icon: BarChart3,
   },
-  {
-    title: "Progress Trends",
-    url: "/dashboard/progress",
-    icon: TrendingUp,
-  },
-  {
-    title: "Transcriptions",
-    url: "/dashboard/transcriptions",
-    icon: FileText,
-  },
 ];
 
 const bottomMenuItems = [
@@ -99,6 +95,24 @@ const bottomMenuItems = [
 
 export default function AppSidebar() {
   const currentLink = usePathname();
+  const router = useRouter();
+  const firstName = useUserStore((state) => state.firstName);
+  const lastName = useUserStore((state) => state.lastName);
+
+  const subTier = useSubscriptionStore((state) => state.subscription_tier);
+
+  const subscription_tier = useSubscriptionStore(
+    (state) => state.subscription_tier
+  );
+
+  const avatarUrl = useAvatarStore((state) => state.url);
+
+  const handleLogout = useCallback(async () => {
+    const loggedOut = await logOutUser();
+    if (loggedOut) {
+      router.replace("/");
+    }
+  }, [router]);
   return (
     <Sidebar className="font-geist bg-white">
       <SidebarHeader className="px-6 py-6 pt-8">
@@ -135,12 +149,12 @@ export default function AppSidebar() {
         <SidebarSeparator className="my-4 max-w-[90%]" />
         <SidebarGroup>
           <SidebarGroupContent>
-            <button className="px-4 py-2.5 rounded-md bg-gray-800 hover:bg-gray-700 active:bg-gray-700 text-sm font-medium text-white flex flex-row gap-2 items-center transition-colors">
+            <MainButton className="ml-0">
               <Plus className="size-4" />
               <span className="text-xs font-medium font-geist">
                 New Practice Test
               </span>
-            </button>
+            </MainButton>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
@@ -164,22 +178,32 @@ export default function AppSidebar() {
             );
           })}
         </SidebarMenu>
-        <UpgradePro plan="free" />
+        <UpgradePro plan={subTier} />
         <DropdownMenu>
           <DropdownMenuTrigger
             asChild
             className="px-4 py-2 rounded-lg w-full hover:bg-gray-100 active:bg-gray-100 transition-colors data-[state=open]:bg-gray-100"
           >
             <div className="flex flex-row gap-3 items-center justify-start w-full">
-              <div className="h-8 w-8 rounded-full bg-indigo-500 flex items-center justify-center">
-                <User className="size-4 text-white shrink-0" />
-              </div>
+              {avatarUrl ? (
+                <Image
+                  width={200}
+                  height={200}
+                  src={avatarUrl}
+                  alt="avatar"
+                  className="object-cover shrink-0 h-8 w-8 rounded-full border border-gray-300 p-[1px]"
+                />
+              ) : (
+                <div className="h-8 w-8 rounded-full bg-indigo-600 flex items-center justify-center hover:bg-indigo-600 active:bg-indigo-600 transition-colors">
+                  <User className="size-4 text-white shrink-0" />
+                </div>
+              )}
               <div className="space-y-0 flex flex-col items-start">
                 <h3 className="text-sm font-medium text-gray-800">
-                  Aldanov Daniyal
+                  {firstName} {lastName}
                 </h3>
                 <p className="text-xs font-normal text-gray-600">
-                  Intermediate level
+                  {subscription_tier}
                 </p>
               </div>
             </div>
@@ -190,7 +214,7 @@ export default function AppSidebar() {
             <DropdownMenuItem>Billing</DropdownMenuItem>
             <DropdownMenuItem>Subscription</DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>Log Out</DropdownMenuItem>
+            <DropdownMenuItem onClick={handleLogout}>Log Out</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </SidebarFooter>

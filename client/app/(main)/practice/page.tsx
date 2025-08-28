@@ -129,7 +129,8 @@ export default function Page() {
           if (
             instructionsAudio.current &&
             !instructionsAudio.current?.paused &&
-            sessionState.currentPart === 3
+            sessionState.currentPart === 3 &&
+            !openReadingCard
           ) {
             instructionsAudio.current.onended = () => {
               audioFile.current?.play();

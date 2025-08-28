@@ -7,7 +7,7 @@ import TestInfo from "@/components/home/TestInfo";
 import React from "react";
 import Footer from "@/components/Footer";
 import PowerfulFeatures from "@/components/home/PowerfulFeatures";
-import PlansPricing from "@/components/home/PlansPricing";
+import StaticPlansPricing from "@/components/home/StaticPlansPricing";
 
 export default function Page() {
   return (
@@ -19,7 +19,7 @@ export default function Page() {
         <TestInfo />
         <PowerfulFeatures />
         <FeedbackInfo />
-        <PlansPricing />
+        <StaticPlansPricing />
         <AppFaq />
       </section>
       <Footer />

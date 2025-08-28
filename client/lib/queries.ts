@@ -3,14 +3,24 @@ import { toast } from "sonner";
 import {
   AnalyticsSchema,
   AnalyticsType,
+  CreditCardType,
+  GrammarCommonMistakeType,
+  NotificationSchema,
+  NotificationType,
   PracticeTestSchema,
   PracticeTestType,
+  PronunciationCommonMistakeType,
   QuestionCardType,
   ReadingCardType,
   ResultSchema,
   ResultType,
+  SubscriptionSchema,
+  SubscriptionType,
+  SubscriptionUpdateType,
   TestTranscriptionsType,
+  UpdatePracticeTestType,
   UserSchema,
+  VocabularyCommonMistakeType,
 } from "./types";
 import { UserData, UserDataServer } from "./userStorage";
 
@@ -21,6 +31,7 @@ type PostResponse = {
 
 export async function fetchUser(setUserData: (data: UserData) => void) {
   try {
+    console.log("Fetching user...");
     const response = await axios.get<UserDataServer>(
       "http://localhost:8000/users/me",
       {
@@ -45,6 +56,7 @@ export async function fetchUser(setUserData: (data: UserData) => void) {
       lastName: data.last_name,
       updatedAt: data.updatedAt,
       createdAt: data.createdAt,
+      avatar_path: data.avatar_path,
     };
     setUserData(user);
     return user;
@@ -80,6 +92,23 @@ export async function sendReadingCardSpeech(
       },
     });
     return undefined;
+  }
+}
+
+export async function logOutUser() {
+  try {
+    await axios.post("http://localhost:8000/auth/jwt/logout", undefined, {
+      withCredentials: true,
+    });
+    return true;
+  } catch (error) {
+    toast("Error while sending reading speech", {
+      description: "Could not upload audio to S3 storage",
+      action: {
+        label: "Log",
+        onClick: () => console.log(error),
+      },
+    });
   }
 }
 
@@ -167,6 +196,26 @@ export async function createPracticeTest(data: {
   }
 }
 
+export async function updatePracticeTest({
+  data,
+  practiceTestId,
+}: {
+  data: UpdatePracticeTestType;
+  practiceTestId: string;
+}) {
+  try {
+    await axios.put(
+      `http://localhost:8000/practice_test/${practiceTestId}`,
+      data,
+      { withCredentials: true }
+    );
+    console.log(practiceTestId, data);
+    return true;
+  } catch (error) {
+    throw error;
+  }
+}
+
 export async function fetchPracticeTests(
   setGlobalPracticeTests: (data: PracticeTestType[]) => void
 ) {
@@ -198,6 +247,91 @@ export async function fetchPracticeTests(
   }
 }
 
+export async function fetchAvatar(
+  path: string,
+  setAvatarUrl: (url: string) => void
+): Promise<string | undefined> {
+  const cachedUrl = sessionStorage.getItem(`avatar-url`);
+  if (cachedUrl) {
+    setAvatarUrl(cachedUrl);
+    console.log("Returing a cached value");
+    return cachedUrl;
+  }
+  try {
+    const response = await axios.get<{ url: string }>(`/api/avatar`, {
+      params: {
+        filename: path,
+      },
+    });
+    const url = response.data.url;
+    sessionStorage.setItem("avatar-url", url);
+    setAvatarUrl(url);
+    return response.data.url;
+  } catch (error) {
+    toast("Error Fetching Avatar", {
+      description: "Could not fetch the avatar",
+      action: {
+        label: "Log",
+        onClick: () => console.log(error),
+      },
+    });
+  }
+}
+
+export async function deleteAvatar() {
+  try {
+    await axios.delete("http://localhost:8000/avatar/me", {
+      withCredentials: true,
+    });
+  } catch (error) {
+    toast("Error Deleting Avatar", {
+      description: "Could not delete avatar",
+      action: {
+        label: "Log",
+        onClick: () => console.log(error),
+      },
+    });
+  }
+}
+
+export async function fetchNotifications() {
+  try {
+    const response = await axios.get<{ data: NotificationType[] }>(
+      "http://localhost:8000/notifications/me?today=true",
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data.data;
+  } catch (error) {
+    toast("Error Fetching Notifications", {
+      description: "Could not delete avatar",
+      action: {
+        label: "Log",
+        onClick: () => console.log(error),
+      },
+    });
+  }
+}
+
+export async function authorizeGoogle() {
+  try {
+    const response = await axios.get<{ authorization_url: string }>(
+      "http://localhost:8000/auth/google/authorize"
+    );
+
+    const url = response.data.authorization_url;
+    return url;
+  } catch (error) {
+    toast("Error Fetching Auth Google URL", {
+      description: "Could not fetch Auth URL",
+      action: {
+        label: "Log",
+        onClick: () => console.log(error),
+      },
+    });
+  }
+}
 export async function fetchPracticeTestById(testId: string) {
   try {
     const response = await axios.get<{ data: PracticeTestType[] }>(
@@ -223,6 +357,67 @@ export async function fetchPracticeTestById(testId: string) {
   }
 }
 
+export async function fetchSubscription(
+  setData: (data: SubscriptionType) => void
+) {
+  try {
+    const response = await axios.get<{ data: SubscriptionType }>(
+      "http://localhost:8000/subscription/me",
+      {
+        withCredentials: true,
+      }
+    );
+    const validate = await SubscriptionSchema.safeParseAsync(
+      response.data.data
+    );
+    if (validate.error) {
+      throw new Error(validate.error.message);
+    }
+    setData(validate.data);
+    return validate.data;
+  } catch (error) {
+    toast("Error Fetching Subscription", {
+      description: "Could not fetch subscription",
+      action: {
+        label: "Log",
+        onClick: () => console.log(error),
+      },
+    });
+  }
+}
+
+export async function updateSubscription(updateSchema: SubscriptionUpdateType) {
+  try {
+    await axios.put("http://localhost:8000/subscription", updateSchema, {
+      withCredentials: true,
+    });
+  } catch (error) {
+    toast("Error Updating Subscription", {
+      description: "Could not update subscription",
+      action: {
+        label: "Log",
+        onClick: () => console.log(error),
+      },
+    });
+  }
+}
+
+export async function updateCreditCard(creditCard: CreditCardType) {
+  try {
+    await axios.post("http://localhost:8000/subscription/card", creditCard, {
+      withCredentials: true,
+    });
+  } catch (error) {
+    toast("Error Updating Credit Card", {
+      description: "Could not update credit card",
+      action: {
+        label: "Log",
+        onClick: () => console.log(error),
+      },
+    });
+  }
+}
+
 export async function updateAnalytics(data: {
   practice_time?: number;
   tests_completed?: number;
@@ -234,9 +429,9 @@ export async function updateAnalytics(data: {
     pronunciation: number;
   };
   average_band?: number;
-  common_mistakes?: {
-    additionalProp1: Record<string, string> | undefined;
-  };
+  grammar_common_mistakes?: GrammarCommonMistakeType[];
+  lexis_common_mistakes?: VocabularyCommonMistakeType[];
+  pronunciation_common_mistakes?: PronunciationCommonMistakeType[];
   streak_days?: number;
 }) {
   try {

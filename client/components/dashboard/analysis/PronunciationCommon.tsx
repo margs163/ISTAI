@@ -1,6 +1,8 @@
 import { cn } from "@/lib/utils";
-import { Check, X } from "lucide-react";
 import React from "react";
+import CommonMistakesFallback from "../CommonFallback";
+import { PronunciationCommonMistakeType } from "@/lib/types";
+import { useAnalyticsStore } from "@/lib/userStorage";
 
 function getStyle(
   status: "Improving" | "Innacurate" | "Strong" | "Good Progress"
@@ -17,53 +19,49 @@ function getStyle(
   }
 }
 
-type MistakeType = {
-  type: string;
-  frequency: number;
-  example: {
-    original: string;
-    improved: string;
-  };
-  description: string;
-};
-
 const pronunciationMistakes = [
   {
-    type: "Word Stress",
+    mistake_type: "Word Stress",
     frequency: 12,
-    example: {
-      original: "/ˈfoʊtəɡræf/",
-      improved: "/fəˈtɑɡrəfi/",
-    },
-    description: "PHOtograph vs phoTOgraphy stress patterns",
+    word: "photograph",
+    user_phonemes: "/ˈfoʊtəɡræf/",
+    accuracy: 85,
+    correct_phonemes: "/fəˈtɑɡrəfi/",
+    // description: "PHOtograph vs phoTOgraphy stress patterns",
   },
   {
-    type: "Consonant Sounds",
+    mistake_type: "Consonant Sounds",
     frequency: 8,
-    example: {
-      original: "think /θɪŋk/",
-      improved: "fink /fɪŋk/",
-    },
-    description: "Confusing /θ/ and /f/ sounds",
+    word: "think",
+    accuracy: 85,
+    user_phonemes: "think /θɪŋk/",
+    correct_phonemes: "fink /fɪŋk/",
+    // description: "Confusing /θ/ and /f/ sounds",
   },
   {
-    type: "Vowel Phoneme Errors",
+    mistake_type: "Vowel Phoneme Errors",
     frequency: 10,
-    example: {
-      original: "/ədˈvɛn.tʃəz/",
-      improved: "/ədˈvɛn.tʃɚz/",
-    },
-    description: "Flat intonation in questions",
+    word: "adventure",
+    accuracy: 85,
+    user_phonemes: "/ədˈvɛn.tʃəz/",
+    correct_phonemes: "/ədˈvɛn.tʃɚz/",
+    // description: "Flat intonation in questions",
   },
 ];
 
-function CommonPronunciationMistake({ mistake }: { mistake: MistakeType }) {
+function CommonPronunciationMistake({
+  mistake,
+}: {
+  mistake: PronunciationCommonMistakeType;
+}) {
   return (
     <div className="bg-gray-50 border border-gray-100 flex flex-col gap-4 p-4 rounded-lg">
       <header className="flex flex-row justify-between items-center">
         <div className="flex flex-row gap-2 items-center">
           <span className="w-2 h-2 rounded-full bg-amber-400"></span>
-          <h3 className="text-sm font-medium text-gray-800">{mistake.type}</h3>
+          <h3 className="text-sm font-medium text-gray-800">
+            {mistake.mistake_type}
+          </h3>
         </div>
         <h3
           className={cn(
@@ -73,12 +71,12 @@ function CommonPronunciationMistake({ mistake }: { mistake: MistakeType }) {
           {mistake.frequency} errors
         </h3>
       </header>
-      <p className="text-sm font-medium text-gray-600">{mistake.description}</p>
+      {/* <p className="text-sm font-medium text-gray-600">{mistake.}</p> */}
       <main className="space-y-1 p-4 rounded-md flex flex-col gap-1 items-start bg-white">
         <h3 className="text-xs font-medium text-gray-600">Phonetic Guide:</h3>
         <code className="text-xs text-purple-800 font-medium border border-purple-200 bg-purple-50 rounded-sm py-1.5 px-3">
-          <span>{mistake.example.original}</span> vs{" "}
-          <span>{mistake.example.improved}</span>
+          <span>{mistake.user_phonemes}</span> vs{" "}
+          <span>{mistake.correct_phonemes}</span>
         </code>
       </main>
     </div>
@@ -87,6 +85,9 @@ function CommonPronunciationMistake({ mistake }: { mistake: MistakeType }) {
 
 export default function PronunciationCommon() {
   const styles = getStyle("Improving");
+  const pronunciationCommonMistake = useAnalyticsStore(
+    (state) => state.pronunciation_common_mistakes
+  );
   return (
     <section className="rounded-lg p-6 flex flex-col gap-6 bg-white font-geist border border-slate-200/80">
       <header className="flex flex-row items-start justify-between">
@@ -102,23 +103,31 @@ export default function PronunciationCommon() {
           Improving
         </h3>
       </header>
-      <main className="space-y-4">
-        {pronunciationMistakes.map((item, index) => (
-          <CommonPronunciationMistake mistake={item} key={index} />
-        ))}
-      </main>
-      <footer className="p-4 rounded-lg border border-blue-100 bg-blue-50 flex flex-row gap-2 items-start justify-start">
-        <div className="w-4 h-4 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0 mt-0.5">
-          <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
+      {!pronunciationCommonMistake ? (
+        <CommonMistakesFallback />
+      ) : (
+        <div className="flex flex-col gap-6">
+          <main className="space-y-4">
+            {pronunciationCommonMistake.map((item, index) => (
+              <CommonPronunciationMistake mistake={item} key={index} />
+            ))}
+          </main>
+          <footer className="p-4 rounded-lg border border-blue-100 bg-blue-50 flex flex-row gap-2 items-start justify-start">
+            <div className="w-4 h-4 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0 mt-0.5">
+              <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
+            </div>
+            <div className="space-y-1">
+              <h3 className="text-sm font-medium text-blue-900">
+                Improvement Tip
+              </h3>
+              <p className="text-xs font-normal text-blue-600">
+                Focus on past tense forms and third-person singular verbs.
+                Practice with simple sentences first.
+              </p>
+            </div>
+          </footer>
         </div>
-        <div className="space-y-1">
-          <h3 className="text-sm font-medium text-blue-900">Improvement Tip</h3>
-          <p className="text-xs font-normal text-blue-600">
-            Focus on past tense forms and third-person singular verbs. Practice
-            with simple sentences first.
-          </p>
-        </div>
-      </footer>
+      )}
     </section>
   );
 }

@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export default function Footer() {
   return (
-    <footer className="flex flex-col gap-6 p-8 lg:px-20 xl:px-40 lg:gap-12 pt-0 font-mont">
+    <footer className="flex flex-col gap-6 p-8 lg:px-20 xl:px-36 lg:gap-12 pt-0 font-mont">
       <div className="flex flex-col lg:flex-row lg:justify-between lg:items-end gap-10 w-full">
         <div className="flex flex-col gap-3 lg:gap-5 justify-start items-start">
           <h1 className="text-3xl lg:text-4xl font-bold">ISTAI Ltd.</h1>

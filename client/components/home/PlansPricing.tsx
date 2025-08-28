@@ -3,6 +3,8 @@ import { cn } from "@/lib/utils";
 import { Check } from "lucide-react";
 import React, { useState } from "react";
 import MainButton from "../MainButton";
+import { useRouter } from "next/navigation";
+import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 
 export type Plan = {
   tier: "Free" | "Starter" | "Pro";
@@ -10,6 +12,7 @@ export type Plan = {
   description: string;
   audience: string;
   features: string[];
+  priceId: string;
 };
 
 const plansAnnual: Plan[] = [
@@ -24,10 +27,11 @@ const plansAnnual: Plan[] = [
       "1 assistant available",
       "2 short practices",
     ],
+    priceId: "",
   },
   {
     tier: "Starter",
-    price: 5,
+    price: 4,
     description: "Per user/month billed annualy",
     audience: "Ideal for students with regular preparation",
     features: [
@@ -39,10 +43,11 @@ const plansAnnual: Plan[] = [
       "3 assistants available",
       "30 short practices",
     ],
+    priceId: "pri_01k3naxj8kbs1mcqmmbstk3wk2",
   },
   {
     tier: "Pro",
-    price: 11,
+    price: 10,
     description: "Per user/month billed annualy",
     audience: "Greate for shared users with intensive preparation",
     features: [
@@ -54,6 +59,7 @@ const plansAnnual: Plan[] = [
       "3 assistants available",
       "50 short practices",
     ],
+    priceId: "pri_01k3nb5c4wgc1tjewzye9yxg62",
   },
 ];
 
@@ -69,10 +75,11 @@ const plansMonthly: Plan[] = [
       "1 assistant available",
       "2 short practices",
     ],
+    priceId: "",
   },
   {
     tier: "Starter",
-    price: 7,
+    price: 6,
     description: "Per user/month billed monthly",
     audience: "Ideal for students with regular preparation",
     features: [
@@ -80,14 +87,15 @@ const plansMonthly: Plan[] = [
       "unlimited analysis",
       "unlimited export",
       "daily challenges",
-      "10 daily pronunciation checks",
-      "3 assistants available",
-      "30 short practices",
+      "5 daily pronunciation checks",
+      "2 assistants available",
+      "20 short practices",
     ],
+    priceId: "pri_01k3nav7xg35tmnt13qcmn8c5a",
   },
   {
     tier: "Pro",
-    price: 14,
+    price: 12,
     description: "Per user/month billed monthly",
     audience: "Greate for shared users with intensive preparation",
     features: [
@@ -99,15 +107,20 @@ const plansMonthly: Plan[] = [
       "3 assistants available",
       "50 short practices",
     ],
+    priceId: "pri_01k3nb492e576cffdj4ssj9scf",
   },
 ];
 
 export function PlanCard({
   plan,
   className,
+  openCheckout,
+  router,
 }: {
   plan: Plan;
   className?: string;
+  openCheckout: (priceId: string) => void;
+  router: AppRouterInstance;
 }) {
   return (
     <div
@@ -150,14 +163,26 @@ export function PlanCard({
           ))}
         </ul>
       </div>
-      <button className="w-full text-xs lg:text-sm cursor-pointer mt-auto border text-center border-gray-300 bg-slate-100 font-medium text-gray-800 py-2.5 lg:py-3 rounded-md lg:rounded-lg hover:bg-slate-200 active:bg-slate-100 transition-colors">
+      <button
+        onClick={() =>
+          plan.priceId
+            ? openCheckout(plan.priceId)
+            : router.replace("/dashboard")
+        }
+        className="w-full text-xs lg:text-sm cursor-pointer mt-auto border text-center border-gray-300 bg-slate-100 font-medium text-gray-800 py-2.5 lg:py-3 rounded-md lg:rounded-lg hover:bg-slate-200 active:bg-slate-100 transition-colors"
+      >
         Get Started
       </button>
     </div>
   );
 }
 
-export default function PlansPricing() {
+export default function PlansPricing({
+  checkoutCallback,
+}: {
+  checkoutCallback: (priceId: string) => void;
+}) {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<"month" | "year">("year");
   return (
     <section className=" w-full flex flex-col items-center justify-center p-8 lg:p-20 gap-10 lg:gap-10 max-w-[1400px] mx-auto">
@@ -200,7 +225,12 @@ export default function PlansPricing() {
         {activeTab === "year"
           ? plansAnnual.map((plan, index) =>
               index !== 1 ? (
-                <PlanCard plan={plan} key={index} />
+                <PlanCard
+                  openCheckout={checkoutCallback}
+                  router={router}
+                  plan={plan}
+                  key={index}
+                />
               ) : (
                 <div
                   key={index}
@@ -209,13 +239,22 @@ export default function PlansPricing() {
                   <h3 className="text-xs lg:text-sm tracking-wide text-center mb-2.5 font-semibold text-gray-700">
                     Recommended for your
                   </h3>
-                  <PlanCard plan={plan} />
+                  <PlanCard
+                    router={router}
+                    openCheckout={checkoutCallback}
+                    plan={plan}
+                  />
                 </div>
               )
             )
           : plansMonthly.map((plan, index) =>
               index !== 1 ? (
-                <PlanCard plan={plan} key={index} />
+                <PlanCard
+                  router={router}
+                  openCheckout={checkoutCallback}
+                  plan={plan}
+                  key={index}
+                />
               ) : (
                 <div
                   key={index}
@@ -224,7 +263,11 @@ export default function PlansPricing() {
                   <h3 className="text-xs lg:text-sm text-center tracking-wide mb-2.5 font-semibold text-gray-700">
                     Recommended for your
                   </h3>
-                  <PlanCard plan={plan} />
+                  <PlanCard
+                    router={router}
+                    openCheckout={checkoutCallback}
+                    plan={plan}
+                  />
                 </div>
               )
             )}

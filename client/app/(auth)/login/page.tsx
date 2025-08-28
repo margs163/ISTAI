@@ -12,6 +12,7 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { SignInFormData, UserSignInSchema } from "@/lib/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
+import { authorizeGoogle } from "@/lib/queries";
 
 export default function Page() {
   const router = useRouter();
@@ -22,6 +23,13 @@ export default function Page() {
   } = useForm<SignInFormData>({
     resolver: zodResolver(UserSignInSchema),
   });
+
+  const handleGoogleLogin = async () => {
+    const url = await authorizeGoogle();
+    if (url) {
+      router.push(url);
+    }
+  };
 
   const submit: SubmitHandler<SignInFormData> = async (
     data: SignInFormData
@@ -70,7 +78,10 @@ export default function Page() {
                 Welcome back! Please enter your details.
               </p>
             </div>
-            <button className="w-full flex flex-row items-center justify-center gap-2 border-2 border-gray-300/80 rounded-md p-2.5 mt-2">
+            <button
+              onClick={handleGoogleLogin}
+              className="w-full flex flex-row items-center justify-center gap-2 border-2 border-gray-300/80 rounded-md p-2.5 mt-2"
+            >
               <Image src={googleIcon} alt="google" className="w-6 shrink-0" />
               <p className="text-sm font-medium text-gray-700">
                 Log In with Google

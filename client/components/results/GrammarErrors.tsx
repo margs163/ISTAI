@@ -8,23 +8,6 @@ import {
 } from "lucide-react";
 import React from "react";
 
-const errors = [
-  {
-    type: "Past Participle",
-    incorrect: "I have went to the store",
-    correct: "I have gone to the store",
-    explanation: "Use 'gone' not 'went' with present perfect tense",
-  },
-  {
-    type: "Subject-Verb Agreement",
-    incorrect: "I like reading books because it's interesting.",
-    correct:
-      "I'm passionate about reading books as I find them intellectually stimulating.",
-    explanation:
-      "More complex sentence structure with advanced vocabulary and subordinate clauses.",
-  },
-];
-
 export function GrammarError({
   error,
 }: {

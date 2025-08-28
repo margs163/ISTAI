@@ -303,8 +303,7 @@ async def post_results(
         )
 
     finally:
-        pass
-        # await s3_client.delete_object(Bucket=bucket_name, Key=reading_audio_path)
+        await s3_client.delete_object(Bucket=bucket_name, Key=reading_audio_path)
 
 
 @router.get("/{test_id}")

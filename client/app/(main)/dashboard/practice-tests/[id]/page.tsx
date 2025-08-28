@@ -29,7 +29,8 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
   const practiceTest = getTest(id);
   const firstName = useUserStore((state) => state.firstName);
   const lastName = useUserStore((state) => state.lastName);
-  console.log(firstName);
+
+  console.log(practiceTest);
 
   if (!practiceTest || !practiceTest.result) {
     return <LoadingSmallUI />;

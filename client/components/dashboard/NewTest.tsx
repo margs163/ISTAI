@@ -13,7 +13,6 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import {
   NewTestFormData,
   NewTestFormSchema,
-  PracticeTestSchema,
   PracticeTestType,
   TestSessionType,
 } from "@/lib/types";
@@ -24,7 +23,6 @@ import { useRouter } from "next/navigation";
 import { useTestSessionStore } from "@/lib/testSessionStore";
 import { useUserStore } from "@/lib/userStorage";
 import { useMutation } from "@tanstack/react-query";
-import axios from "axios";
 import { useLocalPracticeTestStore } from "@/lib/practiceTestStore";
 import { createPracticeTest } from "@/lib/queries";
 import { toast } from "sonner";

@@ -8,53 +8,6 @@ import {
 } from "lucide-react";
 import React from "react";
 
-const improvements = {
-  grammar: [
-    {
-      original: "I like reading books because it's interesting.",
-      improved:
-        "I'm passionate about reading books as I find them intellectually stimulating.",
-      explanation:
-        "More complex sentence structure with advanced vocabulary and subordinate clauses.",
-    },
-    {
-      original: "I like reading books because it's interesting.",
-      improved:
-        "I'm passionate about reading books as I find them intellectually stimulating.",
-      explanation:
-        "More complex sentence structure with advanced vocabulary and subordinate clauses.",
-    },
-    {
-      original: "The movie was good. I enjoyed it. It had good actors.",
-      improved:
-        "The movie, which featured exceptional performances, was thoroughly enjoyable.",
-      explanation:
-        "Combining simple sentences into complex structures with relative clauses.",
-    },
-  ],
-  vocabulary: [
-    {
-      original: "The weather was very bad yesterday.",
-      improved: "The weather was absolutely dreadful yesterday.",
-      explanation:
-        "Using more sophisticated adjectives and intensifiers shows better lexical range.",
-    },
-    {
-      original: "I think this is a big problem in society.",
-      improved: "I believe this constitutes a significant societal challenge.",
-      explanation:
-        "Academic vocabulary and more precise word choices demonstrate lexical sophistication.",
-    },
-    {
-      original: "Many people like to travel because it's fun.",
-      improved:
-        "Numerous individuals are drawn to travel due to its enriching and exhilarating nature.",
-      explanation:
-        "Varied vocabulary choices and more formal register show lexical diversity.",
-    },
-  ],
-};
-
 export function Improvement({
   improvement,
 }: {

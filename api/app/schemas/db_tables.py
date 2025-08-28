@@ -1,4 +1,7 @@
-from fastapi_users_db_sqlalchemy import SQLAlchemyBaseUserTableUUID
+from fastapi_users_db_sqlalchemy import (
+    SQLAlchemyBaseOAuthAccountTableUUID,
+    SQLAlchemyBaseUserTableUUID,
+)
 import enum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import (
@@ -12,6 +15,7 @@ from sqlalchemy import (
     Float,
     ARRAY,
     Text,
+    null,
     sql,
 )
 from datetime import date, timedelta
@@ -52,22 +56,33 @@ class Base(DeclarativeBase):
     pass
 
 
+class OAuthAccount(SQLAlchemyBaseOAuthAccountTableUUID, Base):
+    user_id: Mapped[UUID_ID] = mapped_column(ForeignKey("user_table.id"))
+    user: Mapped["User"] = relationship(back_populates="oauth_accounts")
+
+
 class User(Base, SQLAlchemyBaseUserTableUUID):
     first_name: Mapped[str] = mapped_column(String)
     last_name: Mapped[str] = mapped_column(String, nullable=True)
+    avatar_path: Mapped[str] = mapped_column(String, nullable=True)
     createdAt: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.now(), nullable=True
     )
     updatedAt: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.now(), nullable=True, onupdate=datetime.now()
     )
-    subscription: Mapped["Subscription"] = relationship(back_populates="user")
+    subscription: Mapped["Subscription"] = relationship(
+        back_populates="user", lazy="joined"
+    )
     practice_tests: Mapped[list["PracticeTest"]] = relationship(back_populates="user")
     analytics: Mapped["Analytics"] = relationship(back_populates="user")
-    notificates: Mapped["Notifications"] = relationship(back_populates="user")
+    notificates: Mapped[list["Notifications"]] = relationship(back_populates="user")
     transcriptions: Mapped[list["Transcription"]] = relationship(back_populates="user")
     pronunciation_tests: Mapped[list["PronunciationTest"]] = relationship(
         back_populates="user"
+    )
+    oauth_accounts: Mapped[list["OAuthAccount"]] = relationship(
+        back_populates="user", lazy="joined"
     )
 
 
@@ -137,7 +152,15 @@ class Analytics(Base):
     current_bandscore: Mapped[float] = mapped_column(Float)
     average_band_scores: Mapped[dict[str, float]] = mapped_column(JSONB)
     average_band: Mapped[float] = mapped_column(Float)
-    common_mistakes: Mapped[dict[str, Any]] = mapped_column(JSONB)
+    grammar_common_mistakes: Mapped[list[dict | None]] = mapped_column(
+        JSONB, nullable=True
+    )
+    lexis_common_mistakes: Mapped[list[dict | None]] = mapped_column(
+        JSONB, nullable=True
+    )
+    pronunciation_common_mistakes: Mapped[list[dict | None]] = mapped_column(
+        JSONB, nullable=True
+    )
     streak_days: Mapped[int] = mapped_column(Integer, default=0)
 
 
@@ -190,7 +213,7 @@ class PracticeTest(Base):
         "QuestionCard", foreign_keys=[part_two_card_id]
     )
     reading_cards: Mapped[list[ReadingCard]] = relationship(
-        back_populates="practice_test"
+        back_populates="practice_test", lazy="joined"
     )
 
 
@@ -204,7 +227,7 @@ class Notifications(Base):
     user: Mapped[User] = relationship(back_populates="notificates")
     type: Mapped[str] = mapped_column(String(30))
     message: Mapped[str] = mapped_column(String(250))
-    link: Mapped[str] = mapped_column(String(1024), nullable=True)
+    time: Mapped[datetime] = mapped_column(DateTime, default=datetime.now())
 
 
 class Subscription(Base):
@@ -215,6 +238,45 @@ class Subscription(Base):
     user_id: Mapped[UUID_ID] = mapped_column(
         GUID, ForeignKey("user_table.id"), index=True
     )
-    sub_tier: Mapped[str] = mapped_column(String)
+
+    paddle_product_id: Mapped[str] = mapped_column(String(150), nullable=True)
+    paddle_subscription_id: Mapped[str] = mapped_column(String(150), nullable=True)
+    paddle_price_id: Mapped[str] = mapped_column(String(150), nullable=True)
+
+    subscription_tier: Mapped[str] = mapped_column(
+        String(20), nullable=True, default="Free"
+    )
+    paddle_subscription_status: Mapped[str] = mapped_column(String(20), nullable=True)
+    subscription_created_at: Mapped[datetime] = mapped_column(DateTime, nullable=True)
+    subscription_next_billed_at: Mapped[datetime] = mapped_column(
+        DateTime, nullable=True
+    )
+    total_money_spent: Mapped[float] = mapped_column(Float, default=0)
+
+    credit_card: Mapped["CreditCard"] = relationship(
+        back_populates="subscription", lazy="joined"
+    )
     credits_total_purchased: Mapped[int] = mapped_column(Integer)
     credits_left: Mapped[int] = mapped_column(Integer)
+
+    billing_interval: Mapped[str] = mapped_column(String(20), nullable=True)
+    billing_frequency: Mapped[int] = mapped_column(Integer, nullable=True)
+
+
+class CreditCard(Base):
+    __tablename__ = "credit_card_table"
+
+    id: Mapped[UUID_ID] = mapped_column(GUID, primary_key=True, default=uuid.uuid4)
+    subscription: Mapped[Subscription] = relationship(back_populates="credit_card")
+    subscription_id: Mapped[UUID_ID] = mapped_column(
+        ForeignKey("subscriptions_table.id")
+    )
+
+    payment_id: Mapped[str] = mapped_column(String(150), nullable=True)
+    payment_method: Mapped[str] = mapped_column(String(64), nullable=False)
+    card_holder_name: Mapped[str | None] = mapped_column(String(150), nullable=True)
+    card_type: Mapped[str] = mapped_column(String(30))
+    last_four: Mapped[str] = mapped_column(String(4), nullable=False)
+    expiry_month: Mapped[int] = mapped_column(Integer)
+    expiry_year: Mapped[int] = mapped_column(Integer)
+    country: Mapped[str] = mapped_column(String(50))

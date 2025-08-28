@@ -1,5 +1,4 @@
 import * as z from "zod";
-import { v4 as uuidv4 } from "uuid";
 
 export type SignUpFormData = {
   firstName: string;
@@ -24,6 +23,41 @@ export const UserSignUpSchema = z.object({
     .min(8, { error: "Password should be at least 8 characters" }),
 });
 
+export const UpdateUserSchema = z
+  .object({
+    password: z
+      .string()
+      // .min(8, { error: "Password should be at least 8 characters" })
+      .optional(),
+    email: z.string().optional(),
+    first_name: z.string().optional(),
+    last_name: z.string().optional(),
+    avatarFile: z
+      .any()
+      .optional()
+      .refine((value) => value === undefined || value instanceof FileList, {
+        message: "Input must be a FileList or undefined",
+      })
+      .refine(
+        (value) => {
+          if (
+            value === undefined ||
+            (value instanceof FileList && value.length === 0)
+          )
+            return true;
+          return value[0]?.size <= 4194304;
+        },
+        { message: "Max size exceeded (4MB)" }
+      )
+      .transform((value) => {
+        if (value instanceof FileList && value.length > 0) return value[0];
+        return undefined;
+      }),
+  })
+  .partial();
+
+export type UpdateUserType = z.infer<typeof UpdateUserSchema>;
+
 export const UserSignInSchema = z.object({
   email: z.email({ error: "Invalid email" }),
   password: z
@@ -43,6 +77,26 @@ export const NewTestFormSchema = z.object({
     .max(40, "Test name must be less than 40 characters"),
   assisstant: z.enum(["Ron", "Emma"]),
 });
+
+export const NewPasswordSchema = z
+  .object({
+    password: z
+      .string()
+      .min(8, { error: "Password should be at least 8 characters" }),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+  });
+
+export type NewPasswordType = z.infer<typeof NewPasswordSchema>;
+
+export const PasswordResetSchema = z.object({
+  email: z.email({ error: "Invalid email" }),
+});
+
+export type PasswordResetType = z.infer<typeof PasswordResetSchema>;
 
 export const TranscribedMessage = z.object({
   text: z.string(),
@@ -72,26 +126,6 @@ export const ChatMessage = z.object({
   time: z.number(),
 });
 
-export const NewPasswordSchema = z
-  .object({
-    password: z
-      .string()
-      .min(8, { error: "Password should be at least 8 characters" }),
-    confirmPassword: z.string(),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords don't match",
-    path: ["confirmPassword"],
-  });
-
-export type NewPasswordType = z.infer<typeof NewPasswordSchema>;
-
-export const PasswordResetSchema = z.object({
-  email: z.email({ error: "Invalid email" }),
-});
-
-export type PasswordResetType = z.infer<typeof PasswordResetSchema>;
-
 export type ChatMessageType = z.infer<typeof ChatMessage>;
 
 export const TranscriptionMessage = z.object({
@@ -117,8 +151,6 @@ export const ChatSocketResponseSchema = z.object({
 });
 
 export type ChatSocketResponse = z.infer<typeof ChatSocketResponseSchema>;
-
-const objectSchema = z.record(z.string(), z.any());
 
 const CriterionScoresSchema = z.object({
   fluency: z.float32().multipleOf(0.5),
@@ -225,9 +257,10 @@ const TestTranscriptionsSchema = z.object({
 });
 
 const ReadingCardSchema = z.object({
-  id: z.string(),
+  id: z.string().optional().nullable(),
   topic: z.string(),
   text: z.string(),
+  practice_id: z.string().optional().nullable(),
 });
 
 const QuestionCardSchema = z.object({
@@ -236,21 +269,6 @@ const QuestionCardSchema = z.object({
   topic: z.string(),
   questions: z.array(z.string()),
 });
-
-// assistant: "Emma"
-// id: "d80ab77a-8a5a-4323-9ea7-bf3d9ce89d24"
-// part_one_card: null
-// part_one_card_id: null
-// part_two_card: null
-// part_two_card_id: null
-// practice_name: "Test Iteration 4"
-// reading_cards: Array []
-// result: null
-// status: "Ongoing"
-// test_date: "2025-08-18T14:14:06.442190"
-// test_duration: null
-// transcription: null
-// user_id: "5bd3cfa3-05be-4946-b141-2301565ec06f"
 
 export const PracticeTestSchema = z.object({
   id: z.string(),
@@ -269,6 +287,16 @@ export const PracticeTestSchema = z.object({
   reading_cards: z.array(ReadingCardSchema).nullable().optional(),
 });
 
+export const UpdatePracticeTestSchema = z.object({
+  transcription: TestTranscriptionsSchema.nullable().optional(),
+  part_two_card_id: z.string().nullable().optional(),
+  reading_cards: z.array(ReadingCardSchema).nullable().optional(),
+  status: z.enum(["Ongoing", "Cancelled", "Finished", "Paused"]),
+  test_duration: z.number().nullable().optional(),
+});
+
+export type UpdatePracticeTestType = z.infer<typeof UpdatePracticeTestSchema>;
+
 const PronunciationTestSchema = z.object({
   id: z.string(),
   pronunciation_score: z.float32().multipleOf(0.5),
@@ -278,29 +306,30 @@ const PronunciationTestSchema = z.object({
   pronunciation_tips: z.array(z.string()),
 });
 
-// class AnalyticsSchema(BaseModel):
-//     id: str | None = Field(default=None)
-//     user_id: UUID
-//     practice_time: int
-//     tests_completed: int
-//     current_bandscore: float
-//     average_band_scores: AverageBandScores
-//     average_band: float
-//     common_mistakes: dict[str, Any]
-//     streak_days: int
+const GrammarCommonMistake = z.object({
+  original_sentence: z.string(),
+  identified_mistakes: z.array(MistakeSchema),
+  suggested_improvement: z.string(),
+  frequency: z.number(),
+  explanation: z.string(),
+});
 
-// id: Mapped[UUID_ID] = mapped_column(GUID, primary_key=True, default=uuid.uuid4)
-// user_id: Mapped[UUID_ID] = mapped_column(
-//     GUID, ForeignKey("user_table.id"), index=True
-// )
-// user: Mapped[User] = relationship(back_populates="analytics")
-// practice_time: Mapped[int] = mapped_column(Integer, default=0)
-// tests_completed: Mapped[int] = mapped_column(Integer)
-// current_bandscore: Mapped[float] = mapped_column(Float)
-// average_band_scores: Mapped[dict[str, float]] = mapped_column(JSONB)
-// average_band: Mapped[float] = mapped_column(Float)
-// common_mistakes: Mapped[dict[str, Any]] = mapped_column(JSONB)
-// streak_days: Mapped[int] = mapped_column(Integer, default=0)a
+const VocabularyCommonMistake = z.object({
+  original_sentence: z.string(),
+  identified_issues: z.array(z.string()),
+  suggested_improvement: z.string(),
+  frequency: z.number(),
+  explanation: z.string(),
+});
+
+const PronunciationCommonMistake = z.object({
+  word: z.string(),
+  accuracy: z.number().min(0).max(100),
+  mistake_type: z.string(),
+  user_phonemes: z.string(),
+  correct_phonemes: z.string(),
+  frequency: z.number(),
+});
 
 export const AnalyticsSchema = z.object({
   id: z.string(),
@@ -310,8 +339,80 @@ export const AnalyticsSchema = z.object({
   current_bandscore: z.float32(),
   average_band_scores: AverageBandScores,
   average_band: z.float32(),
-  common_mistakes: objectSchema.optional(),
+  grammar_common_mistakes: z.array(GrammarCommonMistake).optional().nullable(),
+  lexis_common_mistakes: z.array(VocabularyCommonMistake).optional().nullable(),
+  pronunciation_common_mistakes: z
+    .array(PronunciationCommonMistake)
+    .optional()
+    .nullable(),
   streak_days: z.number().int(),
+});
+
+export const CreditCardSchema = z.object({
+  id: z.string().optional().nullable(),
+  payment_id: z.string().optional().nullable(),
+  payment_method: z.string().optional().nullable(),
+  card_holder_name: z.string(),
+  card_type: z.string(),
+  last_four: z.string().max(4),
+  expiry_year: z.number().int(),
+  expiry_month: z.number().int(),
+  country: z.string().max(50),
+});
+
+export const SubscriptionSchema = z.object({
+  id: z.string(),
+  user_id: z.string(),
+
+  paddle_product_id: z.string().optional().nullable(),
+  paddle_subscription_id: z.string().optional().nullable(),
+  paddle_price_id: z.string().optional().nullable(),
+  subscription_tier: z.enum(["Free", "Starter", "Pro"]),
+  paddle_subscription_status: z.string().optional().nullable(),
+  subscription_created_at: z.string().optional().nullable(),
+  subscription_next_billed_at: z.string().optional().nullable(),
+  total_money_spent: z.float32(),
+
+  credit_card: CreditCardSchema.optional().nullable(),
+  credits_total_purchased: z.number(),
+  credits_left: z.number(),
+
+  billing_interval: z.string().nullable(),
+  billing_frequency: z.int().nullable(),
+});
+
+export const SubscriptionUpdateSchema = z.object({
+  paddle_product_id: z.string().optional().nullable(),
+  paddle_subscription_id: z.string().optional().nullable(),
+  paddle_price_id: z.string().optional().nullable(),
+  subscription_tier: z.enum(["Free", "Starter", "Pro"]),
+  paddle_subscription_status: z.string().optional().nullable(),
+  subscription_created_at: z.string().optional().nullable(),
+  subscription_next_billed_at: z.string().optional().nullable(),
+  total_money_spent: z.float32(),
+
+  credit_card: CreditCardSchema.optional().nullable(),
+  credits_total_purchased: z.number(),
+  credits_left: z.number(),
+
+  billing_interval: z.string().nullable(),
+  billing_frequency: z.int().nullable(),
+});
+
+export const NotificationSchema = z.object({
+  id: z.string().optional(),
+  user_id: z.string(),
+  type: z.enum([
+    "Greeting",
+    "Test Info",
+    "Profile Change",
+    "Streak",
+    "Credit Balance",
+    "Credit Purchase",
+    "Plan Change",
+  ]),
+  message: z.string(),
+  time: z.union([z.date(), z.string()]).optional(),
 });
 
 export const UserSchema = z.object({
@@ -323,12 +424,13 @@ export const UserSchema = z.object({
   password: z.string().optional(),
   first_name: z.string(),
   last_name: z.string().optional(),
+  avatar_path: z.string().optional().nullable(),
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
-  subscription: objectSchema.optional(),
+  subscription: SubscriptionSchema.optional(),
   practice_tests: z.array(PracticeTestSchema).optional(),
   analytics: AnalyticsSchema.optional(),
-  notificates: objectSchema.optional(),
+  notificates: z.array(NotificationSchema).optional(),
   transcriptions: z.array(TestTranscriptionsSchema).optional(),
   pronunciation_tests: z.array(PronunciationTestSchema).optional(),
 });
@@ -355,3 +457,14 @@ export type CriterionScoresType = z.infer<typeof CriterionScoresSchema>;
 export type ResultType = z.infer<typeof ResultSchema>;
 export type AnalyticsType = z.infer<typeof AnalyticsSchema>;
 export type GrammarAnalysisType = z.infer<typeof GrammarAnalysis>;
+export type CreditCardType = z.infer<typeof CreditCardSchema>;
+export type SubscriptionType = z.infer<typeof SubscriptionSchema>;
+export type NotificationType = z.infer<typeof NotificationSchema>;
+export type SubscriptionUpdateType = z.infer<typeof SubscriptionUpdateSchema>;
+export type GrammarCommonMistakeType = z.infer<typeof GrammarCommonMistake>;
+export type VocabularyCommonMistakeType = z.infer<
+  typeof VocabularyCommonMistake
+>;
+export type PronunciationCommonMistakeType = z.infer<
+  typeof PronunciationCommonMistake
+>;

@@ -1,7 +1,7 @@
 "use client";
 import { useGlobalPracticeTestsStore } from "@/lib/practiceTestStore";
 import { fetchPracticeTests } from "@/lib/queries";
-import { cn, getPreciseTimeAgo } from "@/lib/utils";
+import { cn, getPreciseTimeAgo, parseTimeInt } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import {
   BookText,
@@ -16,72 +16,8 @@ import LoadingSmallUI from "../loadingSmallUI";
 import { PracticeTestType } from "@/lib/types";
 import RecentTestsFallback from "./RecentTestsFallback";
 
-function parseTime(time: number) {
-  const minutes = Math.floor(time / 60);
-  const seconds = time - minutes * 60;
-
-  return `${minutes < 10 ? 0 : ""}${minutes}:${
-    seconds < 10 ? 0 : ""
-  }${seconds}`;
-}
-
-type Test = {
-  practice_name: string;
-  timeAgo: string;
-  duration: number;
-  band: number;
-  assistant: "Ron" | "Kate";
-};
-
-const tests = [
-  {
-    practice_name: "Speaking Test 1",
-    test_date: new Date().toISOString(),
-    duration: 11,
-    result: {
-      overall_score: 7.5,
-    },
-    assistant: "Ron",
-  },
-  {
-    practice_name: "Speaking Test 2",
-    test_date: new Date().toISOString(),
-    duration: 12,
-    result: {
-      overall_score: 6.0,
-    },
-    assistant: "Kate",
-  },
-  {
-    practice_name: "Speaking Test 3",
-    test_date: new Date().toISOString(),
-    duration: 10,
-    result: {
-      overall_score: 7.0,
-    },
-    assistant: "Kate",
-  },
-  {
-    practice_name: "Speaking Test 4",
-    test_date: new Date().toISOString(),
-    duration: 14,
-    result: {
-      overall_score: 8.0,
-    },
-    assistant: "Ron",
-  },
-  {
-    practice_name: "Speaking Test 5",
-    test_date: new Date().toISOString(),
-    duration: 12,
-    result: {
-      overall_score: 6.5,
-    },
-    assistant: "Ron",
-  },
-];
-
 export function PracticeTest({ test }: { test: PracticeTestType }) {
+  if (!test.result) return;
   return (
     <div className="border border-gray-100 rounded-lg w-full px-5 py-3 lg:py-3.5 flex flex-row justify-between items-center hover:bg-slate-50 transition-colors active:bg-slate-50">
       <Link
@@ -97,7 +33,7 @@ export function PracticeTest({ test }: { test: PracticeTestType }) {
           </h3>
           <p className="text-xs font-normal text-gray-600 hidden lg:block">
             {getPreciseTimeAgo(test.test_date)} •{" "}
-            {parseTime(test.test_duration ?? 1200)}
+            {parseTimeInt(test.test_duration ?? 1200)}
           </p>
         </div>
       </Link>

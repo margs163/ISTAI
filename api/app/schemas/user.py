@@ -12,14 +12,14 @@ class UserRead(schemas.BaseUser[uuid.UUID]):
     last_name: str
     updatedAt: datetime.datetime
     createdAt: datetime.datetime
+    avatar_path: str | None
 
 
 class UserCreate(schemas.BaseUserCreate):
     first_name: str
-    last_name: str | None
+    last_name: str | None = None
 
 
 class UserUpdate(schemas.BaseUserUpdate):
-    first_name: str | None
-    last_name: str | None
-    pass
+    first_name: str | None = None
+    last_name: str | None = None

@@ -1,3 +1,4 @@
+"use client";
 import GrammarCommon from "@/components/dashboard/analysis/GrammarCommon";
 import BandScoreCards from "@/components/dashboard/analysis/BandScoreCards";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";

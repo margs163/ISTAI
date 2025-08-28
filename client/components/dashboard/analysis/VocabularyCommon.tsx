@@ -1,6 +1,9 @@
 import { cn } from "@/lib/utils";
 import { Check, X } from "lucide-react";
 import React from "react";
+import CommonMistakesFallback from "../CommonFallback";
+import { VocabularyCommonMistakeType } from "@/lib/types";
+import { useAnalyticsStore } from "@/lib/userStorage";
 
 function getStyle(
   status: "Improving" | "Needs Work" | "Strong" | "Good Progress"
@@ -17,49 +20,41 @@ function getStyle(
   }
 }
 
-type MistakeType = {
-  type: string;
-  frequency: number;
-  example: {
-    original: string;
-    improved: string;
-  };
-};
-
 const vocabularyMistakes = [
   {
-    type: "Uncountable noun",
+    identified_issues: ["Uncountable noun"],
     frequency: 12,
-    example: {
-      original: "I have a lot of homeworks to do",
-      improved: "I have a lot of homework to do",
-    },
+    original_sentence: "I have a lot of homeworks to do",
+    suggested_improvement: "I have a lot of homework to do",
+    explanation: "",
   },
   {
-    type: "Collocation error",
+    identified_issues: ["Collocation error"],
     frequency: 8,
-    example: {
-      original: "She don't like coffee",
-      improved: "She doesn't like coffee",
-    },
+    original_sentence: "She don't like coffee",
+    suggested_improvement: "She doesn't like coffee",
+    explanation: "",
   },
   {
-    type: "Wrong preposition",
+    identified_issues: ["Wrong preposition"],
     frequency: 10,
-    example: {
-      original: "I am very interested about this topic",
-      improved: "I am very interested in this topic",
-    },
+    original_sentence: "I am very interested about this topic",
+    suggested_improvement: "I am very interested in this topic",
+    explanation: "",
   },
 ];
 
-function CommonVocabularyMistake({ mistake }: { mistake: MistakeType }) {
+function CommonVocabularyMistake({
+  mistake,
+}: {
+  mistake: VocabularyCommonMistakeType;
+}) {
   return (
     <div className="bg-gray-50 border border-gray-100 flex flex-col gap-4 p-4 rounded-lg">
       <header className="flex flex-row justify-between items-center">
         <div className="bg-purple-50 px-2 py-1 rounded-md">
           <h3 className="text-xs font-medium text-purple-500">
-            {mistake.type}
+            {mistake.identified_issues[0]}
           </h3>
         </div>
         <h3
@@ -72,15 +67,15 @@ function CommonVocabularyMistake({ mistake }: { mistake: MistakeType }) {
       </header>
       <main className="space-y-1">
         <div className="flex flex-row gap-2 items-center justify-start">
-          <X className="size-4 text-red-500" />
+          <X className="size-4 text-red-500 shrink-0" />
           <blockquote className=" line-through text-gray-500 text-sm font-medium">
-            {mistake.example.original}
+            {mistake.original_sentence}
           </blockquote>
         </div>
         <div className="flex flex-row gap-2 items-center justify-start">
-          <Check className="size-4 text-green-500" />
+          <Check className="size-4 text-green-500 shrink-0" />
           <blockquote className="text-sm text-gray-800 font-medium">
-            {mistake.example.original}
+            {mistake.original_sentence}
           </blockquote>
         </div>
       </main>
@@ -90,6 +85,9 @@ function CommonVocabularyMistake({ mistake }: { mistake: MistakeType }) {
 
 export default function VocabularyCommon() {
   const styles = getStyle("Improving");
+  const vocabularyCommonMistakes = useAnalyticsStore(
+    (state) => state.lexis_common_mistakes
+  );
   return (
     <section className="rounded-lg p-6 flex flex-col gap-6 bg-white font-geist border border-slate-200/80">
       <header className="flex flex-row items-center justify-between">
@@ -105,23 +103,31 @@ export default function VocabularyCommon() {
           Improving
         </h3>
       </header>
-      <main className="space-y-4">
-        {vocabularyMistakes.map((item, index) => (
-          <CommonVocabularyMistake mistake={item} key={index} />
-        ))}
-      </main>
-      <footer className="p-4 rounded-lg border border-blue-100 bg-blue-50 flex flex-row gap-2 items-start justify-start">
-        <div className="w-4 h-4 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0 mt-0.5">
-          <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
+      {!vocabularyCommonMistakes ? (
+        <CommonMistakesFallback />
+      ) : (
+        <div className="flex flex-col gap-6">
+          <main className="space-y-4">
+            {vocabularyCommonMistakes.map((item, index) => (
+              <CommonVocabularyMistake mistake={item} key={index} />
+            ))}
+          </main>
+          <footer className="p-4 rounded-lg border border-blue-100 bg-blue-50 flex flex-row gap-2 items-start justify-start">
+            <div className="w-4 h-4 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0 mt-0.5">
+              <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
+            </div>
+            <div className="space-y-1">
+              <h3 className="text-sm font-medium text-blue-900">
+                Improvement Tip
+              </h3>
+              <p className="text-xs font-normal text-blue-600">
+                Focus on past tense forms and third-person singular verbs.
+                Practice with simple sentences first.
+              </p>
+            </div>
+          </footer>
         </div>
-        <div className="space-y-1">
-          <h3 className="text-sm font-medium text-blue-900">Improvement Tip</h3>
-          <p className="text-xs font-normal text-blue-600">
-            Focus on past tense forms and third-person singular verbs. Practice
-            with simple sentences first.
-          </p>
-        </div>
-      </footer>
+      )}
     </section>
   );
 }

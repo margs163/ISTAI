@@ -462,37 +462,37 @@ Example Output (keys should be in camel_case)
   "vocabulary_enhancements": [
   {{
     "original_sentence": "The weather is very bad today.",
-    "identified_issues": ["overuse of basic adjectives"],
+    "identified_issues": ["Overuse of Basic Adjectives"],
     "suggested_improvement": "The weather is dreadful today.",
     "explanation": "Replaced 'very bad' with 'dreadful' to avoid overusing basic adjectives with intensifiers. This demonstrates more sophisticated vocabulary and natural expression."
   }},
   {{
     "original_sentence": "I think this book is good for learning.",
-    "identified_issues": ["vague vocabulary choice"],
+    "identified_issues": ["Vague Vocabulary Choice"],
     "suggested_improvement": "I believe this book is invaluable for acquiring knowledge.",
     "explanation": "Replaced 'think' with 'believe', 'good' with 'invaluable', and 'learning' with 'acquiring knowledge' for more precise and academic vocabulary choices."
   }},
   {{
     "original_sentence": "People do many things in the park.",
-    "identified_issues": ["overly general terms"],
+    "identified_issues": ["Overly General Terms"],
     "suggested_improvement": "Visitors engage in various recreational activities in the park.",
     "explanation": "Replaced 'people' with 'visitors', 'do' with 'engage in', and 'things' with 'recreational activities' for more specific and descriptive language."
   }},
   {{
     "original_sentence": "The movie was nice to watch.",
-    "identified_issues": ["repetitive/overused words"],
+    "identified_issues": ["Repetitive/Overused Words"],
     "suggested_improvement": "The film was captivating to watch.",
     "explanation": "Replaced 'movie' with 'film' and 'nice' with 'captivating' to avoid overused vocabulary and demonstrate lexical variety."
   }},
   {{
     "original_sentence": "Technology makes life easy and comfortable.",
-    "identified_issues": ["informal vocabulary in formal context"],
+    "identified_issues": ["Informal Vocabulary in Formal Context"],
     "suggested_improvement": "Technology facilitates convenience and enhances quality of life.",
     "explanation": "Replaced 'makes' with 'facilitates' and restructured for more formal, academic vocabulary appropriate for IELTS writing tasks."
   }},
   {{
     "original_sentence": "She got angry when she heard the news.",
-    "identified_issues": ["basic verb choice"],
+    "identified_issues": ["Basic Verb Choice"],
     "suggested_improvement": "She became infuriated when she received the news.",
     "explanation": "Replaced 'got angry' with 'became infuriated' and 'heard' with 'received' for more sophisticated verb choices and emotional precision."
   }},

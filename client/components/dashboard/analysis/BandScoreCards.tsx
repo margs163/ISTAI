@@ -1,3 +1,5 @@
+"use client";
+import { useAnalyticsStore } from "@/lib/userStorage";
 import clsx from "clsx";
 import {
   BookA,
@@ -9,37 +11,6 @@ import {
   TrendingUp,
 } from "lucide-react";
 import React, { ForwardRefExoticComponent, RefAttributes } from "react";
-
-const scores: Score[] = [
-  {
-    icon: Mic,
-    stat: 7.0,
-    description: "Fluency & Cohesion",
-    color: "blue",
-    trend: "up",
-  },
-  {
-    icon: BookMarked,
-    stat: 6.5,
-    description: "Grammatical Range",
-    color: "green",
-    trend: "up",
-  },
-  {
-    icon: BookA,
-    stat: 7.0,
-    description: "Lexical Resource",
-    color: "purple",
-    trend: "down",
-  },
-  {
-    icon: Megaphone,
-    stat: 7.0,
-    description: "Pronunciation",
-    color: "orange",
-    trend: "up",
-  },
-];
 
 type Score = {
   icon: ForwardRefExoticComponent<
@@ -103,6 +74,37 @@ export function BandScoreCard({ score }: { score: Score }) {
   );
 }
 export default function BandScoreCards() {
+  const averageScores = useAnalyticsStore((state) => state.average_band_scores);
+  const scores: Score[] = [
+    {
+      icon: Mic,
+      stat: averageScores.fluency,
+      description: "Fluency & Cohesion",
+      color: "blue",
+      trend: "up",
+    },
+    {
+      icon: BookMarked,
+      stat: averageScores.grammar,
+      description: "Grammatical Range",
+      color: "green",
+      trend: "up",
+    },
+    {
+      icon: BookA,
+      stat: averageScores.lexis,
+      description: "Lexical Resource",
+      color: "purple",
+      trend: "down",
+    },
+    {
+      icon: Megaphone,
+      stat: averageScores.pronunciation,
+      description: "Pronunciation",
+      color: "orange",
+      trend: "up",
+    },
+  ];
   return (
     <section className="flex flex-col lg:flex-row gap-2 lg:gap-3 px-6">
       {scores.map((item, index) => (

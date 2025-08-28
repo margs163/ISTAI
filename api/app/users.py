@@ -7,9 +7,12 @@ from fastapi_users import UUIDIDMixin, BaseUserManager, FastAPIUsers
 from fastapi_mail import ConnectionConfig, MessageSchema, FastMail, MessageType
 
 from api.app.schemas.analytics import AnalyticsSchema, AverageBandScores
-from api.app.schemas.db_tables import Analytics
+from api.app.schemas.db_tables import Analytics, Notifications, Subscription
+from api.app.schemas.notifications import NotificationTypeEnum, NotificationsSchema
+from api.app.schemas.subscriptions import SubscriptionSchema, TierEnum
 from .lib.auth_db import User, get_async_session, get_user_db
-from fastapi import Request, Depends
+from fastapi import Request, Depends, Response
+from httpx_oauth.clients.google import GoogleOAuth2
 from typing import Optional
 import uuid
 from dotenv import load_dotenv
@@ -40,6 +43,13 @@ conf = ConnectionConfig(
     VALIDATE_CERTS=True,
 )
 
+CLIENT_ID = os.getenv("GOOGLE_OAUTH_CLIENTID")
+CLIENT_SECRET = os.getenv("GOOGLE_OAUTH_SECRET")
+
+google_oauth_client = GoogleOAuth2(
+    CLIENT_ID, CLIENT_SECRET, scopes=["openid", "email", "profile"]
+)
+
 
 class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
     reset_password_token_secret = SECRET
@@ -66,11 +76,34 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
                         fluency=0, grammar=0, lexis=0, pronunciation=0
                     ),
                     average_band=0,
-                    common_mistakes={"prop": None},
+                    grammar_common_mistakes=[],
+                    lexis_common_mistakes=[],
+                    pronunciation_common_mistakes=[],
                     streak_days=0,
                 )
+
+                new_subscription = SubscriptionSchema(
+                    user_id=str(user.id),
+                    sub_tier=TierEnum.FREE.value,
+                    credits_total_purchased=0,
+                    credits_left=20,
+                )
+
+                hello_message = (
+                    "Hello, welcome to AIELTSTalk! You have successfully registered."
+                )
+
+                new_message = NotificationsSchema(
+                    user_id=str(user.id),
+                    type=NotificationTypeEnum.GREETING.value,
+                    message=hello_message,
+                )
+
+                notification = Notifications(**new_message.model_dump())
                 analytics_record = Analytics(**new_analytics.model_dump())
-                session.add(analytics_record)
+                subscriptions_record = Subscription(**new_subscription.model_dump())
+
+                session.add_all([analytics_record, subscriptions_record, notification])
                 await session.commit()
             except Exception as e:
                 await session.rollback()
@@ -139,6 +172,16 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
         fm = FastMail(conf)
         await fm.send_message(message=message)
         print(f"Verification requested for user {user.id}. Verification token: {token}")
+
+    async def on_after_login(
+        self,
+        user: User,
+        request: Optional[Request] = None,
+        response: Optional[Response] = None,
+    ):
+        if response is not None:
+            response.status_code = 307
+            response.headers["Location"] = "http://localhost:3000/"
 
 
 cookie_transport = CookieTransport(cookie_max_age=259200, cookie_name="account-session")
