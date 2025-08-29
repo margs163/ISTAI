@@ -434,10 +434,10 @@ export default function Page() {
   useEffect(() => {
     if (!transcribeWebsocketRef.current && !chatWebsocketRef.current) {
       transcribeWebsocketRef.current = new WebSocket(
-        `${process.env.NEXT_PUBLIC_API}/stt/ws`
+        `${process.env.NEXT_PUBLIC_FASTAPI}/stt/ws`
       );
       chatWebsocketRef.current = new WebSocket(
-        `${process.env.NEXT_PUBLIC_API}/chat/ws`
+        `${process.env.NEXT_PUBLIC_FASTAPI}/chat/ws`
       );
     }
 

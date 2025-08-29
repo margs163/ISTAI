@@ -33,7 +33,7 @@ export default function Page() {
   ) => {
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API}/auth/register`,
+        `${process.env.NEXT_PUBLIC_FASTAPI}/auth/register`,
         {
           method: "POST",
           body: JSON.stringify({
@@ -53,7 +53,7 @@ export default function Page() {
       }
 
       await axios.post(
-        `${process.env.NEXT_PUBLIC_API}/auth/request-verify-token`,
+        `${process.env.NEXT_PUBLIC_FASTAPI}/auth/request-verify-token`,
         {
           email: data.email,
         },

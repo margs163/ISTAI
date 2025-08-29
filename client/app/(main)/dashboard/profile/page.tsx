@@ -33,15 +33,19 @@ export default function Page() {
         )
       );
       try {
-        axios.patch(`${process.env.NEXT_PUBLIC_API}/users/me`, cleanedUpdate, {
-          withCredentials: true,
-        });
+        axios.patch(
+          `${process.env.NEXT_PUBLIC_FASTAPI}/users/me`,
+          cleanedUpdate,
+          {
+            withCredentials: true,
+          }
+        );
 
         if (data.avatarFile) {
           const formData = new FormData();
           formData.append("file", data.avatarFile);
           const response_avatar = await axios.put<{ filepath: string }>(
-            `${process.env.NEXT_PUBLIC_API}/avatar/me`,
+            `${process.env.NEXT_PUBLIC_FASTAPI}/avatar/me`,
             formData,
             {
               headers: { "Content-Type": "multipart/form-data" },

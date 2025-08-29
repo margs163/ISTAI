@@ -18,7 +18,7 @@ export default function Page({
     mutationFn: async () => {
       try {
         const response = await axios.post(
-          `${process.env.NEXT_PUBLIC_API}/auth/verify`,
+          `${process.env.NEXT_PUBLIC_FASTAPI}/auth/verify`,
           {
             token: token,
           },
