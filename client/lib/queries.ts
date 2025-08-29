@@ -57,6 +57,7 @@ export async function fetchUser(setUserData: (data: UserData) => void) {
       createdAt: data.createdAt,
       avatar_path: data.avatar_path,
     };
+    // @ts-expect-error it is compatible
     setUserData(user);
     return user;
   } catch (error) {
@@ -552,7 +553,7 @@ export async function postTestResults({
     const validate = await ResultSchema.safeParseAsync(response.data.data);
     if (validate.error) {
       console.error(validate.error.message);
-      throw new Error(validate.error);
+      throw new Error("Error");
     }
     return validate.data;
   } catch (error) {

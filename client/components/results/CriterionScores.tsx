@@ -13,7 +13,7 @@ import {
 import React from "react";
 
 type CriterionScore = {
-  band: number;
+  band: number | undefined;
   title: string;
   level: string;
   code: "A1" | "A2" | "B1" | "B2" | "C1" | "C2";
@@ -86,6 +86,7 @@ const scores = {
 
 export function CriterionBand({ score }: { score: CriterionScore }) {
   const band = score.band;
+  if (!band) return;
   const Icon = score.icon;
   return (
     <div className="flex flex-row flex-1/4 gap-4 items-center justify-start p-5 lg:p-5 lg:px-7 bg-white border border-slate-200/80 rounded-xl">
@@ -138,27 +139,27 @@ export default function CriterionScores() {
   const criteria = useLocalPracticeTestStore((state) => {
     return state.result?.criterion_scores;
   });
-  const criterionScores: CriterionScore[] = [
+  const criterionScores = [
     {
-      ...scores[criteria?.fluency],
+      ...scores[criteria?.fluency as 7],
       band: criteria?.fluency,
       title: "Fluency",
       icon: MessageSquare,
     },
     {
-      ...scores[criteria?.grammar],
+      ...scores[criteria?.grammar as 7],
       band: criteria?.grammar,
       title: "Grammar",
       icon: BookOpen,
     },
     {
-      ...scores[criteria?.lexis],
+      ...scores[criteria?.lexis as 7],
       band: criteria?.lexis,
       title: "Lexis",
       icon: Brain,
     },
     {
-      ...scores[criteria?.pronunciation],
+      ...scores[criteria?.pronunciation as 7],
       band: criteria?.pronunciation,
       title: "Pronunciation",
       icon: Volume2,
@@ -176,6 +177,7 @@ export default function CriterionScores() {
         </header>
         <main className="flex flex-col lg:flex-row gap-4">
           {criterionScores.map((item, index) => (
+            // @ts-expect-error it is compatible
             <CriterionBand score={item} key={index} />
           ))}
         </main>

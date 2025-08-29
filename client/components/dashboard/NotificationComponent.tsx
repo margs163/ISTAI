@@ -30,7 +30,7 @@ function NotificationItem({
           {notification.message}
         </p>
         <p className="text-xs font-normal text-gray-400">
-          {new Date(notification?.time).toDateString()}
+          {new Date(notification?.time as string).toDateString()}
         </p>
       </div>
     </div>

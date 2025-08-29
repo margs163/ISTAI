@@ -14,11 +14,13 @@ export const useChatStore = create<ChatStore>((set) => ({
       role: "Assistant",
       messageId: uuidv4(),
       text: "Hello, welcome to the Speaking Test! Press the microphone button to start speaking.",
+      time: 100,
     },
     {
       role: "User",
       messageId: uuidv4(),
       text: "Click the microphone to start speaking",
+      time: 200,
     },
   ],
   addMessage: (message: ChatMessageType) =>
@@ -30,11 +32,13 @@ export const useChatStore = create<ChatStore>((set) => ({
           role: "Assistant",
           messageId: uuidv4(),
           text: "Hello, welcome to the Speaking Test! Press the microphone button to start speaking.",
+          time: 100,
         },
         {
           role: "User",
           messageId: uuidv4(),
           text: "Click the microphone to start speaking",
+          time: 200,
         },
       ],
     }),

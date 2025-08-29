@@ -8,7 +8,7 @@ export function cn(...inputs: ClassValue[]) {
 export function getPreciseTimeAgo(dateString: string): string {
   const now = new Date();
   const past = new Date(dateString);
-  const diffMs = now - past;
+  const diffMs = now.getTime() - past.getTime();
 
   // Handle future dates
   if (diffMs < 0) {
@@ -38,7 +38,7 @@ export function getPreciseTimeAgo(dateString: string): string {
 export function getPreciseTimeFuture(dateString: string): string {
   const now = new Date();
   const future = new Date(dateString);
-  const diffMs = future - now;
+  const diffMs = future.getTime() - now.getTime();
 
   // Handle future dates
   if (diffMs < 0) {
@@ -108,6 +108,6 @@ export function parseTimeString(time: number) {
 }
 
 export function getSecondsDifference(date1: Date, date2: Date) {
-  const diff = Math.abs(date2 - date1);
+  const diff = Math.abs(date2.getTime() - date1.getTime());
   return Math.floor(diff / 1000);
 }

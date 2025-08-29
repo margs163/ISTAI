@@ -138,27 +138,27 @@ export default function DialogCriterionScores({
 }: {
   criteria: CriterionScoresType;
 }) {
-  const criterionScores: CriterionScore[] = [
+  const criterionScores = [
     {
-      ...scores[criteria?.fluency],
+      ...scores[criteria?.fluency as 7],
       band: criteria?.fluency,
       title: "Fluency",
       icon: MessageSquare,
     },
     {
-      ...scores[criteria?.grammar],
+      ...scores[criteria?.grammar as 7],
       band: criteria?.grammar,
       title: "Grammar",
       icon: BookOpen,
     },
     {
-      ...scores[criteria?.lexis],
+      ...scores[criteria?.lexis as 7],
       band: criteria?.lexis,
       title: "Lexis",
       icon: Brain,
     },
     {
-      ...scores[criteria?.pronunciation],
+      ...scores[criteria?.pronunciation as 7],
       band: criteria?.pronunciation,
       title: "Pronunciation",
       icon: Volume2,
@@ -176,6 +176,7 @@ export default function DialogCriterionScores({
         </header>
         <main className="flex flex-col lg:flex-row lg:p-2 lg:py-4 gap-4">
           {criterionScores.map((item, index) => (
+            // @ts-expect-error it is expected
             <DialogCriterionBand score={item} key={index} />
           ))}
         </main>

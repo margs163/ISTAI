@@ -62,8 +62,8 @@ export default function SentenceImprovements() {
     (state) => state.result?.sentence_improvements
   );
   const copySentences = {
-    grammar: [...senteces?.grammar_enhancements],
-    vocabulary: [...senteces?.vocabulary_enhancements],
+    grammar: [...(senteces?.grammar_enhancements as [])],
+    vocabulary: [...(senteces?.vocabulary_enhancements as [])],
   };
   return (
     <section className="w-full px-6 lg:px-20 xl:px-36">

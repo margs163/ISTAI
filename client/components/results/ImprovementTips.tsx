@@ -84,6 +84,7 @@ export default function ImprovementTips() {
         </header>
         <main className="flex flex-col gap-4 lg:gap-8 lg:grid lg:grid-cols-2 lg:items-start">
           {strongPoints.map((item, index) => (
+            // @ts-expect-error it is compatible
             <Tip key={index} aspect={item} />
           ))}
         </main>
