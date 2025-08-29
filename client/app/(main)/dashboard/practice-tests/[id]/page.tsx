@@ -20,7 +20,7 @@ import { useUserStore } from "@/lib/userStorage";
 import React, { use, useRef } from "react";
 import html2canvas from "html2canvas-pro";
 import { jsPDF } from "jspdf";
-// import html2pdf from "html2pdf.js";
+import { QuestionCardType } from "@/lib/types";
 
 export default function Page({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -92,7 +92,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
           status={practiceTest.status}
           partsFinished={3}
           testDate={new Date(practiceTest.test_date)}
-          testDuration={practiceTest.test_duration}
+          testDuration={practiceTest.test_duration ?? 0}
         />
         <div className="flex flex-col lg:grid lg:grid-cols-2 gap-6 pt-0 h-full w-full lg:justify-items-start-start lg:items-start">
           <DialogCriterionScores
@@ -114,8 +114,14 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
           <DialogImprovementTips
             generalTips={practiceTest.result.general_tips}
           />
-          <TestQuestionCard questionCard={practiceTest.part_two_card} />
-          <TestReadingCard questionCard={practiceTest.reading_cards[0]} />
+          <TestQuestionCard
+            questionCard={practiceTest.part_two_card as QuestionCardType}
+          />
+          <TestReadingCard
+            questionCard={
+              practiceTest.reading_cards && practiceTest.reading_cards[0]
+            }
+          />
           <TestTranscripts transcriptions={practiceTest.transcription} />
         </div>
       </div>

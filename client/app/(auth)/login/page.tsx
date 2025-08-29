@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import logoText from "@/assets/images/logo-text2.png";
 import talkingWoman from "@/assets/images/talkingWoman.jpg";
 import person1 from "@/assets/images/person1.jpg";
@@ -23,6 +23,8 @@ export default function Page() {
   } = useForm<SignInFormData>({
     resolver: zodResolver(UserSignInSchema),
   });
+
+  const [isAuthorizingGoogle, setIsAuthorizingGoogle] = useState(false);
 
   const handleGoogleLogin = async () => {
     const url = await authorizeGoogle();
@@ -82,7 +84,10 @@ export default function Page() {
               </p>
             </div>
             <button
-              onClick={handleGoogleLogin}
+              onClick={() => {
+                setIsAuthorizingGoogle(true);
+                authorizeGoogle();
+              }}
               className="w-full flex flex-row items-center justify-center gap-2 border-2 border-gray-300/80 rounded-md p-2.5 mt-2"
             >
               <Image src={googleIcon} alt="google" className="w-6 shrink-0" />
@@ -104,7 +109,7 @@ export default function Page() {
                   className="text-sm w-full text-gray-700 font-normal border-b-2 border-gray-200 px-2 py-2 focus-within:outline-0 focus-within:border-b-indigo-200 transition-colors"
                 />
                 <p className="text-red-700 font-normal text-xs h-3 mt-0.5">
-                  {errors.email && errors.email.message}
+                  {errors.email && !isAuthorizingGoogle && errors.email.message}
                 </p>
               </div>
               <div className="space-y-2">
@@ -115,7 +120,9 @@ export default function Page() {
                   className="text-sm w-full text-gray-700 font-normal border-b-2 border-gray-200 px-2 py-2 focus-within:outline-0 focus-within:border-b-indigo-200 transition-colors"
                 />
                 <p className="text-red-700 font-normal text-xs h-3 mt-0.5 mb-2">
-                  {errors.password && errors.password.message}
+                  {errors.password &&
+                    !isAuthorizingGoogle &&
+                    errors.password.message}
                 </p>
               </div>
               <Link href={"/password-reset"} className="ml-auto mt-1">

@@ -134,7 +134,7 @@ function TestPart({
 export default function TestTranscripts({
   transcriptions,
 }: {
-  transcriptions: TestTranscriptionsType;
+  transcriptions?: TestTranscriptionsType | null;
 }) {
   return (
     <section className="rounded-lg no-print p-6 lg:p-8 lg:col-span-2 flex flex-col gap-6 bg-white font-geist border border-slate-200/80">

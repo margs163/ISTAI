@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/select";
 
 export function PracticeTest({ test }: { test: PracticeTestType }) {
+  if (!test.result) return;
   return (
     <div className="border border-gray-100 rounded-lg w-full px-5 py-3 lg:py-3.5 flex flex-row justify-between items-center hover:bg-slate-50 transition-colors active:bg-slate-50">
       <Link
@@ -87,11 +88,11 @@ export default function AllPracticeTests() {
   );
   const sorted = searched.sort((a, b) => {
     if (sort === "recent") {
-      return a.test_date - b.test_date;
+      return new Date(a.test_date).getTime() - new Date(b.test_date).getTime();
     } else if (sort === "score") {
-      return b.result?.overall_score - a.result?.overall_score;
+      return Number(a.result?.overall_score) - Number(a.result?.overall_score);
     } else {
-      return b.test_duration - a.test_duration;
+      return Number(b.test_duration) - Number(a.test_duration);
     }
   });
   return (

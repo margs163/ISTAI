@@ -16,7 +16,7 @@ const fallbackReadingCard: UIReadingCard = {
 export default function TestReadingCard({
   questionCard,
 }: {
-  questionCard: ReadingCardType;
+  questionCard?: ReadingCardType | null;
 }) {
   const readingCard = {
     ...questionCard,

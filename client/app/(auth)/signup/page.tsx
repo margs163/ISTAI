@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import logoText from "@/assets/images/logo-text2.png";
 import talkingWoman from "@/assets/images/person1.jpg";
@@ -14,6 +14,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { UserData, useUserStore } from "@/lib/userStorage";
 import { useRouter } from "next/navigation";
 import axios from "axios";
+import { authorizeGoogle } from "@/lib/queries";
 
 export default function Page() {
   const router = useRouter();
@@ -24,7 +25,7 @@ export default function Page() {
   } = useForm<SignUpFormData>({
     resolver: zodResolver(UserSignUpSchema),
   });
-
+  const [isAuthorizingGoogle, setIsAuthorizingGoogle] = useState(false);
   const setUserData = useUserStore((state) => state.setUserData);
 
   const submit: SubmitHandler<SignUpFormData> = async (
@@ -51,7 +52,7 @@ export default function Page() {
         throw new Error("Could not signup!");
       }
 
-      const response_verify = await axios.post(
+      await axios.post(
         `${process.env.NEXT_PUBLIC_API}/auth/request-verify-token`,
         {
           email: data.email,
@@ -91,7 +92,13 @@ export default function Page() {
                 Please enter you details to get started.
               </p>
             </div>
-            <button className="w-full flex flex-row items-center justify-center gap-2 border-2 border-gray-300/80 rounded-md p-2.5 mt-2">
+            <button
+              onClick={() => {
+                setIsAuthorizingGoogle(true);
+                authorizeGoogle();
+              }}
+              className="w-full flex flex-row items-center justify-center gap-2 border-2 border-gray-300/80 rounded-md p-2.5 mt-2"
+            >
               <Image src={googleIcon} alt="google" className="w-6 shrink-0" />
               <p className="text-sm font-medium text-gray-700">
                 Sign Up with Google
@@ -110,7 +117,7 @@ export default function Page() {
                   {...register("firstName")}
                   className="text-sm w-full text-gray-700 font-normal border-b-2 border-gray-200 px-2 py-2 focus-within:outline-0 focus-within:border-b-indigo-200 transition-colors"
                 />
-                {errors.firstName && (
+                {errors.firstName && !isAuthorizingGoogle && (
                   <p className="text-red-700 font-normal text-xs">
                     {errors.firstName.message}
                   </p>
@@ -123,7 +130,7 @@ export default function Page() {
                   {...register("lastName")}
                   className="text-sm w-full text-gray-700 font-normal border-b-2 border-gray-200 px-2 py-2 focus-within:outline-0 focus-within:border-b-indigo-200 transition-colors"
                 />
-                {errors.lastName && (
+                {errors.lastName && !isAuthorizingGoogle && (
                   <p className="text-red-700 font-normal text-xs">
                     {errors.lastName.message}
                   </p>
