@@ -15,22 +15,22 @@ export default async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
-  const res = NextResponse.next();
-  res.headers.append("Access-Control-Allow-Credentials", "true");
-  res.headers.append(
+  const response = NextResponse.next();
+  response.headers.set(
     "Access-Control-Allow-Origin",
     "https://10e186148c02.ngrok-free.app"
-  ); // replace this your actual origin
-  res.headers.append(
-    "Access-Control-Allow-Methods",
-    "GET,DELETE,PATCH,POST,PUT,OPTIONS"
   );
-  res.headers.append(
+  response.headers.set("Access-Control-Allow-Credentials", "true");
+  response.headers.set(
+    "Access-Control-Allow-Methods",
+    "GET, POST, OPTIONS, PUT, PATCH, DELETE"
+  );
+  response.headers.set(
     "Access-Control-Allow-Headers",
     "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Set-Cookie"
   );
 
-  return res;
+  return response;
 }
 
 export const config = {

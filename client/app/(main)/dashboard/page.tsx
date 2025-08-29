@@ -69,6 +69,8 @@ export default function Page() {
   //   pdf.save(`stats.pdf`);
   // };
 
+  console.log("DAMN");
+
   useQuery({
     queryKey: ["user"],
     queryFn: async () => await fetchUser(setUserData),
