@@ -8,20 +8,19 @@ import TestTranscripts from "@/components/dashboard/dynamicPractice/TestTranscri
 import DialogAdvancedVocabulary from "@/components/dashboard/practiceDialog/DialogAdvanedVocab";
 import DialogCriterionScores from "@/components/dashboard/practiceDialog/DialogCriteriaScores";
 import DialogImprovementTips from "@/components/dashboard/practiceDialog/DialogGeneralTips";
-import DialogGrammarErrors, {
-  DialogGrammarError,
-} from "@/components/dashboard/practiceDialog/DialogGrammarErrors";
+import DialogGrammarErrors from "@/components/dashboard/practiceDialog/DialogGrammarErrors";
 import DialogPronunciationIssues from "@/components/dashboard/practiceDialog/DialogPronunciation";
-import DialogRepetitions, {
-  DialogRepetition,
-} from "@/components/dashboard/practiceDialog/DialogRepetitions";
+import DialogRepetitions from "@/components/dashboard/practiceDialog/DialogRepetitions";
 import DialogSentences from "@/components/dashboard/practiceDialog/DialogSentences";
 import DialogStrongSides from "@/components/dashboard/practiceDialog/DialogStrongSides";
 import DialogWeakSides from "@/components/dashboard/practiceDialog/DialogWeakSides";
 import LoadingSmallUI from "@/components/loadingSmallUI";
 import { useGlobalPracticeTestsStore } from "@/lib/practiceTestStore";
 import { useUserStore } from "@/lib/userStorage";
-import React, { use } from "react";
+import React, { use, useRef } from "react";
+import html2canvas from "html2canvas-pro";
+import { jsPDF } from "jspdf";
+// import html2pdf from "html2pdf.js";
 
 export default function Page({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -29,17 +28,60 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
   const practiceTest = getTest(id);
   const firstName = useUserStore((state) => state.firstName);
   const lastName = useUserStore((state) => state.lastName);
+  const printRef = useRef<HTMLDivElement>(null);
 
   console.log(practiceTest);
 
   if (!practiceTest || !practiceTest.result) {
     return <LoadingSmallUI />;
   }
+
+  const handleExport = async () => {
+    const element = printRef.current;
+    if (!element) return;
+
+    const canvas = await html2canvas(element, {
+      scale: 2,
+      ignoreElements: (el) => el.classList?.contains("no-print"),
+    });
+    const imgData = canvas.toDataURL("image/jpeg");
+
+    const pdf = new jsPDF({
+      orientation: "portrait",
+      unit: "px",
+      format: "a4",
+    });
+
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+
+    const imgProps = pdf.getImageProperties(imgData);
+    const imgWidth = pageWidth;
+    const imgHeight = (imgProps.height * imgWidth) / imgProps.width;
+
+    let y = 0;
+    let pageNum = 0;
+
+    while (y < imgHeight) {
+      if (pageNum > 0) pdf.addPage();
+
+      pdf.addImage(imgData, "PNG", 0, -y, imgWidth, imgHeight);
+      y += pageHeight;
+      pageNum++;
+    }
+
+    pdf.save(`results-${practiceTest.practice_name}.pdf`);
+  };
+
   return (
     <div className="w-full flex flex-col gap-6 bg-gray-50 pb-6">
       <DashboardHeader />
-      <div className="px-4 lg:px-6 grid grid-cols-1 gap-6 lg:grid-cols-1">
+      <div
+        ref={printRef}
+        className="px-4 lg:px-8 grid grid-cols-1 gap-6 lg:grid-cols-1"
+      >
         <TestHeader
+          handleExport={handleExport}
           testName={practiceTest.practice_name}
           testID={practiceTest.id}
           overallBand={practiceTest.result?.overall_score}

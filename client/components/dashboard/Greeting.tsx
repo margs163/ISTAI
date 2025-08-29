@@ -4,10 +4,13 @@ import MainButton from "../MainButton";
 import DailyStreak from "./DailyStreak";
 import { useUserStore } from "@/lib/userStorage";
 
-const currentDate = new Date();
-
-export default function Greeting() {
+export default function Greeting({
+  handleExport,
+}: {
+  handleExport?: () => void;
+}) {
   const userFirstName = useUserStore((state) => state.firstName);
+  const currentDate = new Date();
   return (
     <section className="w-full px-6 pl-8 flex flex-row justify-between items-center">
       <div>
@@ -35,6 +38,7 @@ export default function Greeting() {
           Share
         </MainButton>
         <MainButton
+          onClick={handleExport}
           variant="secondary"
           className={
             "bg-white border border-gray-200 hover:bg-gray-50 active:bg-gray-50 hidden lg:flex"

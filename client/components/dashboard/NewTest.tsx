@@ -22,17 +22,20 @@ import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTestSessionStore } from "@/lib/testSessionStore";
 import { useUserStore } from "@/lib/userStorage";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocalPracticeTestStore } from "@/lib/practiceTestStore";
-import { createPracticeTest } from "@/lib/queries";
+import { createPracticeTest, spendCredits } from "@/lib/queries";
 import { toast } from "sonner";
+import { useSubscriptionStore } from "@/lib/subscriptionStore";
 
 export default function NewTest({ children }: { children: React.ReactNode }) {
+  const queryClient = useQueryClient();
   const setLocalPracticeTest = useLocalPracticeTestStore(
     (state) => state.setTestData
   );
   const router = useRouter();
   const firstName = useUserStore((state) => state.firstName);
+  const creditsLeft = useSubscriptionStore((state) => state.credits_left);
   const lastName = useUserStore((state) => state.lastName);
   const [open, setOpen] = useState(false);
   const setSessionData = useTestSessionStore((state) => state.setSessionData);
@@ -46,8 +49,10 @@ export default function NewTest({ children }: { children: React.ReactNode }) {
 
   const mutation = useMutation({
     mutationFn: createPracticeTest,
-    onSuccess: (data: PracticeTestType) => {
+    onSuccess: async (data: PracticeTestType) => {
+      await spendCredits();
       setLocalPracticeTest(data);
+      queryClient.invalidateQueries({ queryKey: ["subscription-fetch"] });
     },
     onError: (error: Error) => {
       toast("Failed Creating Practice Test", {
@@ -61,6 +66,13 @@ export default function NewTest({ children }: { children: React.ReactNode }) {
   });
 
   const onSubmit: SubmitHandler<NewTestFormData> = (data) => {
+    if (creditsLeft < 10) {
+      setOpen(false);
+      toast("You don't have enough credits", {
+        description: "Could not create a practice test",
+      });
+      return;
+    }
     const createdTest = mutation.mutate({
       assistant: data.assisstant,
       practice_name: data.testName,

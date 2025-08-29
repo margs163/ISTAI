@@ -84,11 +84,11 @@ class SubscriptionUpdateSchema(BaseModel):
     paddle_subscription_id: str | None = Field(default=None)
     paddle_price_id: str | None = Field(default=None)
 
-    subscription_tier: TierEnum | str
+    subscription_tier: TierEnum | str | None = Field(default=None)
     paddle_subscription_status: str | None = Field(default=None)
     subscription_created_at: datetime | None = Field(default=None)
     subscription_next_billed_at: datetime | None = Field(default=None)
-    total_money_spent: float = Field(default=0)
+    total_money_spent: float | None = Field(default=0)
 
     credit_card: CreditCardSchema | None = Field(default=None)
     credits_total_purchased: int | None = Field(default=0)

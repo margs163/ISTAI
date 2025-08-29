@@ -33,6 +33,7 @@ async def chat_websocket(
     config: RunnableConfig = {"configurable": {"thread_id": thread_id}}
     input_message = {"role": "user", "content": ""}
     delete_audio_list = []
+    test_ended = False
 
     try:
         await websocket.accept()
@@ -108,12 +109,13 @@ async def chat_websocket(
                                         "text": "That concludes the test. Thank you very much for your time today.",
                                     }
                                 )
+                                test_ended = True
                                 break
 
                         full_text_response += str(ai_chunk.content)
                 print("Part 3 response: ", full_text_response)
 
-            if full_text_response:
+            if full_text_response and not test_ended:
                 print("Generating tts")
                 voice_id = ""
                 tts_filename = f"tts-files/test-{uuid.uuid4()}.mp3"

@@ -40,14 +40,17 @@ export default function Page() {
     formData.append("password", data.password);
 
     try {
-      const response = await fetch("http://localhost:8000/auth/jwt/login", {
-        method: "POST",
-        body: formData.toString(),
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        credentials: "include",
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API}/auth/jwt/login`,
+        {
+          method: "POST",
+          body: formData.toString(),
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+          credentials: "include",
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Could not login");

@@ -5,7 +5,6 @@ import {
   AnalyticsType,
   CreditCardType,
   GrammarCommonMistakeType,
-  NotificationSchema,
   NotificationType,
   PracticeTestSchema,
   PracticeTestType,
@@ -33,7 +32,7 @@ export async function fetchUser(setUserData: (data: UserData) => void) {
   try {
     console.log("Fetching user...");
     const response = await axios.get<UserDataServer>(
-      "http://localhost:8000/users/me",
+      `${process.env.NEXT_PUBLIC_API}/users/me`,
       {
         withCredentials: true,
         headers: {
@@ -97,9 +96,13 @@ export async function sendReadingCardSpeech(
 
 export async function logOutUser() {
   try {
-    await axios.post("http://localhost:8000/auth/jwt/logout", undefined, {
-      withCredentials: true,
-    });
+    await axios.post(
+      `${process.env.NEXT_PUBLIC_API}/auth/jwt/logout`,
+      undefined,
+      {
+        withCredentials: true,
+      }
+    );
     return true;
   } catch (error) {
     toast("Error while sending reading speech", {
@@ -117,7 +120,7 @@ export async function fetchPart2QuestionCard(
 ): Promise<QuestionCardType | undefined> {
   try {
     const response = await axios.get<{ questions: QuestionCardType[] }>(
-      "http://localhost:8000/questions/?part=2",
+      `${process.env.NEXT_PUBLIC_API}/questions/?part=2`,
       {
         headers: {
           "Content-Type": "application/json",
@@ -145,7 +148,7 @@ export async function fetchReadingCard(
 ): Promise<ReadingCardType | undefined> {
   try {
     const response = await axios.get<{ cards: ReadingCardType[] }>(
-      "http://localhost:8000/reading_cards/?random=true&count=1",
+      `${process.env.NEXT_PUBLIC_API}/reading_cards/?random=true&count=1`,
       {
         headers: {
           "Content-Type": "application/json",
@@ -175,7 +178,7 @@ export async function createPracticeTest(data: {
 }) {
   try {
     const response = await axios.post<PostResponse>(
-      "http://localhost:8000/practice_test/new",
+      `${process.env.NEXT_PUBLIC_API}/practice_test/new`,
       data,
       {
         headers: {
@@ -205,7 +208,7 @@ export async function updatePracticeTest({
 }) {
   try {
     await axios.put(
-      `http://localhost:8000/practice_test/${practiceTestId}`,
+      `${process.env.NEXT_PUBLIC_API}/practice_test/${practiceTestId}`,
       data,
       { withCredentials: true }
     );
@@ -221,7 +224,7 @@ export async function fetchPracticeTests(
 ) {
   try {
     const response = await axios.get<{ data: PracticeTestType[] }>(
-      "http://localhost:8000/practice_test/?user_id=true",
+      `${process.env.NEXT_PUBLIC_API}/practice_test/?user_id=true`,
       { withCredentials: true }
     );
     if (response.data.data.length === 0) {
@@ -280,7 +283,7 @@ export async function fetchAvatar(
 
 export async function deleteAvatar() {
   try {
-    await axios.delete("http://localhost:8000/avatar/me", {
+    await axios.delete(`${process.env.NEXT_PUBLIC_API}/avatar/me`, {
       withCredentials: true,
     });
   } catch (error) {
@@ -297,7 +300,7 @@ export async function deleteAvatar() {
 export async function fetchNotifications() {
   try {
     const response = await axios.get<{ data: NotificationType[] }>(
-      "http://localhost:8000/notifications/me?today=true",
+      `${process.env.NEXT_PUBLIC_API}/notifications/me?today=true`,
       {
         withCredentials: true,
       }
@@ -317,7 +320,7 @@ export async function fetchNotifications() {
 export async function authorizeGoogle() {
   try {
     const response = await axios.get<{ authorization_url: string }>(
-      "http://localhost:8000/auth/google/authorize"
+      `${process.env.NEXT_PUBLIC_API}/auth/google/authorize`
     );
 
     const url = response.data.authorization_url;
@@ -335,7 +338,7 @@ export async function authorizeGoogle() {
 export async function fetchPracticeTestById(testId: string) {
   try {
     const response = await axios.get<{ data: PracticeTestType[] }>(
-      `http://localhost:8000/practice_test/?test_ids=${testId}&user_id=true`,
+      `${process.env.NEXT_PUBLIC_API}/practice_test/?test_ids=${testId}&user_id=true`,
       { withCredentials: true }
     );
     const validated = await PracticeTestSchema.safeParseAsync(
@@ -362,7 +365,7 @@ export async function fetchSubscription(
 ) {
   try {
     const response = await axios.get<{ data: SubscriptionType }>(
-      "http://localhost:8000/subscription/me",
+      `${process.env.NEXT_PUBLIC_API}/subscription/me`,
       {
         withCredentials: true,
       }
@@ -388,9 +391,13 @@ export async function fetchSubscription(
 
 export async function updateSubscription(updateSchema: SubscriptionUpdateType) {
   try {
-    await axios.put("http://localhost:8000/subscription", updateSchema, {
-      withCredentials: true,
-    });
+    await axios.put(
+      `${process.env.NEXT_PUBLIC_API}/subscription`,
+      updateSchema,
+      {
+        withCredentials: true,
+      }
+    );
   } catch (error) {
     toast("Error Updating Subscription", {
       description: "Could not update subscription",
@@ -404,9 +411,13 @@ export async function updateSubscription(updateSchema: SubscriptionUpdateType) {
 
 export async function updateCreditCard(creditCard: CreditCardType) {
   try {
-    await axios.post("http://localhost:8000/subscription/card", creditCard, {
-      withCredentials: true,
-    });
+    await axios.post(
+      `${process.env.NEXT_PUBLIC_API}/subscription/card`,
+      creditCard,
+      {
+        withCredentials: true,
+      }
+    );
   } catch (error) {
     toast("Error Updating Credit Card", {
       description: "Could not update credit card",
@@ -436,7 +447,7 @@ export async function updateAnalytics(data: {
 }) {
   try {
     const response = await axios.put<{ data: AnalyticsType }>(
-      "http://localhost:8000/analytics/",
+      `${process.env.NEXT_PUBLIC_API}/analytics/`,
       {
         ...data,
       },
@@ -460,7 +471,7 @@ export async function fetchAnalytics(
 ) {
   try {
     const response = await axios.get<{ data: AnalyticsType }>(
-      "http://localhost:8000/analytics",
+      `${process.env.NEXT_PUBLIC_API}/analytics/?limit=4`,
       { withCredentials: true }
     );
     const validated = await AnalyticsSchema.safeParseAsync(response.data.data);
@@ -478,6 +489,28 @@ export async function fetchAnalytics(
       },
     });
     return undefined;
+  }
+}
+
+export async function spendCredits(credits: number = 10) {
+  try {
+    await axios.put(
+      `${process.env.NEXT_PUBLIC_API}/subscription/`,
+      {
+        credits_left: credits,
+      },
+      { withCredentials: true }
+    );
+
+    return true;
+  } catch (error) {
+    toast("Could not spend credits", {
+      description: "Could not fetch analytics",
+      action: {
+        label: "Log",
+        onClick: () => console.log(error),
+      },
+    });
   }
 }
 
@@ -506,7 +539,7 @@ export async function postTestResults({
   };
   try {
     const response = await axios.post<{ data: ResultType }>(
-      `http://localhost:8000/results/?reading_audio_path=${readingCardAudioPath}`,
+      `${process.env.NEXT_PUBLIC_API}/results/?reading_audio_path=${readingCardAudioPath}`,
       body,
       {
         headers: {
@@ -524,5 +557,30 @@ export async function postTestResults({
     return validate.data;
   } catch (error) {
     throw error;
+  }
+}
+
+export async function cancellPracticeTest(testId: string) {
+  try {
+    const response = await axios.put(
+      `${process.env.NEXT_PUBLIC_API}/practice_test/${testId}`,
+      { status: "Cancelled" },
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        withCredentials: true,
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    toast("Could not cancell a practice test", {
+      description: "Could not cancell a practice test",
+      action: {
+        label: "Log",
+        onClick: () => console.log(error),
+      },
+    });
   }
 }

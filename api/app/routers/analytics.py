@@ -1,5 +1,6 @@
+from copy import deepcopy
 from typing import Annotated
-from fastapi import APIRouter, Body, Depends, HTTPException, status
+from fastapi import APIRouter, Body, Depends, HTTPException, Query, status
 from sqlalchemy import and_, select
 from sqlalchemy.orm import joinedload
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -25,6 +26,7 @@ router = APIRouter(dependencies=[Depends(current_active_user)])
 async def get_analytics(
     user: Annotated[User, Depends(current_active_user)],
     session: Annotated[AsyncSession, Depends(get_async_session)],
+    limit: Annotated[int | None, Query()] = 4,
 ):
     try:
         result = await session.scalars(
@@ -40,7 +42,33 @@ async def get_analytics(
 
         await session.commit()
 
-        return {"data": analytic}
+        result = {
+            "id": analytic.id,
+            "user_id": analytic.user_id,
+            "practice_time": analytic.practice_time,
+            "tests_completed": analytic.tests_completed,
+            "current_bandscore": analytic.current_bandscore,
+            "average_band_scores": deepcopy(analytic.average_band_scores),
+            "average_band": analytic.average_band,
+            "grammar_common_mistakes": (
+                deepcopy(analytic.grammar_common_mistakes)[:limit]
+                if analytic.grammar_common_mistakes
+                else None
+            ),
+            "lexis_common_mistakes": (
+                deepcopy(analytic.lexis_common_mistakes)[:limit]
+                if analytic.lexis_common_mistakes
+                else None
+            ),
+            "pronunciation_common_mistakes": (
+                deepcopy(analytic.pronunciation_common_mistakes)[:limit]
+                if analytic.pronunciation_common_mistakes
+                else None
+            ),
+            "streak_days": analytic.streak_days,
+        }
+
+        return {"data": result}
     except Exception as e:
         await session.rollback()
         raise HTTPException(

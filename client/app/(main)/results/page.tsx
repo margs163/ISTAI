@@ -57,51 +57,54 @@ export default function Page() {
     },
   });
 
-  const { mutate, isPending, isError, isSuccess, error, data } = useMutation({
-    mutationKey: ["results"],
-    mutationFn: postTestResults,
-    onSuccess: async (data: ResultType) => {
-      setResults(data);
-      if (!localPracticeTest.test_duration) {
+  const { mutateAsync, isPending, isError, isSuccess, error, data } =
+    useMutation({
+      mutationKey: ["results"],
+      mutationFn: postTestResults,
+      onSuccess: async (data: ResultType) => {
+        setResults(data);
+        if (!localPracticeTest.test_duration) {
+          toast("Error posting results", {
+            description: "Could not post test results",
+            action: {
+              label: "Log",
+              onClick: () => console.error(error),
+            },
+          });
+        } else {
+          await mutation.mutateAsync({
+            practice_time: localPracticeTest.test_duration,
+            tests_completed: 1,
+            current_bandscore: data.overall_score,
+            average_band_scores: data.criterion_scores,
+            average_band: data.overall_score,
+            streak_days: 1,
+            grammar_common_mistakes: data.grammar_errors.grammar_analysis.map(
+              (item) => ({ ...item, frequency: 1 })
+            ),
+            lexis_common_mistakes:
+              data.sentence_improvements.vocabulary_enhancements.map(
+                (item) => ({
+                  ...item,
+                  frequency: 1,
+                })
+              ),
+            pronunciation_common_mistakes: data.pronunciation_issues.map(
+              (item) => ({ ...item, frequency: 1 })
+            ),
+          });
+        }
+      },
+      onError: (error) => {
         toast("Error posting results", {
           description: "Could not post test results",
           action: {
             label: "Log",
-            onClick: () => console.error(error),
+            onClick: () => console.log(error),
           },
         });
-      } else {
-        await mutation.mutateAsync({
-          practice_time: localPracticeTest.test_duration,
-          tests_completed: 1,
-          current_bandscore: data.overall_score,
-          average_band_scores: data.criterion_scores,
-          average_band: data.overall_score,
-          streak_days: 1,
-          grammar_common_mistakes: data.grammar_errors.grammar_analysis.map(
-            (item) => ({ ...item, frequency: 1 })
-          ),
-          lexis_common_mistakes:
-            data.sentence_improvements.vocabulary_enhancements.map((item) => ({
-              ...item,
-              frequency: 1,
-            })),
-          pronunciation_common_mistakes: data.pronunciation_issues.map(
-            (item) => ({ ...item, frequency: 1 })
-          ),
-        });
-      }
-    },
-    onError: (error) => {
-      toast("Error posting results", {
-        description: "Could not post test results",
-        action: {
-          label: "Log",
-          onClick: () => console.log(error),
-        },
-      });
-    },
-  });
+      },
+    });
 
   useEffect(() => {
     const readingCards = localPracticeTest.reading_cards;
@@ -113,35 +116,37 @@ export default function Page() {
       typeof audioPath === "string" &&
       transcription;
 
-    console.log(audioPath);
-
     const resultSession = sessionStorage.getItem("local-practice-test");
 
-    console.log(readyParams);
-    if (resultSession) {
-      setResults(JSON.parse(resultSession));
-      console.log(JSON.parse(resultSession));
-    } else if (readyParams && !postedRef.current) {
-      console.log("mutating");
-      postedRef.current = true;
-      mutate({
-        readingCard: readingCards[0],
-        readingCardAudioPath: audioPath,
-        transcription: transcription,
-        testId: localPracticeTest.id,
-      });
-
-      mutation_test.mutate({
-        data: {
+    async function sendResults() {
+      if (resultSession) {
+        setResults(JSON.parse(resultSession));
+        console.log("We have got the results session");
+      } else if (readyParams && !postedRef.current) {
+        console.log("mutating");
+        postedRef.current = true;
+        await mutation_test.mutateAsync({
+          data: {
+            transcription: transcription,
+            part_two_card_id: localPracticeTest?.part_two_card?.id,
+            test_duration: localPracticeTest.test_duration,
+            status: localPracticeTest.status,
+            reading_cards: localPracticeTest.reading_cards,
+          },
+          practiceTestId: localPracticeTest.id,
+        });
+        await mutateAsync({
+          readingCard: readingCards[0],
+          readingCardAudioPath: audioPath,
           transcription: transcription,
-          part_two_card_id: localPracticeTest?.part_two_card?.id,
-          test_duration: localPracticeTest.test_duration,
-          status: localPracticeTest.status,
-          reading_cards: localPracticeTest.reading_cards,
-        },
-        practiceTestId: localPracticeTest.id,
-      });
+          testId: localPracticeTest.id,
+        });
+
+        console.log("mutation were run");
+      }
     }
+
+    sendResults();
   }, []);
 
   if (isError)

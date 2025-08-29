@@ -15,6 +15,7 @@ from pydantic import BaseModel, Field
 class TranscriptionMessage(BaseModel):
     name: str
     text: str
+    time: int
 
 
 class TranscriptionSchema(BaseModel):

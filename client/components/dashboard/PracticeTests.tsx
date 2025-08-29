@@ -1,95 +1,60 @@
-import { QueryClient } from "@tanstack/react-query";
-import { BookText, Bot, ChartColumn, Ellipsis } from "lucide-react";
+"use client";
+import { BookText, Bot, ChartColumn, Ellipsis, Search } from "lucide-react";
 import Link from "next/link";
-import React from "react";
-import axios from "axios";
+import React, { useState } from "react";
+import { useGlobalPracticeTestsStore } from "@/lib/practiceTestStore";
+import RecentTestsFallback from "./RecentTestsFallback";
+import { PracticeTestType } from "@/lib/types";
+import { cn, getPreciseTimeAgo, parseTimeInt } from "@/lib/utils";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
-type Test = {
-  name: string;
-  timeAgo: string;
-  duration: number;
-  band: number;
-  assistant: "Ron" | "Kate";
-};
-
-const tests: Test[] = [
-  {
-    name: "Speaking Test 1",
-    timeAgo: "2 hours ago",
-    duration: 11,
-    band: 7.0,
-    assistant: "Ron",
-  },
-  {
-    name: "Speaking Test 2",
-    timeAgo: "6 hours ago",
-    duration: 12,
-    band: 6.5,
-    assistant: "Kate",
-  },
-  {
-    name: "Speaking Test 3",
-    timeAgo: "1 day ago",
-    duration: 10,
-    band: 7.5,
-    assistant: "Kate",
-  },
-  {
-    name: "Speaking Test 4",
-    timeAgo: "2 days ago",
-    duration: 14,
-    band: 7.0,
-    assistant: "Ron",
-  },
-  {
-    name: "Speaking Test 5",
-    timeAgo: "3 days ago",
-    duration: 12,
-    band: 7.0,
-    assistant: "Ron",
-  },
-  {
-    name: "Speaking Test 6",
-    timeAgo: "3 days ago",
-    duration: 12,
-    band: 7.0,
-    assistant: "Ron",
-  },
-  {
-    name: "Speaking Test 7",
-    timeAgo: "3 days ago",
-    duration: 12,
-    band: 7.0,
-    assistant: "Ron",
-  },
-];
-
-export async function PracticeTest({ test }: { test: Test }) {
-  // const queryClient = new QueryClient();
-
-  // await queryClient.prefetchQuery({
-  //   queryKey: ["practice-tests"],
-  //   queryFn: () => {
-  //     axios.get();
-  //   },
-  // });
-
+export function PracticeTest({ test }: { test: PracticeTestType }) {
   return (
-    <div className="border border-gray-100 rounded-lg w-full px-5 py-2.5 flex flex-row justify-between items-center hover:bg-slate-50 transition-colors active:bg-slate-50">
-      <Link href={"#"} className="flex flex-row gap-3 items-center">
+    <div className="border border-gray-100 rounded-lg w-full px-5 py-3 lg:py-3.5 flex flex-row justify-between items-center hover:bg-slate-50 transition-colors active:bg-slate-50">
+      <Link
+        href={`/dashboard/practice-tests/${test.id}`}
+        className="flex flex-row gap-3 items-center w-[200px] md:w-[220px] lg:w-[220px]"
+      >
         <div className="p-2 rounded-lg bg-indigo-100">
           <BookText className="size-5 text-indigo-600 shrink-0" />
         </div>
         <div>
-          <h3 className="font-medium text-gray-800 text-sm">{test.name}</h3>
+          <h3 className="font-medium text-gray-800 text-sm">
+            {test.practice_name}
+          </h3>
           <p className="text-xs font-normal text-gray-600 hidden lg:block">
-            {test.timeAgo} • {test.duration}
+            {getPreciseTimeAgo(test.test_date)} •{" "}
+            {parseTimeInt(test.test_duration ?? 0)}
           </p>
         </div>
       </Link>
-      <div className="px-2.5 py-1 rounded-full bg-green-100 hidden lg:inline-block">
-        <p className="text-xs font-medium text-green-700">
-          band {test.band.toFixed(1)}
+      <div
+        className={cn(
+          "px-2.5 py-1 rounded-xl border hidden lg:inline-block",
+          test.result?.overall_score > 6.0
+            ? "border-green-300 bg-green-50"
+            : test.result?.overall_score >= 4.5
+            ? "border-yellow-300 bg-yellow-50"
+            : "border-red-300 bg-red-50"
+        )}
+      >
+        <p
+          className={cn(
+            "text-xs font-medium",
+            test.result?.overall_score > 6.0
+              ? "text-green-600"
+              : test.result?.overall_score >= 4.5
+              ? "text-yellow-600"
+              : "text-red-600"
+          )}
+        >
+          Band {test.result?.overall_score.toFixed(1)}
         </p>
       </div>
       <h3 className="text-sm font-medium text-gray-800 flex-row items-center gap-1 hidden lg:flex">
@@ -98,10 +63,10 @@ export async function PracticeTest({ test }: { test: Test }) {
       </h3>
       <div className="flex flex-row gap-2 items-center">
         <Link href={"#"}>
-          <ChartColumn className="size-4 p-1.5 rounded-full hover:bg-gray-50 active:bg-gray-50 text-gray-800 hover:text-gray-700 active:text-gray-700 transition-colors box-content" />
+          <ChartColumn className="size-4 p-1.5 rounded-full hover:bg-gray-100 active:bg-gray-100 text-gray-800 hover:text-gray-700 active:text-gray-700 transition-colors box-content" />
         </Link>
         <Link href={"#"}>
-          <Ellipsis className="size-4 p-1.5 rounded-full hover:bg-gray-50 active:bg-gray-50 text-gray-800 hover:text-gray-700 active:text-gray-700 transition-colors box-content" />
+          <Ellipsis className="size-4 p-1.5 rounded-full hover:bg-gray-100 active:bg-gray-100 text-gray-800 hover:text-gray-700 active:text-gray-700 transition-colors box-content" />
         </Link>
       </div>
     </div>
@@ -109,26 +74,75 @@ export async function PracticeTest({ test }: { test: Test }) {
 }
 
 export default function AllPracticeTests() {
+  const allPracticeTests = useGlobalPracticeTestsStore(
+    (state) => state.practice_tests
+  );
+  const [sort, setSort] = useState<"recent" | "score" | "duration">("recent");
+  const [search, setSearch] = useState("");
+  const onValueChange = (value: "recent" | "score" | "duration") =>
+    setSort(value);
+  const filtered = allPracticeTests.filter((test) => test.result);
+  const searched = filtered.filter((item) =>
+    item.practice_name.includes(search)
+  );
+  const sorted = searched.sort((a, b) => {
+    if (sort === "recent") {
+      return a.test_date - b.test_date;
+    } else if (sort === "score") {
+      return b.result?.overall_score - a.result?.overall_score;
+    } else {
+      return b.test_duration - a.test_duration;
+    }
+  });
   return (
-    <section className="px-6 w-full flex flex-col gap-6">
+    <section className="px-4 lg:px-6 w-full flex flex-col gap-6">
       <div className="p-5 w-full flex flex-col gap-6 bg-white rounded-lg border border-gray-200/80">
-        <header className="w-full flex flex-row justify-between items-center px-1">
+        <header className="w-full flex flex-row justify-between items-center px-1 gap-4">
           <div className="flex flex-row items-center justify-start gap-2">
             {/* <BriefcaseBusiness className="size-5 text-gray-700" /> */}
             <h3 className="font-semibold text-lg text-gray-800">
               Practice Tests
             </h3>
           </div>
+          <div className=" px-4 py-2 border border-slate-200 focus-within:border-gray-300 bg-gray-50 focus-within:bg-gray-100 rounded-md hidden lg:flex flex-row gap-2 items-center transition-all ml-auto">
+            <Search className="size-4 text-gray-500" />
+            <input
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              type="text"
+              placeholder="Practice Name"
+              name="search"
+              className="w-full text-sm font-normal text-gray-700 focus-within:outline-0"
+            />
+          </div>
+          <Select
+            defaultValue="recent"
+            onValueChange={onValueChange}
+            value={sort}
+          >
+            <SelectTrigger className="w-[180px] hidden lg:inline-flex">
+              <SelectValue placeholder="Theme" />
+            </SelectTrigger>
+            <SelectContent className="font-geist">
+              <SelectItem value="recent">Most Recent</SelectItem>
+              <SelectItem value="score">Band Score</SelectItem>
+              <SelectItem value="duration">Duration</SelectItem>
+            </SelectContent>
+          </Select>
           <Link href={"#"}>
-            <p className="font-medium text-xs text-gray-800 p-1 hover:text-gray-700 active:text-gray-700">
-              {tests.length} tests
+            <p className="font-medium text-sm text-gray-800 p-1 hover:text-gray-700 active:text-gray-700">
+              {sorted.length} tests
             </p>
           </Link>
         </header>
         <div className="space-y-3">
-          {tests.map((item, index) => (
-            <PracticeTest key={index} test={item} />
-          ))}
+          {allPracticeTests && filtered && filtered.length > 0 ? (
+            searched.map((item, index) => (
+              <PracticeTest key={index} test={item} />
+            ))
+          ) : (
+            <RecentTestsFallback />
+          )}
         </div>
       </div>
     </section>

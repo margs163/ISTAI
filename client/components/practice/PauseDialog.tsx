@@ -18,6 +18,7 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useChatStore } from "@/lib/chatStore";
 import { useTestTranscriptionStore } from "@/lib/testTranscriptionStore";
+import { cancellPracticeTest } from "@/lib/queries";
 
 export default function PauseDialog({
   dialogOpen,
@@ -37,27 +38,7 @@ export default function PauseDialog({
   const router = useRouter();
   const quitMutation = useMutation({
     mutationKey: ["cancel-test"],
-    mutationFn: () =>
-      axios
-        .put(
-          `http://localhost:8000/practice_test/${testId}`,
-          { status: "Cancelled" },
-          {
-            headers: {
-              "Content-Type": "application/json",
-            },
-            withCredentials: true,
-          }
-        )
-        .then((response) => {
-          if (response.status !== 200) {
-            console.log("Could not update a practice test");
-          }
-          return response.data;
-        })
-        .catch((error) =>
-          console.log("Could not update a practice test: ", error)
-        ),
+    mutationFn: cancellPracticeTest,
   });
   return (
     <Dialog
@@ -91,7 +72,7 @@ export default function PauseDialog({
                   if (status === "inactive" && testState !== "Finished") {
                     setTestStatus("active");
                   } else {
-                    quitMutation.mutate();
+                    quitMutation.mutate(testId);
                     restoreChatMessages();
                     restoreTranscriptions();
                     router.replace("/dashboard");

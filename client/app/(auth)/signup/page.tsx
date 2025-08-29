@@ -31,25 +31,28 @@ export default function Page() {
     data: SignUpFormData
   ) => {
     try {
-      const response = await fetch("http://localhost:8000/auth/register", {
-        method: "POST",
-        body: JSON.stringify({
-          first_name: data.firstName,
-          last_name: data.lastName,
-          email: data.email,
-          password: data.password,
-        }),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API}/auth/register`,
+        {
+          method: "POST",
+          body: JSON.stringify({
+            first_name: data.firstName,
+            last_name: data.lastName,
+            email: data.email,
+            password: data.password,
+          }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Could not signup!");
       }
 
       const response_verify = await axios.post(
-        "http://localhost:8000/auth/request-verify-token",
+        `${process.env.NEXT_PUBLIC_API}/auth/request-verify-token`,
         {
           email: data.email,
         },

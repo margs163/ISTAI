@@ -130,7 +130,7 @@ export default function Page() {
             instructionsAudio.current &&
             !instructionsAudio.current?.paused &&
             sessionState.currentPart === 3 &&
-            !openReadingCard
+            openReadingCard
           ) {
             instructionsAudio.current.onended = () => {
               audioFile.current?.play();
@@ -256,6 +256,8 @@ export default function Page() {
         text: text,
         time: getSecondsDifference(startDatetime, new Date()),
       };
+      console.log(transcription);
+      console.log(startDatetime);
       const part =
         sessionState.currentPart === 1
           ? "partOne"
@@ -432,9 +434,11 @@ export default function Page() {
   useEffect(() => {
     if (!transcribeWebsocketRef.current && !chatWebsocketRef.current) {
       transcribeWebsocketRef.current = new WebSocket(
-        "ws://localhost:8000/stt/ws"
+        `${process.env.NEXT_PUBLIC_API}/stt/ws`
       );
-      chatWebsocketRef.current = new WebSocket("ws://localhost:8000/chat/ws");
+      chatWebsocketRef.current = new WebSocket(
+        `${process.env.NEXT_PUBLIC_API}/chat/ws`
+      );
     }
 
     initializeMediaRecorder();
@@ -570,10 +574,10 @@ export default function Page() {
         ],
         part_three: transcriptionsState.partThree,
       };
+      console.log(`Final Transcriptions:\n${finalTranscriptions}`);
       setRunConfetti(true);
       addTranscriptionsLocal(finalTranscriptions);
       setTestDuration(sessionState.duration);
-      console.log(finalTranscriptions);
       restoreChatMessages();
       transcriptionsState.restoreTranscriptions();
     }

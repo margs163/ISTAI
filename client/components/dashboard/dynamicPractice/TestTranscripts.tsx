@@ -137,7 +137,7 @@ export default function TestTranscripts({
   transcriptions: TestTranscriptionsType;
 }) {
   return (
-    <section className="rounded-lg p-6 lg:p-8 lg:col-span-2 flex flex-col gap-6 bg-white font-geist border border-slate-200/80">
+    <section className="rounded-lg no-print p-6 lg:p-8 lg:col-span-2 flex flex-col gap-6 bg-white font-geist border border-slate-200/80">
       <header className="flex flex-row items-start justify-between">
         <h2 className="text-lg text-gray-800 font-semibold">
           Test Transcriptions

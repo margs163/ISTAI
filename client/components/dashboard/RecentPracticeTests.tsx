@@ -3,13 +3,7 @@ import { useGlobalPracticeTestsStore } from "@/lib/practiceTestStore";
 import { fetchPracticeTests } from "@/lib/queries";
 import { cn, getPreciseTimeAgo, parseTimeInt } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
-import {
-  BookText,
-  Bot,
-  BriefcaseBusiness,
-  ChartColumn,
-  Ellipsis,
-} from "lucide-react";
+import { BookText, Bot, ChartColumn, Ellipsis } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 import LoadingSmallUI from "../loadingSmallUI";
@@ -90,7 +84,7 @@ export default function RecentPracticeTests() {
   const recentTests = data && data.filter((item) => item.result);
   const lastFive =
     recentTests && recentTests.length > 5
-      ? recentTests.slice(recentTests.length - 10, recentTests.length - 5)
+      ? recentTests.slice(recentTests.length - 6, recentTests.length - 1)
       : recentTests;
   return (
     <section className="px-6 lg:pr-0 w-full flex flex-col gap-6">

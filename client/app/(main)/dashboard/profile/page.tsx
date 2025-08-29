@@ -33,7 +33,7 @@ export default function Page() {
         )
       );
       try {
-        axios.patch("http://localhost:8000/users/me", cleanedUpdate, {
+        axios.patch(`${process.env.NEXT_PUBLIC_API}/users/me`, cleanedUpdate, {
           withCredentials: true,
         });
 
@@ -41,7 +41,7 @@ export default function Page() {
           const formData = new FormData();
           formData.append("file", data.avatarFile);
           const response_avatar = await axios.put<{ filepath: string }>(
-            "http://localhost:8000/avatar/me",
+            `${process.env.NEXT_PUBLIC_API}/avatar/me`,
             formData,
             {
               headers: { "Content-Type": "multipart/form-data" },
