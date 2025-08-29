@@ -43,7 +43,7 @@ export default function Page() {
 
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_FASTAPI}/auth/jwt/login`,
+        `https://${process.env.NEXT_PUBLIC_FASTAPI}/auth/jwt/login`,
         {
           method: "POST",
           body: formData.toString(),

@@ -29,7 +29,7 @@ export default function Page() {
     try {
       console.log(data);
       const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_FASTAPI}/auth/forgot-password`,
+        `https://${process.env.NEXT_PUBLIC_FASTAPI}/auth/forgot-password`,
         data,
         {
           headers: {
