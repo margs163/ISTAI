@@ -128,7 +128,7 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
                 <body>
                     <div>
                         <h1>Password Reset</h1> 
-                        <p>Hi, you have requested a password reset. Click on the following link to set a new password: http://localhost:3000/new-password/{token}</p>
+                        <p>Hi, you have requested a password reset. Click on the following link to set a new password: https://ielts-fluency.vercel.app/login/new-password/{token}</p>
                     </div>
                 </body>
                 </html>"""
@@ -157,7 +157,7 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
                 <body>
                     <div>
                         <h1>Email verification</h1> 
-                        <p>Hi, you have to verify your email to continue. Click on the following link to verify your e: http://localhost:3000/verify/{token}</p>
+                        <p>Hi, you have to verify your email to continue. Click on the following link to verify your e: https://ielts-fluency.vercel.app/verify/{token}</p>
                     </div>
                 </body>
                 </html>"""
@@ -181,7 +181,7 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
     ):
         if response is not None:
             response.status_code = 307
-            response.headers["Location"] = "http://localhost:3000/"
+            response.headers["Location"] = "https://ielts-fluency.vercel.app/"
 
 
 cookie_transport = CookieTransport(cookie_max_age=259200, cookie_name="account-session")

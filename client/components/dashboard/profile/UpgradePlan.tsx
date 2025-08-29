@@ -41,7 +41,7 @@ export default function UpgradePlan() {
       paddle?.Checkout.open({
         items: [{ priceId: priceId, quantity: 1 }],
         settings: {
-          successUrl: "http://localhost:3000/dashboard",
+          successUrl: "https://ielts-fluency.vercel.app/dashboard",
         },
         customer: {
           email: userEmail,
