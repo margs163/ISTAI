@@ -634,6 +634,7 @@ export default function Page() {
         <TestSession />
         <TestProgress />
         <Joyride
+          // @ts-expect-error tour object is always error
           steps={tourSteps}
           run={runTour}
           continuous={true}
