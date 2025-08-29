@@ -88,10 +88,7 @@ async function getAddress(
 
 export async function GET(request: NextRequest) {
   try {
-    const subs = await getPaymentMethod(
-      "ctm_01k3ngh9c98fhfegaj7yw5m4aw",
-      "add_01k3ngnshs52mm1sewj32c8tdf"
-    );
+    const subs = await getPaymentMethod("ctm_01k3ngh9c98fhfegaj7yw5m4aw");
     console.log("Address:", subs);
     return NextResponse.json({ message: subs });
   } catch (error) {

@@ -45,6 +45,7 @@ export async function GET(request: NextRequest) {
     }
 
     const chunks: Buffer[] = [];
+    // @ts-expect-error Body object is an iterator
     for await (const chunk of Body) {
       chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
     }
@@ -80,6 +81,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // @ts-expect-error it is an iterator
     const buffer = Buffer.from(await audioFile.arrayBuffer());
     const filePath = `reading-files/${uuidv4()}.wav`;
 
