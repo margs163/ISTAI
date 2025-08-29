@@ -29,6 +29,8 @@ export default async function middleware(request: NextRequest) {
     "Access-Control-Allow-Headers",
     "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Set-Cookie"
   );
+
+  return res;
 }
 
 export const config = {
