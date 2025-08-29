@@ -179,12 +179,15 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
         request: Optional[Request] = None,
         response: Optional[Response] = None,
     ):
-        if response is not None:
-            response.status_code = 307
-            response.headers["Location"] = "https://ielts-fluency.vercel.app/"
+        # if response is not None:
+        #     response.status_code = 307
+        #     response.headers["Location"] = "https://ielts-fluency.vercel.app/"
+        pass
 
 
-cookie_transport = CookieTransport(cookie_max_age=259200, cookie_name="account-session")
+cookie_transport = CookieTransport(
+    cookie_max_age=259200, cookie_name="account-session", cookie_samesite="none"
+)
 
 
 def get_jwt_strategy() -> JWTStrategy:

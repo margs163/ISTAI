@@ -57,6 +57,7 @@ export default function Page() {
       if (!response.ok) {
         throw new Error("Could not login");
       }
+      router.replace("/");
       router.replace("/dashboard");
     } catch (error) {
       console.error(error);
