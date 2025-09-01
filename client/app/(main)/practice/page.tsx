@@ -19,7 +19,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import CustomTooltip from "@/components/practice/CustomTooltip";
 import IntroductionDialog from "@/components/practice/IntroductionDialog";
-import { tourSteps, dialogInfo } from "@/lib/metadata";
+import { tourSteps, dialogInfo } from "@/lib/constants";
 import dynamic from "next/dynamic";
 import PauseDialog from "@/components/practice/PauseDialog";
 import { useQuery } from "@tanstack/react-query";
@@ -129,8 +129,7 @@ export default function Page() {
           if (
             instructionsAudio.current &&
             !instructionsAudio.current?.paused &&
-            sessionState.currentPart === 3 &&
-            openReadingCard
+            sessionState.currentPart === 3
           ) {
             instructionsAudio.current.onended = () => {
               audioFile.current?.play();
@@ -434,10 +433,10 @@ export default function Page() {
   useEffect(() => {
     if (!transcribeWebsocketRef.current && !chatWebsocketRef.current) {
       transcribeWebsocketRef.current = new WebSocket(
-        `https://${process.env.NEXT_PUBLIC_FASTAPI}/stt/ws`
+        `http://${process.env.NEXT_PUBLIC_FASTAPI}/stt/ws`
       );
       chatWebsocketRef.current = new WebSocket(
-        `https://${process.env.NEXT_PUBLIC_FASTAPI}/chat/ws`
+        `http://${process.env.NEXT_PUBLIC_FASTAPI}/chat/ws`
       );
     }
 

@@ -88,7 +88,7 @@ export default function AllPracticeTests() {
   );
   const sorted = searched.sort((a, b) => {
     if (sort === "recent") {
-      return new Date(a.test_date).getTime() - new Date(b.test_date).getTime();
+      return new Date(b.test_date).getTime() - new Date(a.test_date).getTime();
     } else if (sort === "score") {
       return Number(a.result?.overall_score) - Number(a.result?.overall_score);
     } else {

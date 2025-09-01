@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Path, status, Query
+from fastapi import APIRouter, Depends, HTTPException, Path, Request, status, Query
 from sqlalchemy import and_, func, insert, select
 from typing import Annotated
 
@@ -6,12 +6,14 @@ from api.app.schemas.db_tables import ReadingCard
 from ..dependencies import current_active_user
 from ..lib.auth_db import get_async_session
 from ..schemas.practice_test import ReadingCardSchema
+from ..dependencies import limiter
 
 router = APIRouter(dependencies=[Depends(current_active_user)])
 
 
 @router.post("/new")
-async def post_questions(readingCards: list[ReadingCardSchema]):
+@limiter.limit("4/minute")
+async def post_questions(request: Request, readingCards: list[ReadingCardSchema]):
     async for session in get_async_session():
         async with session.begin():
             try:
@@ -31,7 +33,9 @@ async def post_questions(readingCards: list[ReadingCardSchema]):
 
 
 @router.get("/")
+@limiter.limit("10/minute")
 async def get_reading_card(
+    request: Request,
     cardId: Annotated[str | None, Query()] = None,
     random: Annotated[bool | None, Query()] = None,
     count: Annotated[int, Query(ge=1, le=3)] = 1,
@@ -64,7 +68,8 @@ async def get_reading_card(
 
 
 @router.delete("/{readingCardId}")
-async def delete_questions(readingCardId: Annotated[str, Path()]):
+@limiter.limit("4/minute")
+async def delete_questions(request: Request, readingCardId: Annotated[str, Path()]):
     try:
         async for session in get_async_session():
             async with session.begin():

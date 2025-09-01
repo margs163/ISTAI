@@ -33,7 +33,7 @@ export default function Page() {
       paddle?.Checkout.open({
         items: [{ priceId: priceId, quantity: 1 }],
         settings: {
-          successUrl: "https://ielts-fluency.vercel.app/dashboard",
+          successUrl: "http://localhost:3000/",
         },
         customer: {
           email: userEmail,

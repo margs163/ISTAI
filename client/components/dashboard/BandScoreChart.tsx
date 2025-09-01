@@ -28,6 +28,9 @@ export default function BandScoreChart() {
   );
 
   const filtered = practices.filter((item) => item.result);
+  const sorted = filtered.sort((a, b) => {
+    return new Date(a.test_date).getTime() - new Date(b.test_date).getTime();
+  });
   const chartScores = filtered.map((item, index) => ({
     test: index,
     bandScore: item.result?.overall_score,
@@ -58,16 +61,16 @@ export default function BandScoreChart() {
             </p>
           </Link>
         </header>
-        <ChartContainer
-          config={chartConfig}
-          className={cn(
-            "aspect-auto lg:min-h-[224px] w-full px-2 lg:px-4 pb-5",
-            filtered.length < 2 ? "min-h-[160px]" : "h-[160px]"
-          )}
-        >
-          {filtered.length < 2 ? (
-            <BandScoreFallback />
-          ) : (
+        {filtered.length < 2 ? (
+          <BandScoreFallback />
+        ) : (
+          <ChartContainer
+            config={chartConfig}
+            className={cn(
+              "aspect-auto lg:min-h-[214px] w-full px-2 lg:px-4 pb-5",
+              filtered.length < 2 ? "min-h-[160px]" : "h-[160px]"
+            )}
+          >
             <LineChart
               accessibilityLayer
               data={lastTen}
@@ -108,8 +111,8 @@ export default function BandScoreChart() {
               <ChartLegend content={<ChartLegendContent />} />
               <CartesianGrid vertical={false} />
             </LineChart>
-          )}
-        </ChartContainer>
+          </ChartContainer>
+        )}
       </div>
     </section>
   );

@@ -1,4 +1,5 @@
 "use client";
+import { scores } from "@/lib/constants";
 import { useLocalPracticeTestStore } from "@/lib/practiceTestStore";
 import { cn } from "@/lib/utils";
 import {
@@ -20,68 +21,6 @@ type CriterionScore = {
   icon: React.ForwardRefExoticComponent<
     Omit<LucideProps, "ref"> & React.RefAttributes<SVGSVGElement>
   >;
-};
-const scores = {
-  2.0: {
-    level: "Beginner",
-    code: "A1",
-  },
-  2.5: {
-    level: "Beginner",
-    code: "A1",
-  },
-  3.0: {
-    level: "Elementary",
-    code: "A2",
-  },
-  3.5: {
-    level: "Elementary",
-    code: "A2",
-  },
-  4.0: {
-    level: "Intermediate",
-    code: "B1",
-  },
-  4.5: {
-    level: "Intermediate",
-    code: "B1",
-  },
-  5.0: {
-    level: "Intermediate",
-    code: "B1",
-  },
-  5.5: {
-    level: "Upper Intermediate",
-    code: "B2",
-  },
-  6.0: {
-    level: "Upper Intermediate",
-    code: "B2",
-  },
-  6.5: {
-    level: "Upper Intermediate",
-    code: "B2",
-  },
-  7.0: {
-    level: "Advanced",
-    code: "C1",
-  },
-  7.5: {
-    level: "Advanced",
-    code: "C1",
-  },
-  8.0: {
-    level: "Advanced",
-    code: "C1",
-  },
-  8.5: {
-    level: "Proficient",
-    code: "C2",
-  },
-  9.0: {
-    level: "Proficient",
-    code: "C2",
-  },
 };
 
 export function CriterionBand({ score }: { score: CriterionScore }) {

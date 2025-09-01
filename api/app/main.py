@@ -1,7 +1,9 @@
+import logging
 import os
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from dotenv import load_dotenv
 from fastapi.middleware.cors import CORSMiddleware
+import seqlog
 from .routers.email import router as email_router
 from .routers.questions import router as questions_router
 from .users import fastapi_users, auth_backend
@@ -16,6 +18,10 @@ from .routers.analytics import router as analytics_router
 from .routers.chat import router as chat_router
 from .routers.avatar import router as avatar_router
 from .routers.notifications import router as notification_router
+from .routers.pronunciation_test import router as pronunciation_test_router
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from .dependencies import limiter
 from .users import google_oauth_client
 
 load_dotenv()
@@ -24,7 +30,17 @@ SECRET = os.getenv("SECRET")
 if not SECRET:
     raise Exception("Google OAuth Secret empty")
 
+seqlog.log_to_seq(
+    server_url="http://localhost:5341/",
+    level=logging.INFO,
+    batch_size=10,
+    auto_flush_timeout=10,
+)
+
 app = FastAPI()
+
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 origins = [
     "http://localhost",
@@ -111,7 +127,12 @@ app.include_router(subscription_router, prefix="/subscription", tags=["subscript
 
 app.include_router(notification_router, prefix="/notifications", tags=["notifications"])
 
+app.include_router(
+    pronunciation_test_router, prefix="/pronunciation-test", tags=["pronunciation test"]
+)
+
 
 @app.get("/")
-async def main():
+@limiter.limit("20/minute")
+async def main(request: Request):
     return {"message": "Hello, World!"}

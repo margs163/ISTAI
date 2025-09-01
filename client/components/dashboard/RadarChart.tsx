@@ -10,16 +10,6 @@ import {
 } from "@/components/ui/chart";
 import Link from "next/link";
 import { useAnalyticsStore } from "@/lib/userStorage";
-import LoadingUI from "../loadingUI";
-import LoadingSmallUI from "../loadingSmallUI";
-
-const chartData = [
-  { criterion: "Fluency", score: 7.0 },
-  { criterion: "Cohesion", score: 6.5 },
-  { criterion: "Pronunciation", score: 7.0 },
-  { criterion: "Grammatical Range", score: 6.5 },
-  { criterion: "Lexical Resource", score: 6.0 },
-];
 
 const chartConfig = {
   score: {
@@ -42,7 +32,7 @@ export default function RadarChart() {
   ];
   return (
     <section className="px-6 lg:pl-0 w-full flex flex-col gap-4">
-      <div className=" w-full flex flex-col gap-2 lg:gap-6 bg-white rounded-lg border border-gray-200">
+      <div className=" w-full flex flex-col gap-2 lg:gap-4 bg-white rounded-lg border border-gray-200">
         <header className="p-5 px-6 w-full flex flex-row justify-between items-start gap-20">
           <div className="flex flex-col items-start justify-start gap-0">
             <h3 className="font-semibold text-lg text-gray-800">

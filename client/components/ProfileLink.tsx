@@ -12,7 +12,7 @@ export default function ProfileLink({ avatarUrl }: { avatarUrl?: string }) {
           width={200}
           height={200}
           alt="avatar"
-          className="object-cover shrink-0 h-8 w-8 rounded-full border border-gray-300 p-0.5"
+          className="object-cover shrink-0 h-8 w-8 rounded-full border border-gray-300"
         />
       ) : (
         <div className="h-8 w-8 rounded-full bg-indigo-600 flex items-center justify-center hover:bg-indigo-600 active:bg-indigo-600 transition-colors">

@@ -6,7 +6,7 @@ import lineGraphFallback from "@/assets/images/linegraphFallback.svg";
 
 export default function BandScoreFallback() {
   return (
-    <div className="flex flex-col lg:flex-row items-center justify-start lg:justify-center w-full p-2 gap-4">
+    <div className="flex flex-col lg:flex-row items-center justify-start lg:justify-center w-full p-2 gap-4 pt-0 lg:pb-7">
       <Image
         src={lineGraphFallback}
         alt="test-fallback"

@@ -1,13 +1,17 @@
-from fastapi import APIRouter, BackgroundTasks
+from fastapi import APIRouter, BackgroundTasks, Request
 from pydantic import EmailStr
 from fastapi_mail import MessageSchema, MessageType, FastMail
+from ..dependencies import limiter
 from ..users import conf
 
 router = APIRouter()
 
 
 @router.post("/test")
-async def send_email(emails: list[EmailStr], background_tasks: BackgroundTasks):
+@limiter.limit("5/minute")
+async def send_email(
+    request: Request, emails: list[EmailStr], background_tasks: BackgroundTasks
+):
     html = "<p>Hi this is test email!</p>"
 
     message = MessageSchema(
@@ -21,4 +25,3 @@ async def send_email(emails: list[EmailStr], background_tasks: BackgroundTasks):
 
     background_tasks.add_task(fm.send_message, message)
     return {"message": "Successfully sent an email!"}
-

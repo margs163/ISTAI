@@ -297,7 +297,7 @@ export const UpdatePracticeTestSchema = z.object({
 
 export type UpdatePracticeTestType = z.infer<typeof UpdatePracticeTestSchema>;
 
-const PronunciationTestSchema = z.object({
+export const PronunciationTestSchema = z.object({
   id: z.string(),
   pronunciation_score: z.float32().multipleOf(0.5),
   pronunciation_strong_points: z.array(z.string()),

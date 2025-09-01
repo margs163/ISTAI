@@ -2,7 +2,16 @@ from datetime import datetime
 import os
 from typing import Annotated, Any
 from uuid import uuid4
-from fastapi import APIRouter, Body, Depends, File, HTTPException, UploadFile, status
+from fastapi import (
+    APIRouter,
+    Body,
+    Depends,
+    File,
+    HTTPException,
+    Request,
+    UploadFile,
+    status,
+)
 from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.orm import joinedload
@@ -13,6 +22,7 @@ from api.app.schemas.db_tables import CreditCard, Notifications, Subscription, U
 from api.app.schemas.notifications import NotificationTypeEnum, NotificationsSchema
 from ..dependencies import current_active_user, get_s3_client
 from sqlalchemy.ext.asyncio import AsyncSession
+from ..dependencies import limiter
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -28,7 +38,9 @@ bucket_name = os.getenv("S3_BUCKET_NAME")
 
 
 @router.put("/me")
+@limiter.limit("10/minute")
 async def upload_avatar(
+    request: Request,
     user: Annotated[User, Depends(current_active_user)],
     session: Annotated[AsyncSession, Depends(get_async_session)],
     file: UploadFile,
@@ -66,7 +78,9 @@ async def upload_avatar(
 
 
 @router.delete("/me")
+@limiter.limit("10/minute")
 async def delete_my_avatar(
+    request: Request,
     user: Annotated[User, Depends(current_active_user)],
     session: Annotated[AsyncSession, Depends(get_async_session)],
     s3_client: Annotated[Any, Depends(get_s3_client)],

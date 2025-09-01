@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 import { type ClassValue } from "clsx";
-import React, { ButtonHTMLAttributes } from "react";
+import React, { ButtonHTMLAttributes, forwardRef } from "react";
 
 type MainButtonProps = {
   children: React.ReactNode;
@@ -9,15 +9,13 @@ type MainButtonProps = {
   variant?: "primary" | "secondary";
 } & ButtonHTMLAttributes<HTMLButtonElement>;
 
-export default function MainButton({
-  children,
-  className,
-  type = "button",
-  variant = "primary",
-  ...props
-}: MainButtonProps) {
-  return (
+const MainButton = forwardRef<HTMLButtonElement, MainButtonProps>(
+  (
+    { children, className, type = "button", variant = "primary", ...props },
+    ref
+  ) => (
     <button
+      ref={ref}
       type={type}
       className={cn(
         "px-3 py-2 rounded-md text-sm font-medium flex flex-row gap-2 items-center transition-colors ml-auto",
@@ -30,5 +28,7 @@ export default function MainButton({
     >
       {children}
     </button>
-  );
-}
+  )
+);
+
+export default MainButton;

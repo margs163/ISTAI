@@ -1,6 +1,15 @@
 from datetime import datetime
 from typing import Annotated, Any
-from fastapi import APIRouter, Depends, Body, HTTPException, Path, Query, status
+from fastapi import (
+    APIRouter,
+    Depends,
+    Body,
+    HTTPException,
+    Path,
+    Query,
+    Request,
+    status,
+)
 from pydantic import BaseModel
 
 from api.app.lib.send_notification import create_notification
@@ -17,6 +26,7 @@ from api.app.schemas.db_tables import (
 from api.app.schemas.notifications import NotificationTypeEnum, NotificationsSchema
 from ..schemas.practice_test import PracticeTestSchema, PracticeTestUpdateSchema
 from sqlalchemy import select
+from ..dependencies import limiter
 from sqlalchemy.orm import joinedload, selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 from ..dependencies import current_active_user
@@ -43,7 +53,9 @@ class PostResponse(BaseModel):
 
 
 @router.post("/new")
+@limiter.limit("2/minute")
 async def create_test(
+    request: Request,
     test: Annotated[PracticeTestSchema, Body()],
     user: Annotated[User, Depends(current_active_user)],
 ):
@@ -115,7 +127,9 @@ async def create_test(
 
 
 @router.get("/")
+@limiter.limit("25/minute")
 async def get_practice_test(
+    request: Request,
     user: Annotated[User, Depends(current_active_user)],
     test_ids: Annotated[list[str] | None, Query()] = None,
     user_id: Annotated[bool | None, Query()] = None,
@@ -154,7 +168,9 @@ async def get_practice_test(
 
 
 @router.put("/{test_id}")
+@limiter.limit("4/minute")
 async def update_test(
+    request: Request,
     test_id: Annotated[str, Path()],
     update_obj: Annotated[PracticeTestUpdateSchema, Body()],
     user: Annotated[User, Depends(current_active_user)],
@@ -166,8 +182,6 @@ async def update_test(
         )
         practice_test = result_select
 
-        print("Error did not happen here")
-
         if not practice_test:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -176,7 +190,6 @@ async def update_test(
 
         if update_obj.test_duration:
             practice_test.test_duration = update_obj.test_duration
-            print("Error did not happen in test duration")
 
         if update_obj.status:
             practice_test.status = update_obj.status
@@ -200,7 +213,6 @@ async def update_test(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail="Could not find a question card",
                 )
-            print("Error did not happen here")
 
             practice_test.part_one_card = card_one
 
@@ -215,7 +227,6 @@ async def update_test(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail="Could not find a question card",
                 )
-            print("Error did not happen here")
 
             practice_test.part_two_card = card_two
 
@@ -231,10 +242,8 @@ async def update_test(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail="Could not find a reading card",
                 )
-            print("Fetched a reading card:", reading_one)
             reading_cards_list = [reading_one]
             practice_test.reading_cards = reading_cards_list
-            print("Error did not happed in reading cards")
 
         await session.commit()
         return {"status": "success"}
@@ -248,7 +257,8 @@ async def update_test(
 
 
 @router.delete("/{test_id}")
-async def delete_test(test_id: Annotated[str, Path()]):
+@limiter.limit("10/minute")
+async def delete_test(request: Request, test_id: Annotated[str, Path()]):
     async for session in get_async_session():
         async with session.begin():
             try:
@@ -270,8 +280,3 @@ async def delete_test(test_id: Annotated[str, Path()]):
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail=f"Could not delete a practice test {e}",
                 )
-
-
-# "Could not create a practice test (sqlalchemy.dialects.postgresql.asyncpg.Error) <class 'asyncpg.exceptions.InvalidTextRepresentationError'>: invalid input value for enum test_status_enum: \"ONGOING\"
-# \n[SQL: INSERT INTO practice_test_table (id, user_id, status, practice_name, assistant, test_date) VALUES ($1::UUID, $2::UUID, $3::test_status_enum, $4::VARCHAR, $5::assistant_enum, $6::DATE) RETURNING practice_test_table.id, practice_test_table.user_id, practice_test_table.status, practice_test_table.practice_name, practice_test_table.assistant, practice_test_table.test_duration, practice_test_table.test_date, practice_test_table.part_one_card_id, practice_test_table.part_two_card_id]\n[parameters: ('be127298-c6ea-4d09-82fb-0dc2c7e0c8be', '5bd3cfa3-05be-4946-b141-2301565ec06f', 'ONGOING', 'string', 'RON', datetime.date(2025, 8, 15))]
-# (Background on this error at: https://sqlalche.me/e/20/dbapi)"

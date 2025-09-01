@@ -1,4 +1,3 @@
-from operator import add
 from pprint import pprint
 from typing import Annotated, TypedDict, Dict, List
 import asyncio
@@ -13,7 +12,7 @@ from .prompts import pronunciation_system_prompt, human_input_pronunciation
 
 load_dotenv()
 
-llm = ChatGroq(model="llama3-70b-8192", temperature=0.5)
+llm = ChatGroq(model="meta-llama/llama-4-scout-17b-16e-instruct", temperature=0.5)
 
 pronunciation_prompt = ChatPromptTemplate(
     [

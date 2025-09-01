@@ -41,7 +41,7 @@ export default function Page({
     try {
       console.log(data);
       const response = await axios.post(
-        `https://${process.env.NEXT_PUBLIC_FASTAPI}/auth/reset-password`,
+        `http://${process.env.NEXT_PUBLIC_FASTAPI}/auth/reset-password`,
         {
           password: data.confirmPassword,
           token: token,

@@ -1,12 +1,13 @@
 from datetime import date
 from typing import Annotated
-from fastapi import APIRouter, Body, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Body, Depends, HTTPException, Query, Request, status
 from sqlalchemy import func, select
 
 from api.app.lib.auth_db import get_async_session
 from api.app.schemas.db_tables import Notifications, User
 from api.app.dependencies import current_active_user
 from sqlalchemy.ext.asyncio import AsyncSession
+from ..dependencies import limiter
 
 from api.app.schemas.notifications import (
     CreateNotificationSchema,
@@ -18,7 +19,9 @@ router = APIRouter(dependencies=[Depends(current_active_user)])
 
 
 @router.get("/me")
+@limiter.limit("25/minute")
 async def get_notifications(
+    request: Request,
     user: Annotated[User, Depends(current_active_user)],
     session: Annotated[AsyncSession, Depends(get_async_session)],
     today: Annotated[bool, Query()] = False,
@@ -40,7 +43,9 @@ async def get_notifications(
 
 
 @router.post("/init")
+@limiter.limit("4/minute")
 async def init_notifications(
+    request: Request,
     user: Annotated[User, Depends(current_active_user)],
     session: Annotated[AsyncSession, Depends(get_async_session)],
 ):
@@ -70,7 +75,9 @@ async def init_notifications(
 
 
 @router.put("/")
+@limiter.limit("20/minute")
 async def create_notification(
+    request: Request,
     user: Annotated[User, Depends(current_active_user)],
     session: Annotated[AsyncSession, Depends(get_async_session)],
     notification: Annotated[CreateNotificationSchema, Body()],

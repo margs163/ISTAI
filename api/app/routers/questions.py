@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, Depends, HTTPException, Request, status, Query
 from sqlalchemy import and_, insert, select
 from typing import Annotated
 from sqlalchemy import func
@@ -6,12 +6,14 @@ from ..dependencies import current_active_user
 from ..lib.auth_db import get_async_session
 from ..schemas.questions import QuestionSchema
 from ..schemas.db_tables import QuestionCard, TestPartEnum
+from ..dependencies import limiter
 
 router = APIRouter(dependencies=[Depends(current_active_user)])
 
 
 @router.post("/new")
-async def post_questions(questionCards: list[QuestionSchema]):
+@limiter.limit("4/minute")
+async def post_questions(request: Request, questionCards: list[QuestionSchema]):
     async for session in get_async_session():
         async with session.begin():
             try:
@@ -37,7 +39,9 @@ async def post_questions(questionCards: list[QuestionSchema]):
 
 
 @router.get("/")
+@limiter.limit("10/minute")
 async def get_questions(
+    request: Request,
     part: Annotated[int | None, Query(ge=1, le=2)] = None,
     topic: Annotated[str | None, Query()] = None,
 ):
@@ -80,7 +84,8 @@ async def get_questions(
 
 
 @router.delete("/{questionCardId}")
-async def delete_questions(questionCardId: str):
+@limiter.limit("4/minute")
+async def delete_questions(request: Request, questionCardId: str):
     try:
         async for session in get_async_session():
             async with session.begin():

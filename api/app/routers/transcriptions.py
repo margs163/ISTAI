@@ -1,9 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException, Path, status, Query
+from fastapi import APIRouter, Depends, HTTPException, Path, Request, status, Query
 from sqlalchemy import and_, insert, select
 from typing import Annotated
 from ..dependencies import current_active_user
 from ..lib.auth_db import get_async_session
 from ..schemas.transcriptions import TranscriptionSchema
+from ..dependencies import limiter
 from ..schemas.db_tables import (
     PracticeTest,
     Transcription,
@@ -14,7 +15,9 @@ router = APIRouter(dependencies=[Depends(current_active_user)])
 
 
 @router.post("/new")
+@limiter.limit("4/minute")
 async def post_transcription(
+    request: Request,
     transcription: TranscriptionSchema,
     user: Annotated[User, Depends(current_active_user)],
 ):
@@ -52,7 +55,9 @@ async def post_transcription(
 
 
 @router.get("/")
+@limiter.limit("20/minute")
 async def get_transcription(
+    request: Request,
     user: Annotated[User, Depends(current_active_user)],
     test_id: Annotated[str | None, Query()] = None,
     user_id: Annotated[bool | None, Query()] = None,
@@ -85,7 +90,8 @@ async def get_transcription(
 
 
 @router.delete("/{questionCardId}")
-async def delete_questions(testId: Annotated[str, Path()]):
+@limiter.limit("4/minute")
+async def delete_questions(request: Request, testId: Annotated[str, Path()]):
     try:
         async for session in get_async_session():
             async with session.begin():

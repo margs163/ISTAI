@@ -3,31 +3,11 @@ import { BookOpen, Check } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { ProgressBar } from "../dashboard/MistakesCard";
 import { useTestSessionStore } from "@/lib/testSessionStore";
-
-const testProgress = [
-  {
-    name: "Part 1",
-    status: "completed",
-    duration: "4-5 minutes",
-    description: "Introduction & interview",
-    score: 7.5,
-  },
-  {
-    name: "Part 2",
-    status: "ongoing",
-    duration: "3-4 minutes",
-    description: "Individual Long Turn",
-  },
-  {
-    name: "Part 3",
-    staus: "unknown",
-    duration: "4-5 minutes",
-    description: "Two-way Discussion",
-  },
-];
+import { Progress } from "../ui/progress";
 
 export default function TestProgress() {
   const currentPart = useTestSessionStore((state) => state.currentPart);
+  const testStatus = useTestSessionStore((state) => state.status);
   const [testProgress, setTestProgress] = useState([
     {
       name: "Part 1",
@@ -54,7 +34,10 @@ export default function TestProgress() {
     setTestProgress((prev) => {
       const copiedProgress = [...prev];
       for (let i = 0; i < copiedProgress.length; i++) {
-        if (i < currentPart - 1) {
+        if (
+          i < currentPart - 1 ||
+          (testStatus === "inactive" && currentPart === 3)
+        ) {
           copiedProgress[i].status = "completed";
         } else if (i === currentPart - 1) {
           copiedProgress[i].status = "ongoing";
@@ -64,7 +47,7 @@ export default function TestProgress() {
       }
       return copiedProgress;
     });
-  }, [currentPart]);
+  }, [currentPart, testStatus]);
 
   const completedCount = testProgress.filter(
     (item) => item.status === "completed"
@@ -129,16 +112,6 @@ export default function TestProgress() {
                       {item.description}
                     </p>
                   </div>
-
-                  {item?.score ? (
-                    <span className="px-2 py-0.5 bg-green-100 text-sm font-medium text-green-600 ml-auto rounded-lg">
-                      {item?.score}
-                    </span>
-                  ) : (
-                    item?.status === "ongoing" && (
-                      <span className="w-2.5 h-2.5 rounded-full bg-blue-500 animate-pulse ml-auto mr-3"></span>
-                    )
-                  )}
                 </div>
               );
             })}
@@ -146,9 +119,9 @@ export default function TestProgress() {
           <div className="p-4 rounded-lg bg-gray-50 flex flex-col gap-2">
             <div className="flex flex-row justify-between items-center">
               <h3 className="text-sm">Test Progress</h3>
-              <span className="font-medium">33%</span>
+              <span className="font-medium">{completedCount * 33}%</span>
             </div>
-            <ProgressBar frequency={Math.round(100 / (4 - completedCount))} />
+            <Progress value={Math.round(100 / (4 - completedCount))} />
           </div>
         </main>
       </div>

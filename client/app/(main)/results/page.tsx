@@ -1,10 +1,10 @@
 "use client";
 import Footer from "@/components/Footer";
-import LoadingUI from "@/components/loadingUI";
 import AdvancedVocabulary from "@/components/results/AdvancedVocabulary";
 import CriterionScores from "@/components/results/CriterionScores";
 import GrammarErrors from "@/components/results/GrammarErrors";
 import ImprovementTips from "@/components/results/ImprovementTips";
+import LoadingProgress from "@/components/results/LoadingProgress";
 import Overall from "@/components/results/Overall";
 import PronunciationIssues from "@/components/results/PronunciationIssues";
 import RepeatedWords from "@/components/results/Repetitions";
@@ -13,21 +13,44 @@ import SentenceImprovements from "@/components/results/SentenceImprovements";
 import StrongAspects from "@/components/results/StrongAspects";
 import WeakAspects from "@/components/results/WeakAspects";
 import { useLocalPracticeTestStore } from "@/lib/practiceTestStore";
+import { updateAnalytics, updatePracticeTest } from "@/lib/queries";
 import {
-  postTestResults,
-  updateAnalytics,
-  updatePracticeTest,
-} from "@/lib/queries";
-import { ResultType } from "@/lib/types";
+  PracticeTestType,
+  QuestionCardType,
+  ReadingCardType,
+  ResultSchema,
+  TestTranscriptionsType,
+} from "@/lib/types";
+import { useUserStore } from "@/lib/userStorage";
 import { useMutation } from "@tanstack/react-query";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useCallback, useState } from "react";
 import { toast } from "sonner";
 
 export default function Page() {
-  const localPracticeTest = useLocalPracticeTestStore((state) => state);
+  const readingCards = useLocalPracticeTestStore(
+    (state) => state.reading_cards
+  );
+  const user_id = useUserStore((state) => state.id);
+  const transcriptions = useLocalPracticeTestStore(
+    (state) => state.transcription
+  );
+  const audioPath = useLocalPracticeTestStore(
+    (state) => state.readingAudioPath
+  );
+  const testId = useLocalPracticeTestStore((state) => state.id);
+  const status = useLocalPracticeTestStore((state) => state.status);
+  const testDuration = useLocalPracticeTestStore(
+    (state) => state.test_duration
+  );
+  const partTwoCard = useLocalPracticeTestStore((state) => state.part_two_card);
+
   const setResults = useLocalPracticeTestStore((state) => state.setTestResult);
   const results = useLocalPracticeTestStore((state) => state.result);
-  const postedRef = useRef<boolean>(false);
+  const socketRef = useRef<WebSocket>(null);
+  const [posted, setPosted] = useState<boolean>(false);
+
+  const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
+  const [progress, setProgress] = useState(13);
 
   const mutation = useMutation({
     mutationKey: ["analytics-update"],
@@ -57,131 +80,230 @@ export default function Page() {
     },
   });
 
-  const { mutateAsync, isPending, isError, isSuccess, error, data } =
-    useMutation({
-      mutationKey: ["results"],
-      mutationFn: postTestResults,
-      onSuccess: async (data: ResultType) => {
-        setResults(data);
-        if (!localPracticeTest.test_duration) {
+  const sendResults = useCallback(
+    (
+      transcriptions: TestTranscriptionsType,
+      readingCards: ReadingCardType[],
+      testId: string,
+      audioPath: string,
+      status: "Ongoing" | "Cancelled" | "Finished" | "Paused",
+      testDuration: number,
+      partTwoCard: QuestionCardType
+    ) => {
+      console.log("Sending results");
+
+      const body = {
+        readingCard: {
+          topic: readingCards[0].topic,
+          text: readingCards[0].text,
+        },
+        transcription: {
+          test_id: testId,
+          part_one: transcriptions.part_one,
+          part_two: transcriptions.part_two,
+          part_three: transcriptions.part_three,
+        },
+        reading_audio_path: audioPath,
+        score_threshold: 0.5,
+        user_id: user_id,
+      };
+
+      console.log("SocketRef readyState:", socketRef.current?.readyState);
+      if (socketRef.current && socketRef.current.readyState == WebSocket.OPEN) {
+        console.log("Sending JSON to websocket");
+        socketRef.current.send(JSON.stringify(body));
+        mutation_test.mutate({
+          data: {
+            transcription: transcriptions,
+            part_two_card_id: partTwoCard?.id,
+            test_duration: testDuration,
+            status: status,
+            reading_cards: readingCards,
+          },
+          practiceTestId: testId,
+        });
+        setPosted(true);
+      }
+
+      console.log("Updating practice test");
+    },
+    [user_id]
+  );
+
+  const messageHandler = useCallback(
+    async (event: MessageEvent) => {
+      let data;
+      try {
+        data = JSON.parse(event.data);
+      } catch {
+        switch (event.data) {
+          case "Invoking general graph":
+            setProgress(30);
+            setStep(1);
+            break;
+          case "Invoking sentences graph":
+            setProgress(50);
+            setStep(2);
+            break;
+          case "Transcribing reading speech":
+            setProgress(70);
+            setStep(3);
+            break;
+          case "Invoking pronunciation agent":
+            setProgress(90);
+            setStep(4);
+            break;
+          default:
+            break;
+        }
+        return;
+      }
+
+      if (data && data.data) {
+        const validated = await ResultSchema.safeParseAsync(data.data);
+
+        if (validated.error) {
+          toast("Validation Error", {
+            description: "Could not validate a results schema",
+            action: {
+              label: "Log",
+              onClick: () => console.log(validated.error.message),
+            },
+          });
+          return;
+        }
+
+        setResults(validated.data);
+        sessionStorage.setItem(
+          "local-practice-test",
+          JSON.stringify(validated.data)
+        );
+
+        if (!testDuration) {
           toast("Error posting results", {
             description: "Could not post test results",
             action: {
               label: "Log",
-              onClick: () => console.error(error),
+              onClick: () => console.error("No test duration"),
             },
           });
-        } else {
-          await mutation.mutateAsync({
-            practice_time: localPracticeTest.test_duration,
-            tests_completed: 1,
-            current_bandscore: data.overall_score,
-            average_band_scores: data.criterion_scores,
-            average_band: data.overall_score,
-            streak_days: 1,
-            grammar_common_mistakes: data.grammar_errors.grammar_analysis.map(
-              (item) => ({ ...item, frequency: 1 })
-            ),
-            lexis_common_mistakes:
-              data.sentence_improvements.vocabulary_enhancements.map(
-                (item) => ({
-                  ...item,
-                  frequency: 1,
-                })
-              ),
-            pronunciation_common_mistakes: data.pronunciation_issues.map(
-              (item) => ({ ...item, frequency: 1 })
-            ),
-          });
+          return;
         }
-      },
-      onError: (error) => {
-        toast("Error posting results", {
-          description: "Could not post test results",
-          action: {
-            label: "Log",
-            onClick: () => console.log(error),
-          },
-        });
-      },
-    });
 
-  useEffect(() => {
-    const readingCards = localPracticeTest.reading_cards;
-    const audioPath = localPracticeTest.readingAudioPath;
-    const transcription = localPracticeTest.transcription;
+        await mutation.mutateAsync({
+          practice_time: testDuration,
+          tests_completed: 1,
+          current_bandscore: validated.data.overall_score,
+          average_band_scores: validated.data.criterion_scores,
+          average_band: validated.data.overall_score,
+          streak_days: 1,
+          grammar_common_mistakes:
+            validated.data.grammar_errors.grammar_analysis.map((item) => ({
+              ...item,
+              frequency: 1,
+            })),
+          lexis_common_mistakes:
+            validated.data.sentence_improvements.vocabulary_enhancements.map(
+              (item) => ({
+                ...item,
+                frequency: 1,
+              })
+            ),
+          pronunciation_common_mistakes:
+            validated.data.pronunciation_issues.map((item) => ({
+              ...item,
+              frequency: 1,
+            })),
+        });
+      }
+    },
+    [testDuration, sendResults]
+  );
+
+  const onOpenHandler = useCallback(() => {
     const readyParams =
       readingCards &&
       readingCards.length > 0 &&
       typeof audioPath === "string" &&
-      transcription;
+      transcriptions &&
+      testDuration &&
+      partTwoCard;
 
     const resultSession = sessionStorage.getItem("local-practice-test");
+    console.log(
+      readyParams,
+      `ReadyParams. Reading Cards:\n${readingCards}\n\nAudio Path:\n${audioPath}\n\nTranscriptions:\n${transcriptions}`
+    );
 
-    async function sendResults() {
-      if (resultSession) {
-        setResults(JSON.parse(resultSession));
-        console.log("We have got the results session");
-      } else if (readyParams && !postedRef.current) {
-        console.log("mutating");
-        postedRef.current = true;
-        await mutation_test.mutateAsync({
-          data: {
-            transcription: transcription,
-            part_two_card_id: localPracticeTest?.part_two_card?.id,
-            test_duration: localPracticeTest.test_duration,
-            status: localPracticeTest.status,
-            reading_cards: localPracticeTest.reading_cards,
-          },
-          practiceTestId: localPracticeTest.id,
-        });
-        await mutateAsync({
-          readingCard: readingCards[0],
-          readingCardAudioPath: audioPath,
-          transcription: transcription,
-          testId: localPracticeTest.id,
-        });
+    if (resultSession) {
+      setResults(JSON.parse(resultSession));
+    } else if (!posted && readyParams) {
+      sendResults(
+        transcriptions,
+        readingCards,
+        testId,
+        audioPath,
+        status,
+        testDuration,
+        partTwoCard
+      );
+    }
+  }, [
+    readingCards,
+    audioPath,
+    transcriptions,
+    testDuration,
+    partTwoCard,
+    posted,
+    status,
+    testId,
+  ]);
 
-        console.log("mutation were run");
-      }
+  useEffect(() => {
+    if (!socketRef.current) {
+      socketRef.current = new WebSocket(
+        `ws://${process.env.NEXT_PUBLIC_FASTAPI}/results/ws`
+      );
     }
 
-    sendResults();
-  }, []);
+    socketRef.current.onopen = onOpenHandler;
+    socketRef.current.onmessage = messageHandler;
+  }, [onOpenHandler, messageHandler]);
 
-  if (isError)
+  if (mutation_test.isError)
     return (
       <h1 className="text-3xl text-gray-800">
-        Could not create results: {error.message}
+        Could not update a practice test: {mutation_test.error.message}
       </h1>
     );
 
-  if (isPending) return <LoadingUI />;
-
-  if (isSuccess || results) {
-    if (isSuccess) {
-      console.log("Session storage JSON was set");
-      sessionStorage.setItem("local-practice-test", JSON.stringify(data));
-    }
+  if (mutation.isError)
     return (
-      <div className="font-geist w-full min-h-screen flex flex-col gap-6 lg:gap-10 bg-gray-50 pt-24 lg:pt-32 pb-0">
-        <ResultsHeader />
-        <Overall score={results?.overall_score ?? 6.0} />
-        <CriterionScores />
-        <div className="lg:px-20 lg:grid-cols-2 lg:grid lg:gap-6 space-y-6 lg:space-y-0 xl:px-36">
-          <StrongAspects />
-          <WeakAspects />
-        </div>
-        <SentenceImprovements />
-        <GrammarErrors />
-        <div className="lg:px-20 lg:grid-cols-2 lg:grid lg:gap-6 space-y-6 xl:px-36 lg:space-y-0">
-          <AdvancedVocabulary />
-          <RepeatedWords />
-        </div>
-        <PronunciationIssues />
-        <ImprovementTips />
-        <Footer />
-      </div>
+      <h1 className="text-3xl text-gray-800">
+        Could not update analytics: {mutation.error.message}
+      </h1>
     );
-  }
+
+  if (!results) return <LoadingProgress step={step} progress={progress} />;
+
+  return (
+    <div className="font-geist w-full min-h-screen flex flex-col gap-6 lg:gap-10 bg-gray-50 pt-24 lg:pt-32 pb-0">
+      <ResultsHeader />
+      <Overall score={results.overall_score} />
+      <CriterionScores />
+      <div className="lg:px-20 lg:grid-cols-2 lg:grid lg:gap-6 space-y-6 lg:space-y-0 xl:px-36">
+        <StrongAspects />
+        <WeakAspects />
+      </div>
+      <SentenceImprovements />
+      <GrammarErrors />
+      <div className="lg:px-20 lg:grid-cols-2 lg:grid lg:gap-6 space-y-6 xl:px-36 lg:space-y-0">
+        <AdvancedVocabulary />
+        <RepeatedWords />
+      </div>
+      <PronunciationIssues />
+      <ImprovementTips />
+      <Footer />
+    </div>
+  );
 }

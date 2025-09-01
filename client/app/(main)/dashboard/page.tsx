@@ -69,8 +69,6 @@ export default function Page() {
   //   pdf.save(`stats.pdf`);
   // };
 
-  console.log("DAMN");
-
   useQuery({
     queryKey: ["user"],
     queryFn: async () => await fetchUser(setUserData),
@@ -82,9 +80,9 @@ export default function Page() {
   });
 
   useQuery({
-    queryKey: ["avatar-fetch", avatarPath],
+    queryKey: ["avatar-fetch"],
     queryFn: async () => {
-      if (!avatarPath) return null;
+      if (!avatarPath) return;
       await fetchAvatar(avatarPath, setAvatarUrl);
     },
     enabled: !!avatarPath,

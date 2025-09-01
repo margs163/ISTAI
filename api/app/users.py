@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from fastapi_users.authentication import (
     CookieTransport,
     JWTStrategy,
@@ -5,9 +6,15 @@ from fastapi_users.authentication import (
 )
 from fastapi_users import UUIDIDMixin, BaseUserManager, FastAPIUsers
 from fastapi_mail import ConnectionConfig, MessageSchema, FastMail, MessageType
+from sqlalchemy import select
 
 from api.app.schemas.analytics import AnalyticsSchema, AverageBandScores
-from api.app.schemas.db_tables import Analytics, Notifications, Subscription
+from api.app.schemas.db_tables import (
+    Analytics,
+    Notifications,
+    PracticeTest,
+    Subscription,
+)
 from api.app.schemas.notifications import NotificationTypeEnum, NotificationsSchema
 from api.app.schemas.subscriptions import SubscriptionSchema, TierEnum
 from .lib.auth_db import User, get_async_session, get_user_db
@@ -128,7 +135,7 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
                 <body>
                     <div>
                         <h1>Password Reset</h1> 
-                        <p>Hi, you have requested a password reset. Click on the following link to set a new password: https://ielts-fluency.vercel.app/login/new-password/{token}</p>
+                        <p>Hi, you have requested a password reset. Click on the following link to set a new password: http://localhost:3000/login/new-password/{token}</p>
                     </div>
                 </body>
                 </html>"""
@@ -157,7 +164,7 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
                 <body>
                     <div>
                         <h1>Email verification</h1> 
-                        <p>Hi, you have to verify your email to continue. Click on the following link to verify your e: https://ielts-fluency.vercel.app/verify/{token}</p>
+                        <p>Hi, you have to verify your email to continue. Click on the following link to verify your e: http://localhost:3000/verify/{token}</p>
                     </div>
                 </body>
                 </html>"""
@@ -179,10 +186,28 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
         request: Optional[Request] = None,
         response: Optional[Response] = None,
     ):
-        # if response is not None:
-        #     response.status_code = 307
-        #     response.headers["Location"] = "https://ielts-fluency.vercel.app/"
-        pass
+        async for session in get_async_session():
+            async with session.begin():
+                analytic = await session.scalar(
+                    select(Analytics).where(Analytics.user_id == user.id)
+                )
+                tests = await session.scalars(
+                    select(PracticeTest)
+                    .where(PracticeTest.user_id == user.id)
+                    .order_by(PracticeTest.test_date.desc())
+                )
+                result = tests.unique()
+                result = result.all()
+
+                if result and analytic:
+                    last = result[0]
+                    print("LAST DATE:", last.test_date)
+                    if datetime.now() - last.test_date > timedelta(days=1):
+                        analytic.streak_days = 0
+
+        if response is not None:
+            response.status_code = 307
+            response.headers["Location"] = "http://localhost:3000/dashboard"
 
 
 cookie_transport = CookieTransport(

@@ -119,7 +119,7 @@ async def chat_websocket(
                 print("Generating tts")
                 voice_id = ""
                 tts_filename = f"tts-files/test-{uuid.uuid4()}.mp3"
-                if data["assistant"] == AssistantEnumSchema.Kate:
+                if data["assistant"] == "Emma":
                     voice_id = "Salli"
                 else:
                     voice_id = "Stephen"

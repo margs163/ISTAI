@@ -1,16 +1,15 @@
-from contextlib import asynccontextmanager
-from typing import AsyncGenerator, Generator
-import boto3.session
-from fastapi_mail import ConnectionConfig
+from typing import AsyncGenerator
 from .users import fastapi_users
 from dotenv import load_dotenv
-import os
-import aioboto3
 from aioboto3.session import Session
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
 
 load_dotenv()
 
 current_active_user = fastapi_users.current_user(active=True)
+limiter = Limiter(key_func=get_remote_address)
 
 
 async def get_polly_client() -> AsyncGenerator[Session, None]:

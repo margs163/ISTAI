@@ -16,7 +16,7 @@ export function PracticeTest({ test }: { test: PracticeTestType }) {
     <div className="border border-gray-100 rounded-lg w-full px-5 py-3 lg:py-3.5 flex flex-row justify-between items-center hover:bg-slate-50 transition-colors active:bg-slate-50">
       <Link
         href={`/dashboard/practice-tests/${test.id}`}
-        className="flex flex-row gap-3 items-center"
+        className="flex flex-row gap-3 items-center w-[160px] md:w-[200px] lg:w-[200px]"
       >
         <div className="p-2 rounded-lg bg-indigo-100">
           <BookText className="size-5 text-indigo-600 shrink-0" />
@@ -82,10 +82,13 @@ export default function RecentPracticeTests() {
   if (isLoading) return <LoadingSmallUI />;
 
   const recentTests = data && data.filter((item) => item.result);
-  const lastFive =
-    recentTests && recentTests.length > 5
-      ? recentTests.slice(recentTests.length - 6, recentTests.length - 1)
-      : recentTests;
+  const sorted =
+    recentTests &&
+    recentTests.sort((a, b) => {
+      return new Date(b.test_date).getTime() - new Date(a.test_date).getTime();
+    });
+
+  const lastFive = sorted && sorted.length > 5 ? sorted.slice(0, 5) : sorted;
   return (
     <section className="px-6 lg:pr-0 w-full flex flex-col gap-6">
       <div className="p-5 w-full flex flex-col gap-6 bg-white rounded-lg border border-gray-200/80 min-h-[320px]">

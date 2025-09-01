@@ -9,14 +9,6 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  async rewrites() {
-    return [
-      {
-        source: "/api/:path*", // Proxy requests starting with /api/
-        destination: "https://10e186148c02.ngrok-free.app/:path*", // Your FastAPI backend
-      },
-    ];
-  },
 };
 
 export default nextConfig;

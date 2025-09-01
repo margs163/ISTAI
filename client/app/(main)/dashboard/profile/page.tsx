@@ -34,7 +34,7 @@ export default function Page() {
       );
       try {
         axios.patch(
-          `https://${process.env.NEXT_PUBLIC_FASTAPI}/users/me`,
+          `http://${process.env.NEXT_PUBLIC_FASTAPI}/users/me`,
           cleanedUpdate,
           {
             withCredentials: true,
@@ -45,7 +45,7 @@ export default function Page() {
           const formData = new FormData();
           formData.append("file", data.avatarFile);
           const response_avatar = await axios.put<{ filepath: string }>(
-            `https://${process.env.NEXT_PUBLIC_FASTAPI}/avatar/me`,
+            `http://${process.env.NEXT_PUBLIC_FASTAPI}/avatar/me`,
             formData,
             {
               headers: { "Content-Type": "multipart/form-data" },

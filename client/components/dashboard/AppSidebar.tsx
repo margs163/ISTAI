@@ -115,7 +115,7 @@ export default function AppSidebar() {
   }, [router]);
   return (
     <Sidebar className="font-geist bg-white">
-      <SidebarHeader className="px-6 py-6 pt-8">
+      <SidebarHeader className="px-6 py-6">
         <LogoWithIcon />
       </SidebarHeader>
       <SidebarContent className="px-3 font-geist">
@@ -191,7 +191,7 @@ export default function AppSidebar() {
                   height={200}
                   src={avatarUrl}
                   alt="avatar"
-                  className="object-cover shrink-0 h-8 w-8 rounded-full border border-gray-300 p-[1px]"
+                  className="object-cover shrink-0 h-8.5 w-8.5 aspect-square overflow-hidden rounded-full border border-gray-300"
                 />
               ) : (
                 <div className="h-8 w-8 rounded-full bg-indigo-600 flex items-center justify-center hover:bg-indigo-600 active:bg-indigo-600 transition-colors">

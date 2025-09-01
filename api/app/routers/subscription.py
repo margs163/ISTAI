@@ -9,6 +9,7 @@ from paddle_billing.Notifications.Requests.Request import Request as PRequest
 from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.orm import joinedload
+from ..dependencies import limiter
 
 from api.app.lib.auth_db import get_async_session
 from api.app.schemas.db_tables import CreditCard, Subscription, User
@@ -274,7 +275,9 @@ async def paddle_webhook(
 
 
 @router.get("/me")
+@limiter.limit("25/minute")
 async def get_my_subscription(
+    request: Request,
     user: Annotated[User, Depends(current_active_user)],
     session: Annotated[AsyncSession, Depends(get_async_session)],
 ):
@@ -298,7 +301,9 @@ async def get_my_subscription(
 
 
 @router.post("/init")
+@limiter.limit("4/minute")
 async def create_subscription(
+    request: Request,
     user: Annotated[User, Depends(current_active_user)],
     session: Annotated[AsyncSession, Depends(get_async_session)],
 ):
@@ -325,7 +330,9 @@ async def create_subscription(
 
 
 @router.post("/card")
+@limiter.limit("6/minute")
 async def post_credit_card(
+    request: Request,
     user: Annotated[User, Depends(current_active_user)],
     session: Annotated[AsyncSession, Depends(get_async_session)],
     data: Annotated[CreditCardSchema, Body()],
@@ -352,7 +359,9 @@ async def post_credit_card(
 
 
 @router.get("/card")
+@limiter.limit("20/minute")
 async def get_credit_card(
+    request: Request,
     user: Annotated[User, Depends(current_active_user)],
     session: Annotated[AsyncSession, Depends(get_async_session)],
     data: Annotated[CreditCardSchema, Body()],
@@ -388,7 +397,9 @@ async def get_credit_card(
 
 
 @router.put("/")
+@limiter.limit("10/minute")
 async def update_subscription(
+    request: Request,
     user: Annotated[User, Depends(current_active_user)],
     session: Annotated[AsyncSession, Depends(get_async_session)],
     update: Annotated[SubscriptionUpdateSchema, Body()],

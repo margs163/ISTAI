@@ -100,7 +100,7 @@ class Result(Base):
     weak_sides: Mapped[dict[str, list[str]]] = mapped_column(JSONB)
     strong_points: Mapped[dict[str, list[str]]] = mapped_column(JSONB)
     sentence_improvements: Mapped[dict[str, Any]] = mapped_column(JSONB)
-    grammar_errors: Mapped[dict[str, Any] | list[dict]] = mapped_column(JSONB)
+    grammar_errors: Mapped[list[dict]] = mapped_column(JSONB)
     vocabulary_usage: Mapped[list[dict]] = mapped_column(JSONB)
     repeated_words: Mapped[list[dict]] = mapped_column(JSONB)
     pronunciation_issues: Mapped[list[dict]] = mapped_column(JSONB)

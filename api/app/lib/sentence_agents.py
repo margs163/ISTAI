@@ -31,7 +31,7 @@ grammar_prompt = ChatPromptTemplate(
 
 
 class AnalysisState(TypedDict):
-    transcriptions: List
+    transcriptions: str
     grammar_enhancements: List[Dict[str, Any]]
     vocabulary_enhancements: List[Dict[str, Any]]
     grammar_analysis: List[Dict[str, Any]]

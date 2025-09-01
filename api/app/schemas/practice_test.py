@@ -120,6 +120,9 @@ class GrammarAnalysis(BaseModel):
 
 
 class Result(BaseModel):
+    id: str | None = Field(default=None)
+    practice_test_id: str | None = Field(default=None)
+
     overall_score: float = Field(
         ge=2.0, le=9.0, multiple_of=0.5, description="Overall band score of the test"
     )
@@ -127,11 +130,11 @@ class Result(BaseModel):
     weak_sides: WeakSides = Field()
     strong_points: StrongPoints = Field()
     sentence_improvements: SentenceImprovements = Field()
-    grammar_errors: list[ErrorMistake] = Field()
+    grammar_errors: GrammarAnalysis = Field()
     vocabulary_usage: list[VocabUsage] = Field()
     repeated_words: list[VocabRepetition] = Field()
     general_tips: GeneralTips = Field()
-    pronunciation_mistakes: list[PronunciationMistake] = Field()
+    pronunciation_issues: list[PronunciationMistake] = Field()
 
 
 class ReadingCardSchema(BaseModel):

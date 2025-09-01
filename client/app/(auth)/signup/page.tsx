@@ -33,7 +33,7 @@ export default function Page() {
   ) => {
     try {
       const response = await fetch(
-        `https://${process.env.NEXT_PUBLIC_FASTAPI}/auth/register`,
+        `http://${process.env.NEXT_PUBLIC_FASTAPI}/auth/register`,
         {
           method: "POST",
           body: JSON.stringify({
@@ -53,7 +53,7 @@ export default function Page() {
       }
 
       await axios.post(
-        `https://${process.env.NEXT_PUBLIC_FASTAPI}/auth/request-verify-token`,
+        `http://${process.env.NEXT_PUBLIC_FASTAPI}/auth/request-verify-token`,
         {
           email: data.email,
         },
@@ -73,9 +73,9 @@ export default function Page() {
   };
 
   return (
-    <div className="min-h-screen w-full p-6 flex items-center justify-center lg:px-20 xl:px-40 font-geist">
+    <div className="h-full w-full px-4 py-6 flex items-center justify-center lg:px-20 xl:px-40 font-geist">
       <section className=" shadow-md bg-white w-full lg:flex lg:flex-row lg:shadow-lg shadow-slate-200 rounded-lg">
-        <div className="flex flex-col p-6 justify-center gap-16 lg:flex-1/2 lg:items-center lg:p-10">
+        <div className="flex flex-col p-6 px-8 justify-center gap-16 lg:flex-1/2 lg:items-center lg:p-10">
           <div className="flex items-center justify-start gap-2 mb-auto lg:self-start">
             {/* <Image src={logoIcon} alt="iconLogo" className="w-6" /> */}
             <Image src={logoText} alt="iconText" className="w-16" />
@@ -93,9 +93,12 @@ export default function Page() {
               </p>
             </div>
             <button
-              onClick={() => {
+              onClick={async () => {
                 setIsAuthorizingGoogle(true);
-                authorizeGoogle();
+                const url = await authorizeGoogle();
+                if (url) {
+                  router.push(url);
+                }
               }}
               className="w-full flex flex-row items-center justify-center gap-2 border-2 border-gray-300/80 rounded-md p-2.5 mt-2"
             >
@@ -143,7 +146,7 @@ export default function Page() {
                   {...register("email")}
                   className="text-sm w-full text-gray-700 font-normal border-b-2 border-gray-200 px-2 py-2 focus-within:outline-0 focus-within:border-b-indigo-200 transition-colors"
                 />
-                {errors.email && (
+                {errors.email && !isAuthorizingGoogle && (
                   <p className="text-red-700 font-normal text-xs">
                     {errors.email.message}
                   </p>
@@ -156,7 +159,7 @@ export default function Page() {
                   {...register("password")}
                   className="text-sm w-full text-gray-700 font-normal border-b-2 border-gray-200 px-2 py-2 focus-within:outline-0 focus-within:border-b-indigo-200 transition-colors"
                 />
-                {errors.password && (
+                {errors.password && !isAuthorizingGoogle && (
                   <p className="text-red-700 font-normal text-xs">
                     {errors.password.message}
                   </p>

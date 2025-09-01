@@ -1,13 +1,10 @@
 from copy import deepcopy
 from typing import Annotated
-from fastapi import APIRouter, Body, Depends, HTTPException, Query, status
-from sqlalchemy import and_, select
-from sqlalchemy.orm import joinedload
+from fastapi import APIRouter, Body, Depends, HTTPException, Query, Request, status
+from sqlalchemy import Date, and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from api.app.lib.send_notification import create_notification
-from api.app.schemas import analytics, pronunciation
-from datetime import datetime
+from datetime import date, datetime
 
 from api.app.schemas.analytics import (
     AnalyticsSchema,
@@ -15,15 +12,17 @@ from api.app.schemas.analytics import (
     AverageBandScores,
 )
 from api.app.schemas.db_tables import Analytics, Notifications, PracticeTest, User
-from api.app.schemas.notifications import NotificationTypeEnum, NotificationsSchema
+from sqlalchemy import cast, func
 from ..lib.auth_db import get_async_session
-from ..dependencies import current_active_user
+from ..dependencies import current_active_user, limiter
 
 router = APIRouter(dependencies=[Depends(current_active_user)])
 
 
 @router.get("/")
+@limiter.limit("25/minute")
 async def get_analytics(
+    request: Request,
     user: Annotated[User, Depends(current_active_user)],
     session: Annotated[AsyncSession, Depends(get_async_session)],
     limit: Annotated[int | None, Query()] = 4,
@@ -78,7 +77,9 @@ async def get_analytics(
 
 
 @router.post("/new")
+@limiter.limit("4/minute")
 async def init_analytics(
+    request: Request,
     user: Annotated[User, Depends(current_active_user)],
     session: Annotated[AsyncSession, Depends(get_async_session)],
 ):
@@ -111,7 +112,9 @@ async def init_analytics(
 
 
 @router.put("/")
+@limiter.limit("4/minute")
 async def update_analytics(
+    request: Request,
     user: Annotated[User, Depends(current_active_user)],
     session: Annotated[AsyncSession, Depends(get_async_session)],
     update: Annotated[AnalyticsUpdateSchema, Body()],
@@ -122,11 +125,12 @@ async def update_analytics(
             .where(
                 and_(
                     PracticeTest.user_id == user.id,
-                    PracticeTest.test_date == datetime.now(),
+                    cast(PracticeTest.test_date, Date) == date.today(),
                 )
             )
             .order_by(PracticeTest.test_date.desc())
         )
+
         today_tests = result.all()
         result2 = await session.scalars(
             select(Analytics).where(Analytics.user_id == user.id)

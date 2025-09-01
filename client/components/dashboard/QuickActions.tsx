@@ -1,7 +1,11 @@
+"use client";
 import clsx from "clsx";
 import { Calendar, Lightbulb, LucideProps, Volume2, Zap } from "lucide-react";
 import Link from "next/link";
-import { ForwardRefExoticComponent, RefAttributes } from "react";
+import { ForwardRefExoticComponent, RefAttributes, useState } from "react";
+import { FloaterAction, TipsFloaterAction } from "./FloaterAction";
+import MainButton from "../MainButton";
+import PronCheckDialog from "./PronCheckDialog";
 
 function getColor(color: string): [string, string] {
   return [`bg-${color}-50`, `text-${color}-600`];
@@ -50,6 +54,7 @@ const actions: Action[] = [
 export function Action({ action }: { action: Action }) {
   const Icon = action.icon;
   const styles = getColor(action.color);
+
   return (
     <div className="flex flex-row gap-3 items-center justify-start py-1.5 px-2 rounded-lg hover:bg-gray-50 active:bg-gray-50">
       <div className={clsx("p-2 rounded-lg shrink-0 box-content", styles[0])}>
@@ -79,9 +84,98 @@ export function Action({ action }: { action: Action }) {
   );
 }
 
+export function PronunciationAction({
+  action,
+  setDialogOpen,
+}: {
+  action: Action;
+  setDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
+}) {
+  const Icon = action.icon;
+  const styles = getColor(action.color);
+
+  return (
+    <FloaterAction
+      startCallback={setDialogOpen}
+      title="Want to start a pronunciation check?"
+      desc="You have 5 checks left"
+    >
+      <div className="flex flex-row gap-3 items-center justify-start py-1.5 px-2 rounded-lg hover:bg-gray-50 active:bg-gray-50">
+        <div className={clsx("p-2 rounded-lg shrink-0 box-content", styles[0])}>
+          <Icon className={clsx("size-4.5", styles[1])} />
+        </div>
+        <div className="flex flex-col items-start justify-start gap-0.5">
+          <div className="flex flex-row gap-2 items-center">
+            <h3 className="text-sm font-medium text-gray-800">
+              {action.title}
+            </h3>
+            <p
+              className={clsx(
+                "px-2 py-0.5 rounded-3xl box-content text-xs font-medium",
+                action.popular
+                  ? "bg-amber-100 text-amber-700"
+                  : action.new
+                  ? "bg-green-100 text-green-700"
+                  : "hidden"
+              )}
+            >
+              {action.popular ? "Popular" : action.new && "New"}
+            </p>
+          </div>
+          <p className="text-xs font-normal text-gray-600">
+            {action.description}
+          </p>
+        </div>
+      </div>
+    </FloaterAction>
+  );
+}
+
+export function TipsAction({ action }: { action: Action }) {
+  const Icon = action.icon;
+  const styles = getColor(action.color);
+
+  return (
+    <TipsFloaterAction>
+      <div className="flex flex-row gap-3 items-center justify-start py-1.5 px-2 rounded-lg hover:bg-gray-50 active:bg-gray-50 mr-4">
+        <div className={clsx("p-2 rounded-lg shrink-0 box-content", styles[0])}>
+          <Icon className={clsx("size-4.5", styles[1])} />
+        </div>
+        <div className="flex flex-col items-start justify-start gap-0.5">
+          <div className="flex flex-row gap-2 items-center">
+            <h3 className="text-sm font-medium text-gray-800">
+              {action.title}
+            </h3>
+            <p
+              className={clsx(
+                "px-2 py-0.5 rounded-3xl box-content text-xs font-medium",
+                action.popular
+                  ? "bg-amber-100 text-amber-700"
+                  : action.new
+                  ? "bg-green-100 text-green-700"
+                  : "hidden"
+              )}
+            >
+              {action.popular ? "Popular" : action.new && "New"}
+            </p>
+          </div>
+          <p className="text-xs font-normal text-gray-600">
+            {action.description}
+          </p>
+        </div>
+      </div>
+    </TipsFloaterAction>
+  );
+}
+
 export default function QuickActions() {
+  const [openPronDialog, setOpenPronDialog] = useState(false);
   return (
     <section className="px-6 lg:pl-0 w-full flex flex-col gap-4">
+      <PronCheckDialog
+        dialogOpen={openPronDialog}
+        setDialogOpen={setOpenPronDialog}
+      />
       <div className="p-5 w-full flex flex-col gap-5 bg-white rounded-lg border border-gray-200">
         <header className="w-full flex flex-row justify-between items-center px-1">
           <div className="flex flex-row items-center justify-start gap-2">
@@ -96,11 +190,22 @@ export default function QuickActions() {
           </Link>
         </header>
         <div className="space-y-4">
-          {actions.map((item, index) => (
-            <Action key={index} action={item} />
-          ))}
+          {actions.map((item, index) =>
+            item.title === "Pronunciation Check" ? (
+              <PronunciationAction
+                setDialogOpen={setOpenPronDialog}
+                key={index}
+                action={item}
+              />
+            ) : (
+              // ) : item.title === "Speaking Tips" ? (
+              //   <TipsAction key={index} action={item} />
+              <Action key={index} action={item} />
+            )
+          )}
         </div>
         <hr className="h-[1px] text-gray-300 w-[95%] mx-auto" />
+
         <div className="text-sm font-medium text-gray-800 px-4 py-2 border rounded-md border-gray-300 text-center">
           View All Features
         </div>
