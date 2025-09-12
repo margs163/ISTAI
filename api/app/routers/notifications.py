@@ -3,13 +3,13 @@ from typing import Annotated
 from fastapi import APIRouter, Body, Depends, HTTPException, Query, Request, status
 from sqlalchemy import func, select
 
-from api.app.lib.auth_db import get_async_session
-from api.app.schemas.db_tables import Notifications, User
-from api.app.dependencies import current_active_user
+from ..lib.auth_db import get_async_session
+from ..schemas.db_tables import Notifications, User
+from ..dependencies import current_active_user
 from sqlalchemy.ext.asyncio import AsyncSession
 from ..dependencies import limiter
 
-from api.app.schemas.notifications import (
+from ..schemas.notifications import (
     CreateNotificationSchema,
     NotificationTypeEnum,
     NotificationsSchema,

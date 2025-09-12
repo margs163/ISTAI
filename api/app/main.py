@@ -23,6 +23,7 @@ from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from .dependencies import limiter
 from .users import google_oauth_client
+import uvicorn
 
 load_dotenv()
 
@@ -133,6 +134,10 @@ app.include_router(
 
 
 @app.get("/")
-@limiter.limit("20/minute")
+@limiter.limit("8/minute")
 async def main(request: Request):
     return {"message": "Hello, World!"}
+
+
+# if __name__ == "__main__":
+#     uvicorn.run("app.main:app", host="127.0.0.1", port=8000, log_level="info")

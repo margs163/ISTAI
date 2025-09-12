@@ -7,6 +7,7 @@ import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
+  CustomTooltipProps,
 } from "@/components/ui/chart";
 import Link from "next/link";
 import { useAnalyticsStore } from "@/lib/userStorage";
@@ -53,7 +54,12 @@ export default function RadarChart() {
           className="aspect-square h-[160px] lg:min-h-[200px] w-full pl-6 pr-2 lg:px-4 pb-5 mx-auto"
         >
           <RChart data={chartData}>
-            <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+            <ChartTooltip
+              cursor={false}
+              content={(props: CustomTooltipProps) => (
+                <ChartTooltipContent {...props} />
+              )}
+            />
             <PolarAngleAxis dataKey="criterion" />
             <PolarGrid />
             <Radar

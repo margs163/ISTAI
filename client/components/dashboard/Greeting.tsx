@@ -26,9 +26,9 @@ export default function Greeting({
           {userFirstName ? userFirstName : "User"}
         </h2>
       </div>
-      <div className="flex flex-row gap-4 items-end lg:px-1">
+      <div className="flex flex-row gap-2 items-end lg:px-1">
         <DailyStreak />
-        <MainButton
+        {/* <MainButton
           variant="secondary"
           className={
             "bg-white border border-gray-200 hover:bg-gray-50 active:bg-gray-50 hidden lg:flex"
@@ -36,7 +36,7 @@ export default function Greeting({
         >
           <ExternalLink className=" text-gray-700 size-4.5" />
           Share
-        </MainButton>
+        </MainButton> */}
         <MainButton
           onClick={handleExport}
           variant="secondary"

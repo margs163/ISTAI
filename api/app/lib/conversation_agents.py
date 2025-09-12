@@ -31,13 +31,21 @@ async def conclude_part3():
     return "That concludes the test. Thank you very much for your time today."
 
 
+# sumarizing user input
+# tool not working
+
+# part
+
+
 @tool("random_questions_retriever")
 async def get_questions():
     """Useful for getting a topic with a list of speaking part questions
     related to that topic."""
     result = ""
+    print("TOOL INVOKED")
     async for session in get_async_session():
         async with session.begin():
+            print("SESSION STARTED")
             result = await session.scalars(
                 select(QuestionCard)
                 .where(QuestionCard.part == 1)

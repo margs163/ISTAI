@@ -28,6 +28,7 @@ import { toast } from "sonner";
 import { useTestTranscriptionStore } from "@/lib/testTranscriptionStore";
 import Confetti from "react-confetti";
 import {
+  fetchPart1QuestionCard,
   fetchPart2QuestionCard,
   fetchReadingCard,
   sendReadingCardSpeech,
@@ -49,15 +50,16 @@ export default function Page() {
   const addTranscription = useTestTranscriptionStore(
     (state) => state.addTranscription
   );
-  const startDatetime = useLocalPracticeTestStore(
-    (state) => state.startDatetime
-  );
   const restoreChatMessages = useChatStore((state) => state.restoreMessages);
   const transcriptionsState = useTestTranscriptionStore((state) => state);
   const addMessage = useChatStore((state) => state.addMessage);
   const messages = useChatStore((state) => state.messages);
   const sessionState = useTestSessionStore((state) => state);
   const setSession = useTestSessionStore((state) => state.setSessionData);
+  const startTime = useLocalPracticeTestStore((state) => state.startDatetime);
+  const setStartTime = useLocalPracticeTestStore(
+    (state) => state.setStartDateTime
+  );
   const setPart2Question = useLocalPracticeTestStore(
     (state) => state.setPartTwoCard
   );
@@ -99,6 +101,12 @@ export default function Page() {
   const [greetingPlayed, setGreetingPlayed] = useState(false);
   const [openReadingCard, setOpenReadingCard] = useState(false);
   const [runConfetti, setRunConfetti] = useState(false);
+  const [firstMesssage, setFirstMessage] = useState(true);
+
+  const { data } = useQuery({
+    queryKey: ["part1-card"],
+    queryFn: fetchPart1QuestionCard,
+  });
 
   useQuery({
     queryKey: ["question-card"],
@@ -175,10 +183,11 @@ export default function Page() {
         | "greeting.mp3"
         | "reading.mp3"
     ) => {
+      const source = src.split(".")[0] + sessionState.assistant + ".mp3";
       if (instructionsAudio.current) {
-        instructionsAudio.current.src = src;
+        instructionsAudio.current.src = source;
       } else {
-        instructionsAudio.current = new Audio(src);
+        instructionsAudio.current = new Audio(source);
       }
 
       instructionsAudio.current.oncanplaythrough = () => {
@@ -247,16 +256,14 @@ export default function Page() {
         role: "User",
         messageId: uuidv4(),
         text: text,
-        time: getSecondsDifference(startDatetime, new Date()),
+        time: getSecondsDifference(startTime, new Date()),
       };
 
       const transcription: TranscriptionMessageType = {
         name: sessionState.user as string,
         text: text,
-        time: getSecondsDifference(startDatetime, new Date()),
+        time: getSecondsDifference(startTime, new Date()),
       };
-      console.log(transcription);
-      console.log(startDatetime);
       const part =
         sessionState.currentPart === 1
           ? "partOne"
@@ -267,7 +274,17 @@ export default function Page() {
       addMessage(userMessage);
       let chatSocketMessage: null | ChatSocketMessage = null;
 
-      if (sessionState.currentPart === 2 && part2Question) {
+      if (sessionState.currentPart === 1 && firstMesssage && data) {
+        chatSocketMessage = {
+          type: "userResponse",
+          part: sessionState.currentPart as 1 | 2 | 3,
+          assistant: sessionState.assistant as string,
+          text: `${text}\nTopic:${data.topic}, questions: ${data.questions}`,
+        };
+        console.log(data);
+        console.log(chatSocketMessage);
+        setFirstMessage(false);
+      } else if (sessionState.currentPart === 2 && part2Question) {
         chatSocketMessage = {
           type: "part2QuestionCard",
           part: 3,
@@ -286,7 +303,7 @@ export default function Page() {
       sendChatWebsocketMessage(chatSocketMessage);
     },
     [
-      startDatetime,
+      startTime,
       addMessage,
       addTranscription,
       part2Question,
@@ -326,12 +343,12 @@ export default function Page() {
             role: "Assistant",
             messageId: uuidv4(),
             text: data.text,
-            time: getSecondsDifference(startDatetime, new Date()),
+            time: getSecondsDifference(startTime, new Date()),
           };
           const transcription: TranscriptionMessageType = {
             name: sessionState.assistant as "Ron" | "Emma",
             text: data.text,
-            time: getSecondsDifference(startDatetime, new Date()),
+            time: getSecondsDifference(startTime, new Date()),
           };
           const part =
             sessionState.currentPart === 1
@@ -341,7 +358,7 @@ export default function Page() {
               : "partThree";
           addTranscription(part, transcription);
           addMessage(assistantMessage);
-          if (data.filename) {
+          if (data.filename && !openReadingCard) {
             console.log("PLAYING TTS");
             playTTSAudio(data.filename);
           }
@@ -358,7 +375,7 @@ export default function Page() {
     },
     [
       addMessage,
-      startDatetime,
+      startTime,
       playInstructionsAudioWithVideo,
       addTranscription,
       playTTSAudio,
@@ -438,6 +455,7 @@ export default function Page() {
       chatWebsocketRef.current = new WebSocket(
         `http://${process.env.NEXT_PUBLIC_FASTAPI}/chat/ws`
       );
+      setStartTime(new Date());
     }
 
     initializeMediaRecorder();
@@ -567,7 +585,7 @@ export default function Page() {
               (prev, current) => prev + "\n" + current,
               ""
             )}`,
-            time: getSecondsDifference(startDatetime, new Date()),
+            time: getSecondsDifference(startTime, new Date()),
           },
           ...transcriptionsState.partTwo,
         ],
@@ -588,7 +606,7 @@ export default function Page() {
       volumeSlider.current.style.width = "10%";
     }
   }, [
-    startDatetime,
+    startTime,
     part2Question,
     openReadingCard,
     sessionState,

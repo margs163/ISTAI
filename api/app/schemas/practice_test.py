@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field
 
-from api.app.schemas.pronunciation import PronunciationMistake
-from api.app.schemas.transcriptions import TranscriptionSchema
+from .pronunciation import PronunciationMistake
+from .transcriptions import TranscriptionSchema
 
 
 class CriteriaScores(BaseModel):

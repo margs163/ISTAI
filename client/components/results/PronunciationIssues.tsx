@@ -14,7 +14,7 @@ export function PronunMistake({
   };
 }) {
   return (
-    <div className="flex flex-col gap-4 lg:gap-6 justify-start items-start p-6 lg:p-8 w-full bg-purple-50/50 border border-gray-200 rounded-md">
+    <div className="flex flex-col gap-4 lg:gap-6 justify-start items-start p-6 lg:p-8 w-full bg-purple-50/50 border border-gray-200 rounded-md lg:flex-1/4">
       <div className="flex flex-row gap-3 items-center justify-start">
         <div className="flex items-center justify-center bg-purple-100 rounded-full p-2.5 lg:px-3 lg:py-[13px]">
           <Volume2 className="text-purple-600 shrink-0 size-6 lg:size-7" />
@@ -52,7 +52,7 @@ export default function PronunciationIssues() {
             Pronunciation Issues
           </h3>
         </header>
-        <main className="flex flex-col gap-4 lg:flex-row lg:gap-6">
+        <main className="flex flex-col gap-4 lg:flex-row lg:flex-wrap lg:gap-6">
           {pronunIssues?.map((item, index) => (
             <PronunMistake mistake={item} key={index} />
           ))}

@@ -19,11 +19,11 @@ from pydantic import BaseModel, Field
 from sqlalchemy import select
 from pathlib import Path as OSPath
 
-from api.app.dependencies import get_s3_client, current_active_user
-from api.app.lib.auth_db import get_async_session
-from api.app.lib.utils import construct_input
-from api.app.schemas.db_tables import PracticeTest, Result, User
-from api.app.schemas.practice_test import (
+from ..dependencies import get_s3_client, current_active_user
+from ..lib.auth_db import get_async_session
+from ..lib.utils import construct_input
+from ..schemas.db_tables import PracticeTest, Result, User
+from ..schemas.practice_test import (
     CriteriaScores,
     GrammarAnalysis,
     GeneralTips,
@@ -35,10 +35,10 @@ from api.app.schemas.practice_test import (
     Result as ResultModel,
 )
 from uuid import uuid4
-from api.app.schemas.transcriptions import TranscriptionSchema
-from api.app.lib.general_agents import general_app
-from api.app.lib.sentence_agents import sentence_app
-from api.app.lib.pronunciation_agent import pronunciation_app
+from ..schemas.transcriptions import TranscriptionSchema
+from ..lib.general_agents import general_app
+from ..lib.sentence_agents import sentence_app
+from ..lib.pronunciation_agent import pronunciation_app
 import azure.cognitiveservices.speech as speechsdk
 from sqlalchemy.ext.asyncio import AsyncSession
 from dotenv import load_dotenv
@@ -272,9 +272,9 @@ async def post_results(
             )
 
             scores = CriteriaScores(
-                fluency=general_state["fluency_score"],
-                grammar=general_state["grammar_score"],
-                lexis=general_state["lexis_score"],
+                fluency=general_state["fluency_score"] + 0.5,
+                grammar=general_state["grammar_score"] + 0.5,
+                lexis=general_state["lexis_score"] + 0.5,
                 pronunciation=pronunciation_score,
             )
 

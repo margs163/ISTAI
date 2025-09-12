@@ -20,6 +20,7 @@ interface LocalPracticeTestStore extends Omit<PracticeTestType, "user_id"> {
   readingAudioPath?: string;
   setReadingAudioPath: (path: string) => void;
   startDatetime: Date;
+  setStartDateTime: (date: Date) => void;
 }
 
 type GlobalPracticeTestStore = {
@@ -52,6 +53,7 @@ export const useLocalPracticeTestStore = create<LocalPracticeTestStore>()(
       setTranscriptions: (transcription) =>
         set({ transcription: transcription }),
       setTestDuration: (duration) => set({ test_duration: duration }),
+      setStartDateTime: (date: Date) => set({ startDatetime: date }),
       setPartOneCard: (card) => set({ part_one_card: card }),
       setPartTwoCard: (card) => set({ part_two_card: card }),
       setReadingCards: (readingCard) => set({ reading_cards: readingCard }),

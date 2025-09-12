@@ -8,6 +8,13 @@ class AverageBandScores(BaseModel):
     pronunciation: float
 
 
+class BandScoresIncrease(BaseModel):
+    fluency: float
+    grammar: float
+    lexis: float
+    pronunciation: float
+
+
 class GrammarCommonMistake(BaseModel):
     original_sentence: str
     identified_mistakes: list[dict]
@@ -40,6 +47,7 @@ class AnalyticsSchema(BaseModel):
     tests_completed: int
     current_bandscore: float
     average_band_scores: AverageBandScores
+    scores_increase: BandScoresIncrease
     average_band: float
     grammar_common_mistakes: list[GrammarCommonMistake] | None = Field(default=None)
     lexis_common_mistakes: list[VocabularyCommonMistake] | None = Field(default=None)

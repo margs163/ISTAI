@@ -59,8 +59,9 @@ class CreditCardSchema(BaseModel):
 
 class SubscriptionSchema(BaseModel):
     id: str | None = Field(default=None)
-    user_id: str
+    user_id: str | None = Field(default=None)
 
+    status: str | None = Field(default=None)
     paddle_product_id: str | None = Field(default=None)
     paddle_subscription_id: str | None = Field(default=None)
     paddle_price_id: str | None = Field(default=None)
@@ -78,8 +79,12 @@ class SubscriptionSchema(BaseModel):
     billing_interval: str | None = Field(default=None)
     billing_frequency: int | None = Field(default=None)
 
+    paddle_update_url: str | None = Field(default=None)
+    paddle_cancel_url: str | None = Field(default=None)
+
 
 class SubscriptionUpdateSchema(BaseModel):
+    status: str | None = Field(default=None)
     paddle_product_id: str | None = Field(default=None)
     paddle_subscription_id: str | None = Field(default=None)
     paddle_price_id: str | None = Field(default=None)
@@ -96,3 +101,6 @@ class SubscriptionUpdateSchema(BaseModel):
 
     billing_interval: str | None = Field(default=None)
     billing_frequency: int | None = Field(default=None)
+
+    paddle_update_url: str | None = Field(default=None)
+    paddle_cancel_url: str | None = Field(default=None)

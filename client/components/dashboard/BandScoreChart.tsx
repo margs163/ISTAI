@@ -1,11 +1,12 @@
 "use client";
-import React from "react";
+import React, { useMemo } from "react";
 import {
   ChartContainer,
   ChartLegend,
   ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
+  CustomTooltipProps,
   type ChartConfig,
 } from "@/components/ui/chart";
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
@@ -27,16 +28,19 @@ export default function BandScoreChart() {
     (state) => state.practice_tests
   );
 
-  const filtered = practices.filter((item) => item.result);
-  const sorted = filtered.sort((a, b) => {
-    return new Date(a.test_date).getTime() - new Date(b.test_date).getTime();
-  });
-  const chartScores = filtered.map((item, index) => ({
-    test: index,
-    bandScore: item.result?.overall_score,
-  }));
-  const lastTen =
-    chartScores.length <= 10 ? chartScores : chartScores.slice(-11, -1);
+  const lastTen = useMemo(() => {
+    const filtered = practices.filter((item) => item.result);
+    const sorted = filtered.sort((a, b) => {
+      return new Date(a.test_date).getTime() - new Date(b.test_date).getTime();
+    });
+    const chartScores = filtered.map((item, index) => ({
+      test: index,
+      bandScore: item.result?.overall_score,
+    }));
+    const last =
+      chartScores.length <= 10 ? chartScores : chartScores.slice(-11, -1);
+    return last;
+  }, [practices]);
 
   return (
     <section className="px-6 lg:px-0 w-full flex flex-col gap-4">
@@ -44,7 +48,7 @@ export default function BandScoreChart() {
         <header
           className={cn(
             "p-5 lg:pb-5 px-6 w-full flex flex-row justify-between items-start gap-20",
-            filtered.length < 2 ? "pb-2" : "pb-5"
+            lastTen.length < 2 ? "pb-2" : "pb-5"
           )}
         >
           <div className="flex flex-col items-start justify-start gap-0">
@@ -61,14 +65,14 @@ export default function BandScoreChart() {
             </p>
           </Link>
         </header>
-        {filtered.length < 2 ? (
+        {lastTen.length < 2 ? (
           <BandScoreFallback />
         ) : (
           <ChartContainer
             config={chartConfig}
             className={cn(
               "aspect-auto lg:min-h-[214px] w-full px-2 lg:px-4 pb-5",
-              filtered.length < 2 ? "min-h-[160px]" : "h-[160px]"
+              lastTen.length < 2 ? "min-h-[160px]" : "h-[160px]"
             )}
           >
             <LineChart
@@ -107,7 +111,11 @@ export default function BandScoreChart() {
                 dot={{ r: 4 }}
                 activeDot={{ r: 6 }}
               />
-              <ChartTooltip content={<ChartTooltipContent />} />
+              <ChartTooltip
+                content={(props: CustomTooltipProps) => (
+                  <ChartTooltipContent {...props} />
+                )}
+              />
               <ChartLegend content={<ChartLegendContent />} />
               <CartesianGrid vertical={false} />
             </LineChart>

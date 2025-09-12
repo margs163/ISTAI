@@ -5,7 +5,10 @@ import phoneMain2 from "@/assets/images/phoneEdited2.png";
 
 export default function TestInfo() {
   return (
-    <section className="w-full flex flex-col items-center p-8 lg:p-20 gap-8 lg:flex-row lg:gap-12 xl:gap-20 max-w-[1400px] mx-auto">
+    <section
+      id="testinfo"
+      className="w-full flex flex-col items-center p-8 lg:p-20 gap-8 lg:flex-row lg:gap-12 xl:gap-20 max-w-[1400px] mx-auto"
+    >
       <div className="space-y-4 lg:space-y-10 hidden lg:block lg:flex-1/2 lg:p-8">
         <h2 className="font-semibold text-3xl lg:text-5xl lg:font-semibold">
           Our AI powered Test Simulator is Ideal for Preparation

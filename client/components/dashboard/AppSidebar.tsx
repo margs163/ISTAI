@@ -118,17 +118,20 @@ export default function AppSidebar() {
       <SidebarHeader className="px-6 py-6">
         <LogoWithIcon />
       </SidebarHeader>
-      <SidebarContent className="px-3 font-geist">
+      <SidebarContent className="px-2 font-geist">
         <SidebarGroup>
           <SidebarGroupLabel>Application</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {menuItems.map((item) => {
                 return (
-                  <SidebarMenuItem key={item.title}>
+                  <SidebarMenuItem
+                    key={item.title}
+                    className="data-[state=open]:hover:bg-slate-200"
+                  >
                     <SidebarMenuButton
                       asChild
-                      className="text-gray-700 data-[true=active]:text-gray-800 transition-colors"
+                      className="text-gray-700 data-[true=active]:text-gray-800 transition-colors py-4.5 px-3"
                       isActive={currentLink === item.url}
                     >
                       <Link href={item.url}>

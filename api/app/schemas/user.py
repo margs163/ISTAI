@@ -4,7 +4,7 @@ from pydantic import Field
 from typing import Any, Optional
 from fastapi_users import schemas
 
-from api.app.schemas.analytics import AnalyticsSchema
+from .analytics import AnalyticsSchema
 
 
 class UserRead(schemas.BaseUser[uuid.UUID]):

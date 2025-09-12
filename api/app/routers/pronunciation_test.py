@@ -5,7 +5,7 @@ from fastapi import APIRouter, Body, Depends, HTTPException, Path, Request, stat
 from dotenv import load_dotenv
 from sqlalchemy import select
 
-from api.app.schemas.pronunciation import PronunciationAnalysis, PronunciationMistake
+from ..schemas.pronunciation import PronunciationAnalysis, PronunciationMistake
 from ..lib.pronunciation_agent import pronunciation_app
 from boto3.session import Session
 import azure.cognitiveservices.speech as speechsdk
@@ -16,10 +16,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from pathlib import Path as OSPath
 from ..dependencies import limiter
 
-from api.app.dependencies import get_s3_client, current_active_user
-from api.app.lib.auth_db import get_async_session
-from api.app.schemas.db_tables import PronunciationTest, User
-from api.app.schemas.practice_test import ReadingCardSchema
+from ..dependencies import get_s3_client, current_active_user
+from ..lib.auth_db import get_async_session
+from ..schemas.db_tables import PronunciationTest, User
+from ..schemas.practice_test import ReadingCardSchema
 
 load_dotenv()
 

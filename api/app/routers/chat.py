@@ -11,8 +11,8 @@ from langchain_core.runnables import RunnableConfig
 from langchain_core.messages import AIMessageChunk
 from dotenv import load_dotenv
 
-from api.app.dependencies import get_polly_client, get_s3_client
-from api.app.schemas.chat import AssistantEnumSchema
+from ..dependencies import get_polly_client, get_s3_client
+from ..schemas.chat import AssistantEnumSchema
 from ..lib.conversation_agents import agent_part1, agent_part3
 import uuid
 import os
@@ -120,7 +120,7 @@ async def chat_websocket(
                 voice_id = ""
                 tts_filename = f"tts-files/test-{uuid.uuid4()}.mp3"
                 if data["assistant"] == "Emma":
-                    voice_id = "Salli"
+                    voice_id = "Ruth"
                 else:
                     voice_id = "Stephen"
 
@@ -173,3 +173,12 @@ async def chat_websocket(
                 Bucket=bucket_name,
                 Delete={"Objects": delete_audio_list, "Quiet": False},
             )
+
+
+@router.post("/words")
+async def word_pronunciations(
+    words: list[str],
+    s3_client: Annotated[Any, Depends(get_s3_client)],
+    polly_client: Annotated[Any, Depends(get_polly_client)],
+):
+    pass

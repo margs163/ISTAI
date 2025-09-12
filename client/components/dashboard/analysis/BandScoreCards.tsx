@@ -20,6 +20,7 @@ type Score = {
   description: string;
   color: string;
   trend: "up" | "down";
+  delta: number;
 };
 
 export function BandScoreCard({ score }: { score: Score }) {
@@ -54,20 +55,12 @@ export function BandScoreCard({ score }: { score: Score }) {
         <p className="text-xs font-normal text-gray-600">{score.description}</p>
       </div>
       {score.trend === "up" ? (
-        // <ArrowBigUpDash
-        //   strokeWidth={1.5}
-        //   className="size-10 text-green-600 ml-auto"
-        // />
         <h3 className="text-xl text-green-500 font-semibold ml-auto flex flex-row items-center gap-2">
-          <TrendingUp className="text-green-500 size-5.5" /> 0.5
+          <TrendingUp className="text-green-500 size-5.5" /> {score.delta}
         </h3>
       ) : (
-        // <ArrowBigDownDash
-        //   strokeWidth={1.5}
-        //   className="size-10 text-red-600 ml-auto"
-        // />
         <h3 className="text-xl text-red-500 font-semibold ml-auto flex flex-row items-center gap-2">
-          <TrendingDown className="text-red-500 size-5.5" /> 0.5
+          <TrendingDown className="text-red-500 size-5.5" /> {score.delta}
         </h3>
       )}
     </div>
@@ -75,34 +68,39 @@ export function BandScoreCard({ score }: { score: Score }) {
 }
 export default function BandScoreCards() {
   const averageScores = useAnalyticsStore((state) => state.average_band_scores);
+  const scoreIncreases = useAnalyticsStore((state) => state.scores_increase);
   const scores: Score[] = [
     {
       icon: Mic,
       stat: averageScores.fluency,
       description: "Fluency & Cohesion",
       color: "blue",
-      trend: "up",
+      trend: scoreIncreases?.fluency ?? 0.5 > 0 ? "up" : "down",
+      delta: scoreIncreases?.fluency ?? 0.5,
     },
     {
       icon: BookMarked,
       stat: averageScores.grammar,
       description: "Grammatical Range",
       color: "green",
-      trend: "up",
+      trend: scoreIncreases?.grammar ?? 0.5 > 0 ? "up" : "down",
+      delta: scoreIncreases?.grammar ?? 0.5,
     },
     {
       icon: BookA,
       stat: averageScores.lexis,
       description: "Lexical Resource",
       color: "purple",
-      trend: "down",
+      trend: scoreIncreases?.lexis ?? 0.5 > 0 ? "up" : "down",
+      delta: scoreIncreases?.lexis ?? 0.5,
     },
     {
       icon: Megaphone,
       stat: averageScores.pronunciation,
       description: "Pronunciation",
       color: "orange",
-      trend: "up",
+      trend: scoreIncreases?.pronunciation ?? 0.5 > 0 ? "up" : "down",
+      delta: scoreIncreases?.pronunciation ?? 0.5,
     },
   ];
   return (

@@ -7,7 +7,7 @@ from langchain_groq import ChatGroq
 from langchain.prompts import ChatPromptTemplate
 from pydantic_core import from_json
 
-from api.app.schemas.pronunciation import PronunciationAnalysis
+from ..schemas.pronunciation import PronunciationAnalysis
 from .prompts import pronunciation_system_prompt, human_input_pronunciation
 
 load_dotenv()

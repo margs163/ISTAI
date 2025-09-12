@@ -1,7 +1,7 @@
 "use client";
 import { BookText, Bot, ChartColumn, Ellipsis, Search } from "lucide-react";
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useGlobalPracticeTestsStore } from "@/lib/practiceTestStore";
 import RecentTestsFallback from "./RecentTestsFallback";
 import { PracticeTestType } from "@/lib/types";
@@ -82,19 +82,27 @@ export default function AllPracticeTests() {
   const [search, setSearch] = useState("");
   const onValueChange = (value: "recent" | "score" | "duration") =>
     setSort(value);
-  const filtered = allPracticeTests.filter((test) => test.result);
-  const searched = filtered.filter((item) =>
-    item.practice_name.includes(search)
-  );
-  const sorted = searched.sort((a, b) => {
-    if (sort === "recent") {
-      return new Date(b.test_date).getTime() - new Date(a.test_date).getTime();
-    } else if (sort === "score") {
-      return Number(a.result?.overall_score) - Number(a.result?.overall_score);
-    } else {
-      return Number(b.test_duration) - Number(a.test_duration);
-    }
-  });
+
+  const searched = useMemo(() => {
+    const filtered = allPracticeTests.filter((test) => test.result);
+    const searched = filtered.filter((item) =>
+      item.practice_name.includes(search)
+    );
+    return searched.sort((a, b) => {
+      if (sort === "recent") {
+        return (
+          new Date(b.test_date).getTime() - new Date(a.test_date).getTime()
+        );
+      } else if (sort === "score") {
+        return (
+          Number(a.result?.overall_score) - Number(a.result?.overall_score)
+        );
+      } else {
+        return Number(b.test_duration) - Number(a.test_duration);
+      }
+    });
+  }, [allPracticeTests]);
+
   return (
     <section className="px-4 lg:px-6 w-full flex flex-col gap-6">
       <div className="p-5 w-full flex flex-col gap-6 bg-white rounded-lg border border-gray-200/80">
@@ -132,12 +140,12 @@ export default function AllPracticeTests() {
           </Select>
           <Link href={"#"}>
             <p className="font-medium text-sm text-gray-800 p-1 hover:text-gray-700 active:text-gray-700">
-              {sorted.length} tests
+              {searched.length} tests
             </p>
           </Link>
         </header>
         <div className="space-y-3">
-          {allPracticeTests && filtered && filtered.length > 0 ? (
+          {allPracticeTests && searched.length > 2 ? (
             searched.map((item, index) => (
               <PracticeTest key={index} test={item} />
             ))

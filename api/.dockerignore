@@ -1,0 +1,6 @@
+dockerfile
+.dockerignore
+.git
+README.md
+venv
+.venv

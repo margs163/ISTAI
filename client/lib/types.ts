@@ -331,6 +331,13 @@ const PronunciationCommonMistake = z.object({
   frequency: z.number(),
 });
 
+export const BandScoreIncrease = z.object({
+  fluency: z.float32(),
+  grammar: z.float32(),
+  lexis: z.float32(),
+  pronunciation: z.float32(),
+});
+
 export const AnalyticsSchema = z.object({
   id: z.string(),
   user_id: z.string(),
@@ -338,6 +345,7 @@ export const AnalyticsSchema = z.object({
   tests_completed: z.number().int(),
   current_bandscore: z.float32(),
   average_band_scores: AverageBandScores,
+  scores_increase: BandScoreIncrease.nullable().optional(),
   average_band: z.float32(),
   grammar_common_mistakes: z.array(GrammarCommonMistake).optional().nullable(),
   lexis_common_mistakes: z.array(VocabularyCommonMistake).optional().nullable(),
@@ -364,6 +372,7 @@ export const SubscriptionSchema = z.object({
   id: z.string(),
   user_id: z.string(),
 
+  status: z.string().nullable().optional(),
   paddle_product_id: z.string().optional().nullable(),
   paddle_subscription_id: z.string().optional().nullable(),
   paddle_price_id: z.string().optional().nullable(),
@@ -379,9 +388,13 @@ export const SubscriptionSchema = z.object({
 
   billing_interval: z.string().nullable(),
   billing_frequency: z.int().nullable(),
+
+  paddle_update_url: z.string().nullable().optional(),
+  paddle_cancel_url: z.string().nullable().optional(),
 });
 
 export const SubscriptionUpdateSchema = z.object({
+  status: z.string().optional().nullable(),
   paddle_product_id: z.string().optional().nullable(),
   paddle_subscription_id: z.string().optional().nullable(),
   paddle_price_id: z.string().optional().nullable(),

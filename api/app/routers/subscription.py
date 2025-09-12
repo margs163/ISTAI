@@ -1,19 +1,18 @@
 from datetime import datetime
-import json
 import os
-from pathlib import Path
 from pprint import pprint
-from typing import Annotated, Any, Dict
+from typing import Annotated
 from fastapi import APIRouter, Body, Depends, HTTPException, Request, status
-from paddle_billing.Notifications.Requests.Request import Request as PRequest
-from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.orm import joinedload
+
+from ..lib.send_notification import create_notification
+from ..schemas.notifications import NotificationTypeEnum
 from ..dependencies import limiter
 
-from api.app.lib.auth_db import get_async_session
-from api.app.schemas.db_tables import CreditCard, Subscription, User
-from api.app.schemas.subscriptions import (
+from ..lib.auth_db import get_async_session
+from ..schemas.db_tables import CreditCard, Subscription, User
+from ..schemas.subscriptions import (
     CreditCardSchema,
     SubscriptionSchema,
     SubscriptionUpdateSchema,
@@ -21,7 +20,6 @@ from api.app.schemas.subscriptions import (
 )
 from ..dependencies import current_active_user
 from sqlalchemy.ext.asyncio import AsyncSession
-from paddle_billing.Notifications.Requests.Headers import Headers
 from paddle_billing.Notifications import Secret, Verifier
 from paddle_billing import Client, Options, Environment
 from paddle_billing.Resources.Events.Operations import ListEvents
@@ -29,6 +27,7 @@ from paddle_billing.Resources.Shared.Operations import Pager
 from paddle_billing.Entities.Events import EventTypeName
 from paddle_billing.Resources.Transactions.Operations import ListTransactions
 from paddle_billing.Entities.Transaction import Transaction
+from paddle_billing.Resources.Subscriptions.Operations import CancelSubscription
 
 # from paddle_billing.Resources.Events.EventsClient
 
@@ -43,6 +42,9 @@ WEBHOOK_SECRET = os.getenv("PADDLE_WEBHOOK_SECRET")
 PADDLE_API_KEY = os.getenv("PADDLE_API_KEY")
 
 if not PADDLE_API_KEY:
+    raise Exception("No paddle api key")
+
+if not WEBHOOK_SECRET:
     raise Exception("No paddle api key")
 
 
@@ -102,9 +104,6 @@ async def paddle_webhook(
 
             for event in events:
                 if event.event_type.value == EventTypeName.SubscriptionActivated.value:
-                    print("Subscription was activated")
-
-                if event.event_type.value == EventTypeName.SubscriptionCreated.value:
                     subscription_id = data["data"]["id"]
                     customer_id = data["data"]["customer_id"]
                     subscription = None
@@ -167,14 +166,77 @@ async def paddle_webhook(
                             subscription.billing_cycle.frequency
                         )
 
-                        await session.commit()
-                    pprint("Subscription record was updated!")
+                        subscription_record.status = subscription.status.value
 
-                if event.event_type.value == EventTypeName.TransactionCompleted.value:
-                    print("Transaction completed!")
+                        if (
+                            subscription.management_urls
+                            and subscription.management_urls.update_payment_method
+                        ):
+                            subscription_record.paddle_cancel_url = (
+                                subscription.management_urls.cancel
+                            )
+                            subscription_record.paddle_update_url = (
+                                subscription.management_urls.update_payment_method
+                            )
+
+                        await create_notification(
+                            user_id=str(user.id),
+                            session=session,
+                            type=NotificationTypeEnum.CREDIT_PURCHASE,
+                            message=f"You have successfully started a {sub_item.product.name} plan",
+                        )
+                        await session.commit()
+
+                    print("Subscription record was updated!")
+
+                if event.event_type.value == EventTypeName.SubscriptionCreated.value:
+                    print("Subscription created")
 
                 if event.event_type.value == EventTypeName.SubscriptionCanceled.value:
-                    print("Subscription cancelled!")
+                    print("Cancelling your subscription")
+                    subscription_id = data["data"]["id"]
+                    customer_id: str = data["data"]["customer_id"]
+
+                    customer = paddle.customers.get(customer_id)
+                    subscription = paddle.subscriptions.get(subscription_id)
+
+                    if not subscription.canceled_at:
+                        raise HTTPException(
+                            status_code=status.HTTP_400_BAD_REQUEST,
+                            detail="Invalid subscription object",
+                        )
+
+                    if subscription and customer:
+                        user = await session.scalar(
+                            select(User).where(User.email == customer.email)
+                        )
+
+                        if not user:
+                            raise HTTPException(
+                                status_code=status.HTTP_400_BAD_REQUEST,
+                                detail=f"No user was found with email {customer.email}",
+                            )
+                        subscription_record = await session.scalar(
+                            select(Subscription).where(Subscription.user_id == user.id)
+                        )
+
+                        if not subscription_record:
+                            raise HTTPException(
+                                status_code=status.HTTP_400_BAD_REQUEST,
+                                detail="No subscription was found",
+                            )
+
+                        subscription_record.status = subscription.status.value
+
+                        await session.commit()
+
+                        await create_notification(
+                            user_id=str(user.id),
+                            session=session,
+                            type=NotificationTypeEnum.PLAN_CHANGE,
+                            message="Your subscription has been cancelled",
+                        )
+                        print("Subscription was cancelled")
 
                 if event.event_type.value == EventTypeName.PaymentMethodSaved.value:
                     customer_id: str = data["data"]["customer_id"]
@@ -258,6 +320,7 @@ async def paddle_webhook(
                             subscription_record.credit_card.country = (
                                 address.country_code.value
                             )
+
                         await session.commit()
                         pprint("Credit card was set/updated!")
 
@@ -315,11 +378,11 @@ async def create_subscription(
             credits_left=20,
         )
         subscriptions_record = Subscription(**new_subscription.model_dump())
-
         session.add(subscriptions_record)
+        # user.subscription = subscriptions_record
         await session.commit()
 
-        return {"data": subscriptions_record}
+        return {"data": user.subscription}
 
     except Exception as e:
         await session.rollback()
@@ -442,6 +505,12 @@ async def update_subscription(
         if update.subscription_tier:
             record.subscription_tier = update.subscription_tier
 
+        if update.paddle_cancel_url:
+            record.paddle_cancel_url = update.paddle_cancel_url
+
+        if update.paddle_update_url:
+            record.paddle_cancel_url = update.paddle_update_url
+
         await session.commit()
 
     except Exception as e:
@@ -450,3 +519,80 @@ async def update_subscription(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Could not update subscriptions record: {e}",
         )
+
+
+@router.get("/cancel-inline")
+@limiter.limit("2/minute")
+async def cancel_subscription_inline(
+    request: Request,
+    user: Annotated[User, Depends(current_active_user)],
+    session: Annotated[AsyncSession, Depends(get_async_session)],
+):
+    try:
+        subscription = await session.scalar(
+            select(Subscription).where(Subscription.user_id == user.id)
+        )
+
+        if not subscription:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail="No subscription found"
+            )
+
+        paddle_sub_id = subscription.paddle_subscription_id
+        subscription_paddle = paddle.subscriptions.get(paddle_sub_id)
+
+        if not subscription_paddle:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail="No subscription found"
+            )
+
+        paddle.subscriptions.cancel(subscription_paddle.id, CancelSubscription())
+
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=e)
+
+
+@router.get("/cancel-link")
+@limiter.limit("3/minute")
+async def cancel_subscription(
+    request: Request,
+    user: Annotated[User, Depends(current_active_user)],
+    session: Annotated[AsyncSession, Depends(get_async_session)],
+):
+    try:
+        subscription = await session.scalar(
+            select(Subscription).where(Subscription.user_id == user.id)
+        )
+
+        if not subscription:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail="No subscription found"
+            )
+
+        return {"url": subscription.paddle_cancel_url}
+
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=e)
+
+
+@router.get("/update-link")
+@limiter.limit("3/minute")
+async def update_payment_link(
+    request: Request,
+    user: Annotated[User, Depends(current_active_user)],
+    session: Annotated[AsyncSession, Depends(get_async_session)],
+):
+    try:
+        subscription = await session.scalar(
+            select(Subscription).where(Subscription.user_id == user.id)
+        )
+
+        if not subscription:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail="No subscription found"
+            )
+
+        return {"url": subscription.paddle_update_url}
+
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=e)

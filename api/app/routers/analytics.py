@@ -6,12 +6,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from datetime import date, datetime
 
-from api.app.schemas.analytics import (
+from ..schemas.analytics import (
     AnalyticsSchema,
     AnalyticsUpdateSchema,
     AverageBandScores,
+    BandScoresIncrease,
 )
-from api.app.schemas.db_tables import Analytics, Notifications, PracticeTest, User
+from ..schemas.db_tables import Analytics, Notifications, PracticeTest, User
 from sqlalchemy import cast, func
 from ..lib.auth_db import get_async_session
 from ..dependencies import current_active_user, limiter
@@ -92,6 +93,9 @@ async def init_analytics(
             average_band_scores=AverageBandScores(
                 fluency=0, grammar=0, lexis=0, pronunciation=0
             ),
+            scores_increase=BandScoresIncrease(
+                fluency=0, grammar=0, lexis=0, pronunciation=0
+            ),
             average_band=0,
             grammar_common_mistakes=[],
             lexis_common_mistakes=[],
@@ -132,10 +136,10 @@ async def update_analytics(
         )
 
         today_tests = result.all()
-        result2 = await session.scalars(
+        result2 = await session.execute(
             select(Analytics).where(Analytics.user_id == user.id)
         )
-        analytic = result2.first()
+        analytic = result2.unique().scalar_one_or_none()
 
         if not analytic:
             raise HTTPException(
@@ -176,6 +180,15 @@ async def update_analytics(
                 / (num_tests + 1),
             }
             analytic.average_band_scores = new_avg_bands
+
+            scores_increase = {
+                "fluency": new_avg_bands["fluency"] - fluency_avg,
+                "grammar": new_avg_bands["grammar"] - grammar_avg,
+                "lexis": new_avg_bands["lexis"] - lexis_avg,
+                "pronunciation": new_avg_bands["pronunciation"] - pronunciation_avg,
+            }
+
+            analytic.scores_increase = scores_increase
 
         if update.current_bandscore:
             analytic.current_bandscore = update.current_bandscore

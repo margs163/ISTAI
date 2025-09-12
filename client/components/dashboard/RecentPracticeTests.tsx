@@ -1,16 +1,26 @@
 "use client";
 import { useGlobalPracticeTestsStore } from "@/lib/practiceTestStore";
-import { fetchPracticeTests } from "@/lib/queries";
+import { deletePracticeTest, fetchPracticeTests } from "@/lib/queries";
 import { cn, getPreciseTimeAgo, parseTimeInt } from "@/lib/utils";
-import { useQuery } from "@tanstack/react-query";
-import { BookText, Bot, ChartColumn, Ellipsis } from "lucide-react";
+import {
+  useMutation,
+  UseMutationResult,
+  useQuery,
+} from "@tanstack/react-query";
+import { BookText, Bot, ChartColumn, Ellipsis, Trash } from "lucide-react";
 import Link from "next/link";
-import React from "react";
+import React, { useMemo } from "react";
 import LoadingSmallUI from "../loadingSmallUI";
 import { PracticeTestType } from "@/lib/types";
 import RecentTestsFallback from "./RecentTestsFallback";
 
-export function PracticeTest({ test }: { test: PracticeTestType }) {
+export function PracticeTest({
+  test,
+  mutation,
+}: {
+  test: PracticeTestType;
+  mutation: UseMutationResult<true | undefined, Error, string, unknown>;
+}) {
   if (!test.result) return;
   return (
     <div className="border border-gray-100 rounded-lg w-full px-5 py-3 lg:py-3.5 flex flex-row justify-between items-center hover:bg-slate-50 transition-colors active:bg-slate-50">
@@ -60,11 +70,12 @@ export function PracticeTest({ test }: { test: PracticeTestType }) {
       </h3>
       <div className="flex flex-row gap-2 items-center">
         <Link href={"#"}>
-          <ChartColumn className="size-4 p-1.5 rounded-full hover:bg-gray-100 active:bg-gray-100 text-gray-800 hover:text-gray-700 active:text-gray-700 transition-colors box-content" />
-        </Link>
-        <Link href={"#"}>
           <Ellipsis className="size-4 p-1.5 rounded-full hover:bg-gray-100 active:bg-gray-100 text-gray-800 hover:text-gray-700 active:text-gray-700 transition-colors box-content" />
         </Link>
+        <Trash
+          onClick={async () => await mutation.mutateAsync(test.id)}
+          className="size-4 p-1.5 rounded-full hover:bg-gray-100 active:bg-gray-100 text-gray-800 hover:text-gray-700 active:text-gray-700 transition-colors box-content"
+        />
       </div>
     </div>
   );
@@ -79,16 +90,28 @@ export default function RecentPracticeTests() {
     queryFn: async () => await fetchPracticeTests(setGlobalPracticeTests),
   });
 
+  const mutation = useMutation({
+    mutationKey: ["delete-practice"],
+    mutationFn: deletePracticeTest,
+  });
+
+  const lastFive = useMemo(() => {
+    const recentTests = data && data.filter((item) => item.result);
+    const sorted =
+      recentTests &&
+      recentTests.sort((a, b) => {
+        return (
+          new Date(b.test_date).getTime() - new Date(a.test_date).getTime()
+        );
+      });
+
+    const last = sorted && sorted.length > 5 ? sorted.slice(0, 5) : sorted;
+
+    return last;
+  }, [data]);
+
   if (isLoading) return <LoadingSmallUI />;
 
-  const recentTests = data && data.filter((item) => item.result);
-  const sorted =
-    recentTests &&
-    recentTests.sort((a, b) => {
-      return new Date(b.test_date).getTime() - new Date(a.test_date).getTime();
-    });
-
-  const lastFive = sorted && sorted.length > 5 ? sorted.slice(0, 5) : sorted;
   return (
     <section className="px-6 lg:pr-0 w-full flex flex-col gap-6">
       <div className="p-5 w-full flex flex-col gap-6 bg-white rounded-lg border border-gray-200/80 min-h-[320px]">
@@ -107,7 +130,7 @@ export default function RecentPracticeTests() {
         <div className="space-y-3">
           {data && data.length > 0 && lastFive ? (
             lastFive.map((item, index) => (
-              <PracticeTest key={index} test={item} />
+              <PracticeTest key={index} test={item} mutation={mutation} />
             ))
           ) : (
             <RecentTestsFallback />

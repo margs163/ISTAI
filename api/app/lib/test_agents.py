@@ -249,9 +249,10 @@ async def convert_to_wav_aio(input_path: str, output_path: str) -> None:
 
 
 if __name__ == "__main__":
-    asyncio.run(
-        convert_to_wav_aio(
-            "./app/data/pronunciation-6aac544f-726a-4fde-ba30-f07d142c1b0d.wav",
-            "./app/data/damn.wav",
-        )
-    )
+    programming_lesson()
+    # asyncio.run(
+    #     convert_to_wav_aio(
+    #         "./app/data/pronunciation-6aac544f-726a-4fde-ba30-f07d142c1b0d.wav",
+    #         "./app/data/damn.wav",
+    #     )
+    # )

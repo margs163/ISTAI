@@ -43,49 +43,9 @@ export default function PronCheckDialog({
 
   const [isRecording, setIsRecording] = useState(false);
   const [readingAudioPath, setReadingAudioPath] = useState<string>("");
-  const [testResults, setTestResults] = useState<PronunciationTestType | null>({
-    id: "8445498c-8c9e-405e-bf60-baba44bbb957",
-    pronunciation_score: 7,
-    pronunciation_strong_points: [
-      "Clear articulation of vowel sounds in words like 'belongings' and 'challenging'",
-      "Accurate stress patterns in sentences, enhancing overall clarity",
-      "Effective use of intonation to convey meaning, particularly in longer sentences",
-    ],
-    pronunciation_weak_sides: [
-      "Occasional mispronunciation of consonant clusters, such as 'protective' and 'furniture'",
-      "Some words show inconsistent vowel sound production, e.g., 'apartment' and 'unpacking'",
-      "Limited variation in intonation, which could enhance listener engagement",
-    ],
-    pronunciation_mistakes: [
-      {
-        word: "apartment",
-        accuracy: 70,
-        mistake_type: "Vowel Phoneme Errors",
-        user_phonemes: "/əpɑɹtmənt/",
-        correct_phonemes: "/əˈpɑːrtmənt/",
-      },
-      {
-        word: "furniture",
-        accuracy: 54,
-        mistake_type: "Consonant Phoneme Errors",
-        user_phonemes: "/fɝɹnɪtʃəɹ/",
-        correct_phonemes: "/ˈfɜːrnɪtʃər/",
-      },
-      {
-        word: "unpacking",
-        accuracy: 70,
-        mistake_type: "Vowel Phoneme Errors",
-        user_phonemes: "/ʌnpækɪŋ/",
-        correct_phonemes: "/ʌnˈpækɪŋ/",
-      },
-    ],
-    pronunciation_tips: [
-      "Practice linking words smoothly to improve rhythm and fluency.",
-      "Record yourself reading short sentences to monitor and adjust intonation patterns.",
-      "Focus on correct tongue placement for /θ/ and /ð/ sounds in words like 'the' and 'this'.",
-      "Break down multisyllabic words into syllables to ensure clear consonant clusters.",
-    ],
-  });
+  const [testResults, setTestResults] = useState<
+    PronunciationTestType | undefined
+  >();
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["reading-card"],
@@ -258,7 +218,7 @@ export default function PronCheckDialog({
 
   return (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-      <DialogContent className="font-geist max-h-[600px] overflow-y-scroll">
+      <DialogContent className="font-geist max-h-[600px] overflow-y-scroll max-w-[800px]">
         <DialogHeader className="items-start text-left">
           <DialogTitle className="text-base text-gray-800 font-semibold">
             Pronunciation Check

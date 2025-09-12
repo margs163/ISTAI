@@ -84,7 +84,10 @@ export function Feature({
 
 export default function PowerfulFeatures() {
   return (
-    <section className=" w-full flex flex-col items-center justify-center p-8 lg:p-20 gap-10 lg:gap-20 max-w-[1400px] mx-auto">
+    <section
+      id="features"
+      className=" w-full flex flex-col items-center justify-center p-8 lg:p-20 gap-10 lg:gap-20 max-w-[1400px] mx-auto"
+    >
       <header className="space-y-2 lg:space-y-4">
         <h1 className="font-bold text-3xl lg:text-5xl text-gray-800 text-center leading-[1.3]">
           Powerful Test <br className="lg:block hiddden" />

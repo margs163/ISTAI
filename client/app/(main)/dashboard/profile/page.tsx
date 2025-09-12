@@ -60,8 +60,8 @@ export default function Page() {
           description: "Profile was changed successfully",
         });
       } catch (error) {
-        toast("Error Fetching Avatar", {
-          description: "Could not fetch analytics",
+        toast("Error Changing Avatar", {
+          description: "Could not change a profile",
           action: {
             label: "Log",
             onClick: () => console.log(error),

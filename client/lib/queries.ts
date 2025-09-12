@@ -154,6 +154,75 @@ export async function logOutUser() {
   }
 }
 
+export async function CancelSubscriptionLink() {
+  try {
+    const response = await axios.get<{ url: string }>(
+      `http://${process.env.NEXT_PUBLIC_FASTAPI}/subscription/cancel-link`,
+      {
+        withCredentials: true,
+      }
+    );
+
+    const link = response.data.url;
+    console.log(link);
+    return link;
+  } catch (error) {
+    toast("Could not cancel a subscription", {
+      description: "Error cancelling a subscription",
+      action: {
+        label: "Log",
+        onClick: () => console.log(error),
+      },
+    });
+  }
+}
+
+export async function UpdateSubscriptionLink() {
+  try {
+    const response = await axios.get<{ url: string }>(
+      `http://${process.env.NEXT_PUBLIC_FASTAPI}/subscription/update-link`,
+      {
+        withCredentials: true,
+      }
+    );
+
+    const link = response.data.url;
+    console.log(link);
+    return link;
+  } catch (error) {
+    toast("Could not update a subscription", {
+      description: "Error updating a subscription",
+      action: {
+        label: "Log",
+        onClick: () => console.log(error),
+      },
+    });
+  }
+}
+
+export async function deletePracticeTest(practiceId: string) {
+  try {
+    await axios.delete(
+      `http://${process.env.NEXT_PUBLIC_FASTAPI}/practice_test/${practiceId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    toast("Successfully deleted a practice tes.", {
+      description: `Practice Id: ${practiceId}`,
+    });
+    return true;
+  } catch (error) {
+    toast("Could not delete a practice test", {
+      description: "Error deleting a practice test",
+      action: {
+        label: "Log",
+        onClick: () => console.log(error),
+      },
+    });
+  }
+}
+
 export async function fetchPart2QuestionCard(
   setPart2Question: (card: QuestionCardType) => void
 ): Promise<QuestionCardType | undefined> {
@@ -173,6 +242,33 @@ export async function fetchPart2QuestionCard(
   } catch (error) {
     toast("No Question Card", {
       description: "No Part 2 question card found",
+      action: {
+        label: "Log",
+        onClick: () => console.log(error),
+      },
+    });
+    return undefined;
+  }
+}
+
+export async function fetchPart1QuestionCard(): Promise<
+  QuestionCardType | undefined
+> {
+  try {
+    const response = await axios.get<{ questions: QuestionCardType[] }>(
+      `http://${process.env.NEXT_PUBLIC_FASTAPI}/questions/?part=1`,
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        withCredentials: true,
+      }
+    );
+    const question = response.data.questions[0];
+    return question;
+  } catch (error) {
+    toast("No Question Card", {
+      description: "No Part 1 question card found",
       action: {
         label: "Log",
         onClick: () => console.log(error),

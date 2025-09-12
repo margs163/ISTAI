@@ -24,7 +24,6 @@ export default function UserBilling() {
   useQuery({
     queryKey: ["subscription-fetch"],
     queryFn: async () => await fetchSubscription(setSubscription),
-    staleTime: 1000 * 60 * 5,
   });
 
   return (
@@ -35,7 +34,6 @@ export default function UserBilling() {
           Track you credits and manage your billing info
         </p>
       </div>
-      {/* <hr className="h-[1px] bg-slate-100 rounded-sm px-6 my-0 w-full" /> */}
       <div className="flex flex-col gap-8 items-start w-full">
         <div className="space-y-2 w-full">
           <h3 className="text-xs font-normal text-gray-500">Current Plan</h3>
@@ -121,15 +119,25 @@ export default function UserBilling() {
           {/* <div className="max-w-[320px] lg:max-w-full mt-4">
             <BillingHistory />
             </div> */}
-          <Link
-            href={"#"}
-            className="flex flex-row items-center gap-2 self-end"
-          >
-            <Plus className="size-4 text-gray-600" />{" "}
-            <p className="text-gray-600 font-normal text-sm">
-              Change payment method
-            </p>
-          </Link>
+          <div className="flex flex-row items-center justify-between gap-6 w-full">
+            <Link
+              href={subscription.paddle_cancel_url ?? "#"}
+              className="flex flex-row items-center gap-2 self-end"
+            >
+              <p className="text-gray-600 hover:text-gray-800 active:text-gray-800 transition-colors font-normal text-sm">
+                Cancel Subscription
+              </p>
+            </Link>
+            <Link
+              href={subscription.paddle_update_url ?? "#"}
+              className="flex flex-row items-center gap-2 self-end"
+            >
+              <Plus className="size-4 text-gray-600" />{" "}
+              <p className="text-gray-600 hover:text-gray-800 active:text-gray-800 transition-colors font-normal text-sm">
+                Change payment method
+              </p>
+            </Link>
+          </div>
         </div>
       </div>
     </section>

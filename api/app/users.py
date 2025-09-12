@@ -8,15 +8,15 @@ from fastapi_users import UUIDIDMixin, BaseUserManager, FastAPIUsers
 from fastapi_mail import ConnectionConfig, MessageSchema, FastMail, MessageType
 from sqlalchemy import select
 
-from api.app.schemas.analytics import AnalyticsSchema, AverageBandScores
-from api.app.schemas.db_tables import (
+from .schemas.analytics import AnalyticsSchema, AverageBandScores
+from .schemas.db_tables import (
     Analytics,
     Notifications,
     PracticeTest,
     Subscription,
 )
-from api.app.schemas.notifications import NotificationTypeEnum, NotificationsSchema
-from api.app.schemas.subscriptions import SubscriptionSchema, TierEnum
+from .schemas.notifications import NotificationTypeEnum, NotificationsSchema
+from .schemas.subscriptions import SubscriptionSchema, TierEnum
 from .lib.auth_db import User, get_async_session, get_user_db
 from fastapi import Request, Depends, Response
 from httpx_oauth.clients.google import GoogleOAuth2

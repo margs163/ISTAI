@@ -58,7 +58,7 @@ export default function PronCheckResults({
               : band >= 7.0 && "text-blue-600 bg-blue-50"
           )}
         >
-          {scores[band].code}
+          {scores[band as 2].code}
         </p>
       </div>
       <div className="space-y-3 px-2">

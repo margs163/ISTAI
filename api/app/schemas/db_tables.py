@@ -9,14 +9,11 @@ from sqlalchemy import (
     ForeignKey,
     String,
     DateTime,
-    Date,
     Enum as ORMEnum,
     Integer,
     Float,
     ARRAY,
     Text,
-    null,
-    sql,
 )
 from datetime import date, timedelta
 from fastapi_users_db_sqlalchemy.generics import GUID
@@ -93,7 +90,9 @@ class Result(Base):
     practice_test_id: Mapped[UUID_ID] = mapped_column(
         GUID, ForeignKey("practice_test_table.id"), index=True
     )
-    practice_test: Mapped["PracticeTest"] = relationship(back_populates="result")
+    practice_test: Mapped["PracticeTest"] = relationship(
+        back_populates="result",
+    )
 
     overall_score: Mapped[float] = mapped_column(Float)
     criterion_scores: Mapped[dict[str, float]] = mapped_column(JSONB)
@@ -130,8 +129,6 @@ class Transcription(Base):
         GUID, ForeignKey("user_table.id"), index=True
     )
     user: Mapped[User] = relationship(back_populates="transcriptions")
-    # user_responses: Mapped[list[str]] = mapped_column(ARRAY(String))
-    # assistant_responses: Mapped[list[str]] = mapped_column(ARRAY(String))
     part_one: Mapped[list[dict]] = mapped_column(JSONB)
     part_two: Mapped[list[dict]] = mapped_column(JSONB)
     part_three: Mapped[list[dict]] = mapped_column(JSONB)
@@ -151,6 +148,7 @@ class Analytics(Base):
     tests_completed: Mapped[int] = mapped_column(Integer)
     current_bandscore: Mapped[float] = mapped_column(Float)
     average_band_scores: Mapped[dict[str, float]] = mapped_column(JSONB)
+    scores_increase: Mapped[dict[str, float]] = mapped_column(JSONB, nullable=True)
     average_band: Mapped[float] = mapped_column(Float)
     grammar_common_mistakes: Mapped[list[dict | None]] = mapped_column(
         JSONB, nullable=True
@@ -191,12 +189,16 @@ class PracticeTest(Base):
     id: Mapped[UUID_ID] = mapped_column(GUID, primary_key=True, default=uuid.uuid4)
     user_id: Mapped[UUID_ID] = mapped_column(ForeignKey("user_table.id"), index=True)
     user: Mapped[User] = relationship(back_populates="practice_tests")
-    result: Mapped[Result] = relationship(back_populates="practice_test")
+    result: Mapped[Result] = relationship(
+        back_populates="practice_test", cascade="all, delete-orphan"
+    )
     status: Mapped[str] = mapped_column(String)
 
     practice_name: Mapped[str] = mapped_column(String(length=100))
     assistant: Mapped[str] = mapped_column(String)
-    transcription: Mapped[Transcription] = relationship(back_populates="practice_test")
+    transcription: Mapped[Transcription] = relationship(
+        back_populates="practice_test", cascade="all, delete-orphan"
+    )
     test_duration: Mapped[int] = mapped_column(Integer, nullable=True)
     test_date: Mapped[datetime] = mapped_column(DateTime, default=datetime.now())
 
@@ -239,6 +241,7 @@ class Subscription(Base):
         GUID, ForeignKey("user_table.id"), index=True
     )
 
+    status: Mapped[str] = mapped_column(String(50), nullable=True)
     paddle_product_id: Mapped[str] = mapped_column(String(150), nullable=True)
     paddle_subscription_id: Mapped[str] = mapped_column(String(150), nullable=True)
     paddle_price_id: Mapped[str] = mapped_column(String(150), nullable=True)
@@ -251,7 +254,7 @@ class Subscription(Base):
     subscription_next_billed_at: Mapped[datetime] = mapped_column(
         DateTime, nullable=True
     )
-    total_money_spent: Mapped[float] = mapped_column(Float, default=0)
+    total_money_spent: Mapped[float] = mapped_column(Float, default=0, nullable=True)
 
     credit_card: Mapped["CreditCard"] = relationship(
         back_populates="subscription", lazy="joined"
@@ -261,6 +264,8 @@ class Subscription(Base):
 
     billing_interval: Mapped[str] = mapped_column(String(20), nullable=True)
     billing_frequency: Mapped[int] = mapped_column(Integer, nullable=True)
+    paddle_update_url: Mapped[str] = mapped_column(String(2000), nullable=True)
+    paddle_cancel_url: Mapped[str] = mapped_column(String(2000), nullable=True)
 
 
 class CreditCard(Base):

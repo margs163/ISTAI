@@ -77,7 +77,7 @@ const plansMonthly: Plan[] = [
   },
   {
     tier: "Starter",
-    price: 6,
+    price: 5,
     description: "Per user/month billed monthly",
     audience: "Ideal for students with regular preparation",
     features: [
@@ -170,7 +170,10 @@ export function StaticPlanCard({
 export default function StaticPlansPricing() {
   const [activeTab, setActiveTab] = useState<"month" | "year">("year");
   return (
-    <section className=" w-full flex flex-col items-center justify-center p-8 lg:p-20 gap-10 lg:gap-10 max-w-[1400px] mx-auto">
+    <section
+      id="pricing"
+      className=" w-full flex flex-col items-center justify-center p-8 lg:p-20 gap-10 lg:gap-10 max-w-[1400px] mx-auto"
+    >
       <header className="space-y-2 lg:space-y-4">
         <h1 className="font-bold text-3xl lg:text-5xl text-gray-800 text-center leading-[1.3]">
           Plans and Pricing
@@ -202,7 +205,7 @@ export default function StaticPlansPricing() {
             Annual
           </h3>
           <p className="bg-gray-200 rounded-lg px-1 py-0.5 text-xs min-w-18 text-center font-medium text-gray-600">
-            Save 35%
+            Save 20%
           </p>
         </div>
       </div>

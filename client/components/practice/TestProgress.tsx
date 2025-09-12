@@ -90,7 +90,7 @@ export default function TestProgress() {
                     {item.status === "completed" ? (
                       <Check className="text-white size-4 box-content p-0.5" />
                     ) : item.status === "ongoing" ? (
-                      <span className="text-white font-medium box-content px-[7px] py-0.5 text-sm shrink-0">
+                      <span className="text-white font-medium box-content px-[8px] py-0.5 text-sm shrink-0">
                         {index + 1}
                       </span>
                     ) : (

@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Path, Request, status, Qu
 from sqlalchemy import and_, func, insert, select
 from typing import Annotated
 
-from api.app.schemas.db_tables import ReadingCard
+from ..schemas.db_tables import ReadingCard
 from ..dependencies import current_active_user
 from ..lib.auth_db import get_async_session
 from ..schemas.practice_test import ReadingCardSchema

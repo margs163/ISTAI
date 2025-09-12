@@ -79,7 +79,7 @@ const plansMonthly: Plan[] = [
   },
   {
     tier: "Starter",
-    price: 6,
+    price: 5,
     description: "Per user/month billed monthly",
     audience: "Ideal for students with regular preparation",
     features: [
@@ -217,7 +217,7 @@ export default function PlansPricing({
             Annual
           </h3>
           <p className="bg-gray-200 rounded-lg px-1 py-0.5 text-xs min-w-18 text-center font-medium text-gray-600">
-            Save 35%
+            Save 20%
           </p>
         </div>
       </div>

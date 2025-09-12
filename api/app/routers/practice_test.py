@@ -12,10 +12,9 @@ from fastapi import (
 )
 from pydantic import BaseModel
 
-from api.app.lib.send_notification import create_notification
-from api.app.lib.auth_db import get_async_session
-from api.app.schemas.db_tables import (
-    Notifications,
+from ..lib.send_notification import create_notification
+from ..lib.auth_db import get_async_session
+from ..schemas.db_tables import (
     PracticeTest,
     QuestionCard,
     ReadingCard,
@@ -23,7 +22,6 @@ from api.app.schemas.db_tables import (
     Transcription,
     User,
 )
-from api.app.schemas.notifications import NotificationTypeEnum, NotificationsSchema
 from ..schemas.practice_test import PracticeTestSchema, PracticeTestUpdateSchema
 from sqlalchemy import select
 from ..dependencies import limiter
@@ -245,6 +243,13 @@ async def update_test(
             reading_cards_list = [reading_one]
             practice_test.reading_cards = reading_cards_list
 
+        await create_notification(
+            user_id=str(user.id),
+            session=session,
+            type=NotificationTypeEnum.TEST_INFO,
+            message="Your test results are ready!",
+        )
+
         await session.commit()
         return {"status": "success"}
 
@@ -265,12 +270,27 @@ async def delete_test(request: Request, test_id: Annotated[str, Path()]):
                 result_select = await session.scalars(
                     select(PracticeTest).where(PracticeTest.id == test_id)
                 )
+
                 test = result_select.first()
                 if not test:
                     raise HTTPException(
                         status_code=status.HTTP_400_BAD_REQUEST,
                         detail="Could not find a practice test",
                     )
+
+                result_record = await session.scalar(
+                    select(Result).where(Result.practice_test_id == test_id)
+                )
+
+                transcription = await session.scalar(
+                    select(Transcription).where(Transcription.test_id == test.id)
+                )
+
+                if result_record:
+                    await session.delete(result_record)
+
+                if transcription:
+                    await session.delete(transcription)
 
                 await session.delete(test)
                 return {"status": "success"}
