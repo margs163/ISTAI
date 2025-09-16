@@ -1,9 +1,12 @@
+from contextlib import asynccontextmanager
 import logging
 import os
 from fastapi import FastAPI, Request
 from dotenv import load_dotenv
 from fastapi.middleware.cors import CORSMiddleware
 import seqlog
+
+from api.app.lib.auth_db import create_db_and_tables
 from .routers.email import router as email_router
 from .routers.questions import router as questions_router
 from .users import fastapi_users, auth_backend
@@ -38,7 +41,14 @@ seqlog.log_to_seq(
     auto_flush_timeout=10,
 )
 
-app = FastAPI()
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # await create_db_and_tables()
+    yield
+
+
+app = FastAPI(lifespan=lifespan)
 
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
@@ -47,6 +57,8 @@ origins = [
     "http://localhost",
     "http://localhost:3000",
     "https://ielts-fluency.vercel.app",
+    "http://frontend:3000",
+    "http://nextjs:3000",
 ]
 
 app.add_middleware(
@@ -139,5 +151,5 @@ async def main(request: Request):
     return {"message": "Hello, World!"}
 
 
-# if __name__ == "__main__":
-#     uvicorn.run("app.main:app", host="127.0.0.1", port=8000, log_level="info")
+if __name__ == "__main__":
+    uvicorn.run("app.main:app", host="127.0.0.1", port=8000, log_level="info")

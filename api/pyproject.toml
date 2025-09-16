@@ -1,9 +1,11 @@
 [project]
+
 name = "api"
 version = "0.1.0"
-description = "Add your description here"
+description = "Fluent flow api"
 readme = "README.md"
 requires-python = ">=3.13"
+
 dependencies = [
     "aioboto3==15.0.0",
     "aiobotocore==2.23.0",
