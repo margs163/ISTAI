@@ -2,8 +2,8 @@ import React from "react";
 import Tag from "./Tag";
 import ButtonPrimary from "./ButtonPrimary";
 import ButtonSecondary from "./ButtonSecondary";
-import phoneImage from "@/assets/images/phoneEdited1.png";
-import tabletImage from "@/assets/images/tabletMain2.png";
+import phoneImage from "@/assets/compressed/phoneEdited1.png";
+import tabletImage from "@/assets/compressed/tabletMain2.png";
 import Image from "next/image";
 import Link from "next/link";
 

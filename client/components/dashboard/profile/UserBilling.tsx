@@ -9,10 +9,13 @@ import { getPreciseTimeAgo, getPreciseTimeFuture } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { fetchSubscription } from "@/lib/queries";
 import UpgradePlan from "./UpgradePlan";
+import { setSubscriptionEmail } from "@/lib/actions";
+import { useUserStore } from "@/lib/userStorage";
 
 export default function UserBilling() {
   const creditsLeft = useSubscriptionStore((state) => state.credits_left);
   const subscription = useSubscriptionStore((state) => state);
+  const email = useUserStore((store) => store.email);
   const creditCard = useSubscriptionStore((state) => state.credit_card);
   const nextBillingDate = subscription.subscription_next_billed_at;
   const setSubscription = useSubscriptionStore((state) => state.setSubData);
@@ -124,9 +127,14 @@ export default function UserBilling() {
               href={subscription.paddle_cancel_url ?? "#"}
               className="flex flex-row items-center gap-2 self-end"
             >
-              <p className="text-gray-600 hover:text-gray-800 active:text-gray-800 transition-colors font-normal text-sm">
+              <button
+                onClick={async () =>
+                  await setSubscriptionEmail(subscription.id, email)
+                }
+                className="text-gray-600 hover:text-gray-800 active:text-gray-800 transition-colors font-normal text-sm"
+              >
                 Cancel Subscription
-              </p>
+              </button>
             </Link>
             <Link
               href={subscription.paddle_update_url ?? "#"}

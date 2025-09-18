@@ -41,7 +41,7 @@ export default function UpgradePlan() {
       paddle?.Checkout.open({
         items: [{ priceId: priceId, quantity: 1 }],
         settings: {
-          successUrl: "http://localhost:3000/",
+          successUrl: process.env.NEXT_PUBLIC_PADDLE_REDIRECT_URI,
         },
         customer: {
           email: userEmail,

@@ -53,11 +53,6 @@ class Base(DeclarativeBase):
     pass
 
 
-class OAuthAccount(SQLAlchemyBaseOAuthAccountTableUUID, Base):
-    user_id: Mapped[UUID_ID] = mapped_column(ForeignKey("user_table.id"))
-    user: Mapped["User"] = relationship(back_populates="oauth_accounts")
-
-
 class User(Base, SQLAlchemyBaseUserTableUUID):
     first_name: Mapped[str] = mapped_column(String)
     last_name: Mapped[str] = mapped_column(String, nullable=True)
@@ -104,6 +99,11 @@ class Result(Base):
     repeated_words: Mapped[list[dict]] = mapped_column(JSONB)
     pronunciation_issues: Mapped[list[dict]] = mapped_column(JSONB)
     general_tips: Mapped[dict[str, list[str]]] = mapped_column(JSONB)
+
+
+class OAuthAccount(SQLAlchemyBaseOAuthAccountTableUUID, Base):
+    user_id: Mapped[UUID_ID] = mapped_column(ForeignKey("user_table.id"))
+    user: Mapped["User"] = relationship(back_populates="oauth_accounts")
 
 
 class PronunciationTest(Base):

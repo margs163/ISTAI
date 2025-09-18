@@ -2,13 +2,14 @@ from datetime import datetime
 import os
 from pprint import pprint
 from typing import Annotated
-from fastapi import APIRouter, Body, Depends, HTTPException, Request, status
+from fastapi import APIRouter, Body, Depends, HTTPException, Query, Request, status
+from redis import Redis
 from sqlalchemy import select
 from sqlalchemy.orm import joinedload
 
 from ..lib.send_notification import create_notification
 from ..schemas.notifications import NotificationTypeEnum
-from ..dependencies import limiter
+from ..dependencies import get_redis_client, limiter
 
 from ..lib.auth_db import get_async_session
 from ..schemas.db_tables import CreditCard, Subscription, User
@@ -28,6 +29,11 @@ from paddle_billing.Entities.Events import EventTypeName
 from paddle_billing.Resources.Transactions.Operations import ListTransactions
 from paddle_billing.Entities.Transaction import Transaction
 from paddle_billing.Resources.Subscriptions.Operations import CancelSubscription
+from paddle_billing.Resources.Transactions.Operations import CreateTransaction
+from paddle_billing.Resources.Transactions.Operations.Create import (
+    TransactionCreateItemWithPrice,
+    TransactionCreateItem,
+)
 
 # from paddle_billing.Resources.Events.EventsClient
 
@@ -87,7 +93,9 @@ def verify_paddle_signature(request: Request, body: bytes) -> bool:
 
 @router.post("/webhook")
 async def paddle_webhook(
-    request: Request, session: Annotated[AsyncSession, Depends(get_async_session)]
+    request: Request,
+    session: Annotated[AsyncSession, Depends(get_async_session)],
+    redis_client: Annotated[Redis, Depends(get_redis_client)],
 ):
     try:
         body = await request.body()
@@ -116,8 +124,31 @@ async def paddle_webhook(
                     if subscription and customer:
                         sub_item = subscription.items[0]
                         credits_purchased = 0
+                        transaction = paddle.transactions.list(
+                            ListTransactions(subscription_ids=[subscription_id])
+                        )
+                        transactions: list[Transaction] = transaction.items
+                        last_transaction = transactions[0]
+
+                        if not last_transaction:
+                            raise HTTPException(
+                                status_code=status.HTTP_400_BAD_REQUEST,
+                                detail=f"No transaction was found",
+                            )
+                        user_email = redis_client.get(last_transaction.id)
+
+                        if not user_email:
+                            print(
+                                "No user email was found with transaction id:",
+                                last_transaction.id,
+                            )
+                            raise HTTPException(
+                                status_code=status.HTTP_400_BAD_REQUEST,
+                                detail=f"No user email was found",
+                            )
+
                         user = await session.scalar(
-                            select(User).where(User.email == customer.email)
+                            select(User).where(User.email == user_email)
                         )
 
                         if not user:
@@ -207,8 +238,16 @@ async def paddle_webhook(
                         )
 
                     if subscription and customer:
+                        user_email = redis_client.get(subscription_id)
+
+                        if not user_email:
+                            raise HTTPException(
+                                status_code=status.HTTP_400_BAD_REQUEST,
+                                detail="Invalid subscription object",
+                            )
+
                         user = await session.scalar(
-                            select(User).where(User.email == customer.email)
+                            select(User).where(User.email == user_email)
                         )
 
                         if not user:
@@ -251,11 +290,29 @@ async def paddle_webhook(
                         ListTransactions(subscription_ids=[subscription_id])
                     )
                     transactions: list[Transaction] = transaction.items
-                    payment_details = transactions[0].payments[-1].method_details
+                    last_transaction = transactions[0]
+                    payment_details = last_transaction.payments[0].method_details
+
+                    if not last_transaction:
+                        raise HTTPException(
+                            status_code=status.HTTP_400_BAD_REQUEST,
+                            detail=f"No transaction was found",
+                        )
+                    user_email = redis_client.get(last_transaction.id)
+
+                    if not user_email:
+                        print(
+                            "No user email was found with transaction id:",
+                            last_transaction.id,
+                        )
+                        raise HTTPException(
+                            status_code=status.HTTP_400_BAD_REQUEST,
+                            detail=f"No user email was found",
+                        )
 
                     if subscription and customer:
                         user = await session.scalar(
-                            select(User).where(User.email == customer.email)
+                            select(User).where(User.email == user_email)
                         )
 
                         if not user:
@@ -327,14 +384,17 @@ async def paddle_webhook(
             return {"status": "success"}
         except Exception as e:
             print(f"Failed to parse webhook data: {e}")
-            raise HTTPException(status_code=400, detail=f"{e}")
+            return {"exception": e}
+            # return HTTPException(status_code=400, detail=f"{e}")
 
     except Exception as e:
         await session.rollback()
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Could process webhook record: {e}",
-        )
+        print("Catched an exception:", e)
+        return {"exception": e}
+        # raise HTTPException(
+        #     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        #     detail=f"Could process webhook record: {e}",
+        # )
 
 
 @router.get("/me")
@@ -596,3 +656,32 @@ async def update_payment_link(
 
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=e)
+
+
+@router.post("/transaction")
+@limiter.limit("10/minute")
+async def create_price_transaction(
+    request: Request,
+    user: Annotated[User, Depends(current_active_user)],
+    priceId: Annotated[str, Query()],
+):
+    try:
+        prices = paddle.prices.list()
+        list_prices = [price.id for price in list(prices)]
+
+        if priceId not in list_prices:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Price does not exist with id {priceId}",
+            )
+
+        transaction = paddle.transactions.create(
+            CreateTransaction(
+                items=[TransactionCreateItem(price_id=priceId, quantity=1)]
+            )
+        )
+
+        return {"transaction_id": transaction.id, "status": transaction.status}
+
+    except Exception as e:
+        return HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=e)

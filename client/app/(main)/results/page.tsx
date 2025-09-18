@@ -262,7 +262,7 @@ export default function Page() {
   useEffect(() => {
     if (!socketRef.current) {
       socketRef.current = new WebSocket(
-        `ws://${process.env.NEXT_PUBLIC_FASTAPI}/results/ws`
+        `${process.env.NEXT_PUBLIC_FASTAPI}/results/ws`
       );
     }
 

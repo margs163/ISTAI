@@ -45,9 +45,6 @@ export default function CharacterSection({
   openReadingCard: boolean;
   setOpenReadingCard: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
-  const questionCard = useLocalPracticeTestStore(
-    (state) => state.part_two_card
-  );
   return (
     <section className="p-6 py-0 max-w-[600px] lg:mx-0 lg:max-w-max lg:px-0 lg:h-full">
       <div className="p-6 pb-3 rounded-xl border border-gray-200 flex flex-col justify-between bg-white lg:h-full">
@@ -57,7 +54,6 @@ export default function CharacterSection({
           </div>
           <QuestionCard
             partTwoTime={partTwoTime}
-            card={questionCard}
             setPartTwoTime={setPartTwoTime}
             setTimerActive={setTimerActive}
             setIsAnsweringQuestion={setIsAnsweringQuestion}

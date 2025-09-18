@@ -60,6 +60,7 @@ import { useSubscriptionStore } from "@/lib/subscriptionStore";
 import { useAvatarStore } from "@/lib/avatarStore";
 import Image from "next/image";
 import MainButton from "../MainButton";
+import NewTest from "./NewTest";
 
 const menuItems = [
   {
@@ -152,12 +153,14 @@ export default function AppSidebar() {
         <SidebarSeparator className="my-4 max-w-[90%]" />
         <SidebarGroup>
           <SidebarGroupContent>
-            <MainButton className="ml-0">
-              <Plus className="size-4" />
-              <span className="text-xs font-medium font-geist">
-                New Practice Test
-              </span>
-            </MainButton>
+            <NewTest>
+              <MainButton variant="primary" className={"ml-0"}>
+                <Plus className="size-4" />
+                <span className="text-xs font-medium font-geist">
+                  New Practice Test
+                </span>
+              </MainButton>
+            </NewTest>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
@@ -212,10 +215,9 @@ export default function AppSidebar() {
             </div>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="font-geist min-w-[160px]">
-            <DropdownMenuItem>Account</DropdownMenuItem>
-            <DropdownMenuItem>Profile</DropdownMenuItem>
-            <DropdownMenuItem>Billing</DropdownMenuItem>
-            <DropdownMenuItem>Subscription</DropdownMenuItem>
+            <DropdownMenuItem>
+              <Link href={"/dashboard/profile"}>Profile</Link>
+            </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleLogout}>Log Out</DropdownMenuItem>
           </DropdownMenuContent>

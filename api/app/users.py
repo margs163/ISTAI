@@ -135,7 +135,7 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
                 <body>
                     <div>
                         <h1>Password Reset</h1> 
-                        <p>Hi, you have requested a password reset. Click on the following link to set a new password: http://localhost:3000/login/new-password/{token}</p>
+                        <p>Hi, you have requested a password reset. Click on the following link to set a new password: https://fluentflow.space/login/new-password/{token}</p>
                     </div>
                 </body>
                 </html>"""
@@ -164,7 +164,7 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
                 <body>
                     <div>
                         <h1>Email verification</h1> 
-                        <p>Hi, you have to verify your email to continue. Click on the following link to verify your e: http://localhost:3000/verify/{token}</p>
+                        <p>Hi, you have to verify your email to continue. Click on the following link to verify your e: https://fluentflow.space/verify/{token}</p>
                     </div>
                 </body>
                 </html>"""

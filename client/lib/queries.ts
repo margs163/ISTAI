@@ -33,7 +33,7 @@ type PostResponse = {
 export async function fetchUser(setUserData: (data: UserData) => void) {
   try {
     const response = await axios.get<UserDataServer>(
-      `http://${process.env.NEXT_PUBLIC_FASTAPI}/users/me`,
+      `${process.env.NEXT_PUBLIC_FASTAPI}/users/me`,
       {
         withCredentials: true,
         headers: {
@@ -73,6 +73,31 @@ export async function fetchUser(setUserData: (data: UserData) => void) {
   }
 }
 
+export async function requestTransactionCreation(priceId: string) {
+  try {
+    const response = await axios.post<{
+      transaction_id: string;
+      status: string;
+    }>(
+      `${process.env.NEXT_PUBLIC_FASTAPI}/subscription/transaction?priceId=${priceId}`,
+      undefined,
+      { withCredentials: true }
+    );
+
+    const transactionId = response.data.transaction_id;
+    console.log("Got the transaction id:", transactionId);
+    return transactionId;
+  } catch (error) {
+    toast("Error Creating Transaction", {
+      description: "Could not create a transaction",
+      action: {
+        label: "Log",
+        onClick: () => console.log(error),
+      },
+    });
+  }
+}
+
 export async function sendReadingCardSpeech(
   audioBlobs: Blob
 ): Promise<string | undefined> {
@@ -80,7 +105,9 @@ export async function sendReadingCardSpeech(
   formData.append("audio", audioBlobs, `recording-${Date.now()}.wav`);
 
   try {
-    const response = await axios.post("/api/tts", formData);
+    const response = await axios.post("/api/tts", formData, {
+      withCredentials: true,
+    });
     const result: { message: string; filePath: string } = response.data;
     console.log(result);
     return result.filePath;
@@ -105,7 +132,7 @@ export async function PostPronunciationTest({
 }) {
   try {
     const response = await axios.post<{ data: PronunciationTestType }>(
-      `http://${process.env.NEXT_PUBLIC_FASTAPI}/pronunciation-test/`,
+      `${process.env.NEXT_PUBLIC_FASTAPI}/pronunciation-test/`,
       {
         readingCard: readingCard,
         audio_path: audioPath,
@@ -136,7 +163,7 @@ export async function PostPronunciationTest({
 export async function logOutUser() {
   try {
     await axios.post(
-      `http://${process.env.NEXT_PUBLIC_FASTAPI}/auth/jwt/logout`,
+      `${process.env.NEXT_PUBLIC_FASTAPI}/auth/jwt/logout`,
       undefined,
       {
         withCredentials: true,
@@ -157,7 +184,7 @@ export async function logOutUser() {
 export async function CancelSubscriptionLink() {
   try {
     const response = await axios.get<{ url: string }>(
-      `http://${process.env.NEXT_PUBLIC_FASTAPI}/subscription/cancel-link`,
+      `${process.env.NEXT_PUBLIC_FASTAPI}/subscription/cancel-link`,
       {
         withCredentials: true,
       }
@@ -180,7 +207,7 @@ export async function CancelSubscriptionLink() {
 export async function UpdateSubscriptionLink() {
   try {
     const response = await axios.get<{ url: string }>(
-      `http://${process.env.NEXT_PUBLIC_FASTAPI}/subscription/update-link`,
+      `${process.env.NEXT_PUBLIC_FASTAPI}/subscription/update-link`,
       {
         withCredentials: true,
       }
@@ -203,7 +230,7 @@ export async function UpdateSubscriptionLink() {
 export async function deletePracticeTest(practiceId: string) {
   try {
     await axios.delete(
-      `http://${process.env.NEXT_PUBLIC_FASTAPI}/practice_test/${practiceId}`,
+      `${process.env.NEXT_PUBLIC_FASTAPI}/practice_test/${practiceId}`,
       {
         withCredentials: true,
       }
@@ -228,7 +255,7 @@ export async function fetchPart2QuestionCard(
 ): Promise<QuestionCardType | undefined> {
   try {
     const response = await axios.get<{ questions: QuestionCardType[] }>(
-      `http://${process.env.NEXT_PUBLIC_FASTAPI}/questions/?part=2`,
+      `${process.env.NEXT_PUBLIC_FASTAPI}/questions/?part=2`,
       {
         headers: {
           "Content-Type": "application/json",
@@ -256,7 +283,7 @@ export async function fetchPart1QuestionCard(): Promise<
 > {
   try {
     const response = await axios.get<{ questions: QuestionCardType[] }>(
-      `http://${process.env.NEXT_PUBLIC_FASTAPI}/questions/?part=1`,
+      `${process.env.NEXT_PUBLIC_FASTAPI}/questions/?part=1`,
       {
         headers: {
           "Content-Type": "application/json",
@@ -283,7 +310,7 @@ export async function fetchReadingCard(
 ): Promise<ReadingCardType | undefined> {
   try {
     const response = await axios.get<{ cards: ReadingCardType[] }>(
-      `http://${process.env.NEXT_PUBLIC_FASTAPI}/reading_cards/?random=true&count=1`,
+      `${process.env.NEXT_PUBLIC_FASTAPI}/reading_cards/?random=true&count=1`,
       {
         headers: {
           "Content-Type": "application/json",
@@ -315,7 +342,7 @@ export async function createPracticeTest(data: {
 }) {
   try {
     const response = await axios.post<PostResponse>(
-      `http://${process.env.NEXT_PUBLIC_FASTAPI}/practice_test/new`,
+      `${process.env.NEXT_PUBLIC_FASTAPI}/practice_test/new`,
       data,
       {
         headers: {
@@ -345,7 +372,7 @@ export async function updatePracticeTest({
 }) {
   try {
     await axios.put(
-      `http://${process.env.NEXT_PUBLIC_FASTAPI}/practice_test/${practiceTestId}`,
+      `${process.env.NEXT_PUBLIC_FASTAPI}/practice_test/${practiceTestId}`,
       data,
       { withCredentials: true }
     );
@@ -360,7 +387,7 @@ export async function fetchPracticeTests(
 ) {
   try {
     const response = await axios.get<{ data: PracticeTestType[] }>(
-      `http://${process.env.NEXT_PUBLIC_FASTAPI}/practice_test/?user_id=true`,
+      `${process.env.NEXT_PUBLIC_FASTAPI}/practice_test/?user_id=true`,
       { withCredentials: true }
     );
     if (response.data.data.length === 0) {
@@ -418,7 +445,7 @@ export async function fetchAvatar(
 
 export async function deleteAvatar() {
   try {
-    await axios.delete(`http://${process.env.NEXT_PUBLIC_FASTAPI}/avatar/me`, {
+    await axios.delete(`${process.env.NEXT_PUBLIC_FASTAPI}/avatar/me`, {
       withCredentials: true,
     });
   } catch (error) {
@@ -435,7 +462,7 @@ export async function deleteAvatar() {
 export async function fetchNotifications() {
   try {
     const response = await axios.get<{ data: NotificationType[] }>(
-      `http://${process.env.NEXT_PUBLIC_FASTAPI}/notifications/me?today=true`,
+      `${process.env.NEXT_PUBLIC_FASTAPI}/notifications/me?today=true`,
       {
         withCredentials: true,
       }
@@ -455,7 +482,7 @@ export async function fetchNotifications() {
 export async function authorizeGoogle() {
   try {
     const response = await axios.get<{ authorization_url: string }>(
-      `http://${process.env.NEXT_PUBLIC_FASTAPI}/auth/google/authorize`
+      `${process.env.NEXT_PUBLIC_FASTAPI}/auth/google/authorize`
     );
 
     const url = response.data.authorization_url;
@@ -473,7 +500,7 @@ export async function authorizeGoogle() {
 export async function fetchPracticeTestById(testId: string) {
   try {
     const response = await axios.get<{ data: PracticeTestType[] }>(
-      `http://${process.env.NEXT_PUBLIC_FASTAPI}/practice_test/?test_ids=${testId}&user_id=true`,
+      `${process.env.NEXT_PUBLIC_FASTAPI}/practice_test/?test_ids=${testId}&user_id=true`,
       { withCredentials: true }
     );
     const validated = await PracticeTestSchema.safeParseAsync(
@@ -499,7 +526,7 @@ export async function fetchSubscription(
 ) {
   try {
     const response = await axios.get<{ data: SubscriptionType }>(
-      `http://${process.env.NEXT_PUBLIC_FASTAPI}/subscription/me`,
+      `${process.env.NEXT_PUBLIC_FASTAPI}/subscription/me`,
       {
         withCredentials: true,
       }
@@ -526,7 +553,7 @@ export async function fetchSubscription(
 export async function updateSubscription(updateSchema: SubscriptionUpdateType) {
   try {
     await axios.put(
-      `http://${process.env.NEXT_PUBLIC_FASTAPI}/subscription`,
+      `${process.env.NEXT_PUBLIC_FASTAPI}/subscription`,
       updateSchema,
       {
         withCredentials: true,
@@ -546,7 +573,7 @@ export async function updateSubscription(updateSchema: SubscriptionUpdateType) {
 export async function updateCreditCard(creditCard: CreditCardType) {
   try {
     await axios.post(
-      `http://${process.env.NEXT_PUBLIC_FASTAPI}/subscription/card`,
+      `${process.env.NEXT_PUBLIC_FASTAPI}/subscription/card`,
       creditCard,
       {
         withCredentials: true,
@@ -581,7 +608,7 @@ export async function updateAnalytics(data: {
 }) {
   try {
     const response = await axios.put<{ data: AnalyticsType }>(
-      `http://${process.env.NEXT_PUBLIC_FASTAPI}/analytics/`,
+      `${process.env.NEXT_PUBLIC_FASTAPI}/analytics/`,
       {
         ...data,
       },
@@ -604,7 +631,7 @@ export async function fetchAnalytics(
 ) {
   try {
     const response = await axios.get<{ data: AnalyticsType }>(
-      `http://${process.env.NEXT_PUBLIC_FASTAPI}/analytics/?limit=4`,
+      `${process.env.NEXT_PUBLIC_FASTAPI}/analytics/?limit=4`,
       { withCredentials: true }
     );
     const validated = await AnalyticsSchema.safeParseAsync(response.data.data);
@@ -628,7 +655,7 @@ export async function fetchAnalytics(
 export async function spendCredits(credits: number = 10) {
   try {
     await axios.put(
-      `http://${process.env.NEXT_PUBLIC_FASTAPI}/subscription/`,
+      `${process.env.NEXT_PUBLIC_FASTAPI}/subscription/`,
       {
         credits_left: credits,
       },
@@ -672,7 +699,7 @@ export async function postTestResults({
   };
   try {
     const response = await axios.post<{ data: ResultType }>(
-      `http://${process.env.NEXT_PUBLIC_FASTAPI}/results/?reading_audio_path=${readingCardAudioPath}`,
+      `${process.env.NEXT_PUBLIC_FASTAPI}/results/?reading_audio_path=${readingCardAudioPath}`,
       body,
       {
         headers: {
@@ -695,7 +722,7 @@ export async function postTestResults({
 export async function cancellPracticeTest(testId: string) {
   try {
     const response = await axios.put(
-      `http://${process.env.NEXT_PUBLIC_FASTAPI}/practice_test/${testId}`,
+      `${process.env.NEXT_PUBLIC_FASTAPI}/practice_test/${testId}`,
       { status: "Cancelled" },
       {
         headers: {

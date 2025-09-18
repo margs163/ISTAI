@@ -12,6 +12,8 @@ from fastapi import (
 )
 from pydantic import BaseModel
 
+from ..schemas.notifications import NotificationTypeEnum
+
 from ..lib.send_notification import create_notification
 from ..lib.auth_db import get_async_session
 from ..schemas.db_tables import (

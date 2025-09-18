@@ -109,8 +109,9 @@ export default function Page() {
   });
 
   useQuery({
-    queryKey: ["question-card"],
+    queryKey: ["question-card-2"],
     queryFn: async () => await fetchPart2QuestionCard(setPart2Question),
+    enabled: sessionState.currentPart === 2,
   });
 
   useQuery({
@@ -373,15 +374,7 @@ export default function Page() {
           break;
       }
     },
-    [
-      addMessage,
-      startTime,
-      playInstructionsAudioWithVideo,
-      addTranscription,
-      playTTSAudio,
-      sessionState,
-      setSession,
-    ]
+    [startTime, playInstructionsAudioWithVideo, playTTSAudio, sessionState]
   );
 
   const recorderStopHandler = useCallback(async () => {
@@ -404,7 +397,7 @@ export default function Page() {
       };
     }
     audioBlobs.current = null;
-  }, [openReadingCard, setReadingAudioPath]);
+  }, [openReadingCard]);
 
   const initializeMediaRecorder = useCallback(async () => {
     if (navigator.mediaDevices && !mediaStream.current) {
@@ -450,10 +443,10 @@ export default function Page() {
   useEffect(() => {
     if (!transcribeWebsocketRef.current && !chatWebsocketRef.current) {
       transcribeWebsocketRef.current = new WebSocket(
-        `http://${process.env.NEXT_PUBLIC_FASTAPI}/stt/ws`
+        `${process.env.NEXT_PUBLIC_FASTAPI}/stt/ws`
       );
       chatWebsocketRef.current = new WebSocket(
-        `http://${process.env.NEXT_PUBLIC_FASTAPI}/chat/ws`
+        `${process.env.NEXT_PUBLIC_FASTAPI}/chat/ws`
       );
       setStartTime(new Date());
     }
@@ -610,12 +603,7 @@ export default function Page() {
     part2Question,
     openReadingCard,
     sessionState,
-    setSession,
-    setStatus,
-    addTranscriptionsLocal,
-    restoreChatMessages,
     transcriptionsState,
-    setTestDuration,
   ]);
 
   useEffect(() => {

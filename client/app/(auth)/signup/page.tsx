@@ -33,7 +33,7 @@ export default function Page() {
   ) => {
     try {
       const response = await fetch(
-        `http://${process.env.NEXT_PUBLIC_FASTAPI}/auth/register`,
+        `${process.env.NEXT_PUBLIC_FASTAPI}/auth/register`,
         {
           method: "POST",
           body: JSON.stringify({
@@ -53,7 +53,7 @@ export default function Page() {
       }
 
       await axios.post(
-        `http://${process.env.NEXT_PUBLIC_FASTAPI}/auth/request-verify-token`,
+        `${process.env.NEXT_PUBLIC_FASTAPI}/auth/request-verify-token`,
         {
           email: data.email,
         },
@@ -73,7 +73,7 @@ export default function Page() {
   };
 
   return (
-    <div className="h-full w-full px-4 py-6 flex items-center justify-center lg:px-20 xl:px-40 font-geist">
+    <div className="h-full lg:min-h-screen w-full px-4 py-6 pt-10 lg:pt-6 flex items-center justify-center lg:px-20 xl:px-40 font-geist">
       <section className=" shadow-md bg-white w-full lg:flex lg:flex-row lg:shadow-lg shadow-slate-200 rounded-lg">
         <div className="flex flex-col p-6 px-8 justify-center gap-16 lg:flex-1/2 lg:items-center lg:p-10">
           <div className="flex items-center justify-start gap-2 mb-auto lg:self-start">

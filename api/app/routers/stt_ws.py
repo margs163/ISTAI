@@ -44,7 +44,7 @@ async def stt_websocket(websocket: WebSocket):
         await websocket.accept()
         while True:
             data = await websocket.receive_bytes()
-            temp_file_path = f"./data/temp_audio_{uuid.uuid4().hex}.webm"
+            temp_file_path = f"./app/data/temp_audio_{uuid.uuid4().hex}.webm"
 
             with open(temp_file_path, "wb") as file:
                 file.write(data)

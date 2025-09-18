@@ -15,19 +15,18 @@ function parseTime(time: number) {
 }
 
 export default function QuestionCard({
-  card,
   partTwoTime,
   setPartTwoTime,
   setTimerActive,
   setIsAnsweringQuestion,
 }: {
-  card?: QuestionCardType | null;
   partTwoTime: number;
   setPartTwoTime: React.Dispatch<React.SetStateAction<number>>;
   setTimerActive: React.Dispatch<React.SetStateAction<boolean>>;
   setIsAnsweringQuestion: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
   const currentPart = useTestSessionStore((state) => state.currentPart);
+  const card = useLocalPracticeTestStore((state) => state.part_two_card);
   useEffect(() => {
     if (currentPart === 2) {
       setTimerActive(true);
@@ -42,7 +41,8 @@ export default function QuestionCard({
       }, 1000);
       return () => clearInterval(intervalId);
     }
-  }, [setPartTwoTime, currentPart]);
+  }, [currentPart]);
+  console.log(card);
   return (
     <section className="">
       <div className="p-6 rounded-xl bg-gray-100 space-y-2 shadow-sm fourth-step">

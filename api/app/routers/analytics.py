@@ -135,7 +135,7 @@ async def update_analytics(
             .order_by(PracticeTest.test_date.desc())
         )
 
-        today_tests = result.all()
+        today_tests = result.unique().all()
         result2 = await session.execute(
             select(Analytics).where(Analytics.user_id == user.id)
         )

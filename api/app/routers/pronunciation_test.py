@@ -90,7 +90,7 @@ async def test_pronunciation(
     local_path = None
     output_path = None
     try:
-        local_path = f"./data/pronunciation-{uuid4()}.wav"
+        local_path = f"./app/data/pronunciation-{uuid4()}.wav"
         await s3_client.download_file(  # type: ignore
             Bucket=bucket_name,
             Key=audio_path,
@@ -99,7 +99,7 @@ async def test_pronunciation(
 
         LOGGER.info("Downloaded the reading audio file")
 
-        output_path = f"./data/pronunciation-{uuid4()}.wav"
+        output_path = f"./app/data/pronunciation-{uuid4()}.wav"
 
         await convert_to_wav(local_path, output_path)
 

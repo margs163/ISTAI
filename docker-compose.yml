@@ -3,14 +3,20 @@ services:
     image: nginx:1.28-alpine
     container_name: nginx
     restart: unless-stopped
+
     ports:
       - "80:80"
+      - "443:443"
+
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+
     depends_on:
       - app
       - frontend
       - metabase
+      - kv
     networks:
       - app-network
 
@@ -27,14 +33,14 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
-    ports:
-      - "5433:5432"
+    # ports:
+    #   - "5433:5432"
 
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
-      interval: 20s
+      interval: 60s
       timeout: 10s
-      retries: 5
+      retries: 3
 
     networks:
       - app-network
@@ -49,6 +55,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      redis:
+        condition: service_healthy
 
     container_name: fastapi
 
@@ -58,6 +66,7 @@ services:
     command: >
       sh -c "
         echo 'Waiting for database...' &&
+        alembic upgrade head &&
         uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
       "
 
@@ -93,9 +102,9 @@ services:
 
     healthcheck:
       test: curl --fail -I http://localhost:6000/api/health || exit 1
-      interval: 15s
+      interval: 60s
       timeout: 5s
-      retries: 5
+      retries: 3
 
     depends_on:
       db:
@@ -123,8 +132,28 @@ services:
 
     healthcheck:
       test: ["CMD-SHELL", "curl --fail http://localhost:3000 || exit 1"]
-      interval: 30s
+      interval: 60s
       timeout: 5s
+      retries: 3
+
+    networks:
+      - app-network
+
+  redis:
+    image: redis:8.2-alpine
+    container_name: kv-redis
+    restart: unless-stopped
+
+    # ports:
+    #   - "6379:6379"
+
+    volumes:
+      - redis_data:/data
+
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 60s
+      timeout: 10s
       retries: 3
 
     networks:
@@ -132,6 +161,9 @@ services:
 
 volumes:
   postgres_data:
+    driver: local
+
+  redis_data:
     driver: local
 
 networks:

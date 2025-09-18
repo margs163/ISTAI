@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 from fastapi.middleware.cors import CORSMiddleware
 import seqlog
 
-from api.app.lib.auth_db import create_db_and_tables
+from .lib.auth_db import create_db_and_tables
 from .routers.email import router as email_router
 from .routers.questions import router as questions_router
 from .users import fastapi_users, auth_backend
@@ -44,7 +44,7 @@ seqlog.log_to_seq(
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # await create_db_and_tables()
+    await create_db_and_tables()
     yield
 
 
@@ -152,4 +152,6 @@ async def main(request: Request):
 
 
 if __name__ == "__main__":
-    uvicorn.run("app.main:app", host="127.0.0.1", port=8000, log_level="info")
+    uvicorn.run(
+        "app.main:app", host="127.0.0.1", port=8000, log_level="info", reload=True
+    )
