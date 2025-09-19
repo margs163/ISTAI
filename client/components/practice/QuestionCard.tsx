@@ -42,7 +42,6 @@ export default function QuestionCard({
       return () => clearInterval(intervalId);
     }
   }, [currentPart]);
-  console.log(card);
   return (
     <section className="">
       <div className="p-6 rounded-xl bg-gray-100 space-y-2 shadow-sm fourth-step">

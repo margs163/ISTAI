@@ -443,10 +443,10 @@ export default function Page() {
   useEffect(() => {
     if (!transcribeWebsocketRef.current && !chatWebsocketRef.current) {
       transcribeWebsocketRef.current = new WebSocket(
-        `${process.env.NEXT_PUBLIC_FASTAPI}/stt/ws`
+        `${process.env.NEXT_PUBLIC_WS_URL}/stt/ws`
       );
       chatWebsocketRef.current = new WebSocket(
-        `${process.env.NEXT_PUBLIC_FASTAPI}/chat/ws`
+        `${process.env.NEXT_PUBLIC_WS_URL}/chat/ws`
       );
       setStartTime(new Date());
     }
