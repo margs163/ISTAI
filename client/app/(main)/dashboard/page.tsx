@@ -22,6 +22,7 @@ import { useNotificationsStore } from "@/lib/notificationStore";
 import { useAvatarStore } from "@/lib/avatarStore";
 import html2canvas from "html2canvas-pro";
 import jsPDF from "jspdf";
+import { Feedback } from "@/components/results/Feedback";
 
 export default function Page() {
   const setUserData = useUserStore((state) => state.setUserData);

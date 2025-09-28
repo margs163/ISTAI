@@ -8,7 +8,7 @@ from fastapi_users import UUIDIDMixin, BaseUserManager, FastAPIUsers
 from fastapi_mail import ConnectionConfig, MessageSchema, FastMail, MessageType
 from sqlalchemy import select
 
-from .schemas.analytics import AnalyticsSchema, AverageBandScores
+from .schemas.analytics import AnalyticsSchema, AverageBandScores, BandScoresIncrease
 from .schemas.db_tables import (
     Analytics,
     Notifications,
@@ -82,6 +82,9 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
                     average_band_scores=AverageBandScores(
                         fluency=0, grammar=0, lexis=0, pronunciation=0
                     ),
+                    scores_increase=BandScoresIncrease(
+                        fluency=0, grammar=0, lexis=0, pronunciation=0
+                    ),
                     average_band=0,
                     grammar_common_mistakes=[],
                     lexis_common_mistakes=[],
@@ -91,7 +94,7 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
 
                 new_subscription = SubscriptionSchema(
                     user_id=str(user.id),
-                    sub_tier=TierEnum.FREE.value,
+                    subscription_tier=TierEnum.FREE.value,
                     credits_total_purchased=0,
                     credits_left=20,
                 )
@@ -205,9 +208,9 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
                     if datetime.now() - last.test_date > timedelta(days=1):
                         analytic.streak_days = 0
 
-        if response is not None:
-            response.status_code = 307
-            response.headers["Location"] = "http://localhost:3000/dashboard"
+        # if response is not None:
+        #     response.status_code = 307
+        #     response.headers["Location"] = "http://localhost:3000/dashboard"
 
 
 cookie_transport = CookieTransport(

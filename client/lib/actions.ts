@@ -1,5 +1,6 @@
 "use server";
 
+import OpenaAI from "openai";
 import { client } from "./redisClient";
 
 export async function setTransactionEmail(
@@ -27,3 +28,11 @@ export async function deleteTransactionEmail(transactionId: string) {
 
   await client.del(transactionId);
 }
+
+// export async function generateAudioPronunciation(words: string[]) {
+//   try {
+
+//   } catch (error) {
+//     console.error(error);
+//   }
+// }

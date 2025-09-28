@@ -2,6 +2,7 @@
 import Footer from "@/components/Footer";
 import AdvancedVocabulary from "@/components/results/AdvancedVocabulary";
 import CriterionScores from "@/components/results/CriterionScores";
+import { FeedbackPoster } from "@/components/results/Feedback";
 import GrammarErrors from "@/components/results/GrammarErrors";
 import ImprovementTips from "@/components/results/ImprovementTips";
 import LoadingProgress from "@/components/results/LoadingProgress";
@@ -13,7 +14,13 @@ import SentenceImprovements from "@/components/results/SentenceImprovements";
 import StrongAspects from "@/components/results/StrongAspects";
 import WeakAspects from "@/components/results/WeakAspects";
 import { useLocalPracticeTestStore } from "@/lib/practiceTestStore";
-import { updateAnalytics, updatePracticeTest } from "@/lib/queries";
+import {
+  checkFeedbackRecord,
+  getWordsPronunciation,
+  updateAnalytics,
+  updatePracticeTest,
+} from "@/lib/queries";
+import { useWordsTTSStore } from "@/lib/ttsStore";
 import {
   PracticeTestType,
   QuestionCardType,
@@ -22,7 +29,7 @@ import {
   TestTranscriptionsType,
 } from "@/lib/types";
 import { useUserStore } from "@/lib/userStorage";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import React, { useEffect, useRef, useCallback, useState } from "react";
 import { toast } from "sonner";
 
@@ -43,6 +50,7 @@ export default function Page() {
     (state) => state.test_duration
   );
   const partTwoCard = useLocalPracticeTestStore((state) => state.part_two_card);
+  const setTTSWords = useWordsTTSStore((state) => state.setUrls);
 
   const setResults = useLocalPracticeTestStore((state) => state.setTestResult);
   const results = useLocalPracticeTestStore((state) => state.result);
@@ -51,6 +59,12 @@ export default function Page() {
 
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
   const [progress, setProgress] = useState(13);
+  const [openFeedbackDialog, setOpenFeedbackDialog] = useState(false);
+
+  const { data } = useQuery({
+    queryKey: ["feedback-get"],
+    queryFn: checkFeedbackRecord,
+  });
 
   const mutation = useMutation({
     mutationKey: ["analytics-update"],
@@ -190,6 +204,14 @@ export default function Page() {
           return;
         }
 
+        const audioUrls = await getWordsPronunciation(
+          validated.data.pronunciation_issues.map((item) => item.word)
+        );
+
+        if (audioUrls) {
+          setTTSWords(audioUrls);
+        }
+
         await mutation.mutateAsync({
           practice_time: testDuration,
           tests_completed: 1,
@@ -303,6 +325,7 @@ export default function Page() {
       </div>
       <PronunciationIssues />
       <ImprovementTips />
+      {!data && <FeedbackPoster hasFeedback={data} />}
       <Footer />
     </div>
   );

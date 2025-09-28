@@ -9,6 +9,7 @@ from sqlalchemy import (
     ForeignKey,
     String,
     DateTime,
+    UUID,
     Enum as ORMEnum,
     Integer,
     Float,
@@ -16,7 +17,6 @@ from sqlalchemy import (
     Text,
 )
 from datetime import date, timedelta
-from fastapi_users_db_sqlalchemy.generics import GUID
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import DeclarativeBase
 from datetime import datetime
@@ -54,6 +54,9 @@ class Base(DeclarativeBase):
 
 
 class User(Base, SQLAlchemyBaseUserTableUUID):
+    __tablename__ = "user_table"
+
+    id: Mapped[UUID_ID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
     first_name: Mapped[str] = mapped_column(String)
     last_name: Mapped[str] = mapped_column(String, nullable=True)
     avatar_path: Mapped[str] = mapped_column(String, nullable=True)
@@ -73,6 +76,7 @@ class User(Base, SQLAlchemyBaseUserTableUUID):
     pronunciation_tests: Mapped[list["PronunciationTest"]] = relationship(
         back_populates="user"
     )
+    questionnaire_answers: Mapped["Questionnaire"] = relationship(back_populates="user")
     oauth_accounts: Mapped[list["OAuthAccount"]] = relationship(
         back_populates="user", lazy="joined"
     )
@@ -81,9 +85,9 @@ class User(Base, SQLAlchemyBaseUserTableUUID):
 class Result(Base):
     __tablename__ = "result_table"
 
-    id: Mapped[UUID_ID] = mapped_column(GUID, primary_key=True, default=uuid.uuid4)
+    id: Mapped[UUID_ID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
     practice_test_id: Mapped[UUID_ID] = mapped_column(
-        GUID, ForeignKey("practice_test_table.id"), index=True
+        UUID, ForeignKey("practice_test_table.id"), index=True
     )
     practice_test: Mapped["PracticeTest"] = relationship(
         back_populates="result",
@@ -102,6 +106,7 @@ class Result(Base):
 
 
 class OAuthAccount(SQLAlchemyBaseOAuthAccountTableUUID, Base):
+    id: Mapped[UUID_ID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
     user_id: Mapped[UUID_ID] = mapped_column(ForeignKey("user_table.id"))
     user: Mapped["User"] = relationship(back_populates="oauth_accounts")
 
@@ -109,9 +114,9 @@ class OAuthAccount(SQLAlchemyBaseOAuthAccountTableUUID, Base):
 class PronunciationTest(Base):
     __tablename__ = "pronunciation_test_table"
 
-    id: Mapped[UUID_ID] = mapped_column(GUID, primary_key=True, default=uuid.uuid4)
+    id: Mapped[UUID_ID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
     user_id: Mapped[UUID_ID] = mapped_column(
-        GUID, ForeignKey("user_table.id"), index=True
+        UUID, ForeignKey("user_table.id"), index=True
     )
     user: Mapped[User] = relationship(back_populates="pronunciation_tests")
     pronunciation_score: Mapped[float] = mapped_column(FLOAT)
@@ -124,24 +129,24 @@ class PronunciationTest(Base):
 class Transcription(Base):
     __tablename__ = "transcriptions_table"
 
-    id: Mapped[UUID_ID] = mapped_column(GUID, primary_key=True, default=uuid.uuid4)
+    id: Mapped[UUID_ID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
     user_id: Mapped[UUID_ID] = mapped_column(
-        GUID, ForeignKey("user_table.id"), index=True
+        UUID, ForeignKey("user_table.id"), index=True
     )
     user: Mapped[User] = relationship(back_populates="transcriptions")
     part_one: Mapped[list[dict]] = mapped_column(JSONB)
     part_two: Mapped[list[dict]] = mapped_column(JSONB)
     part_three: Mapped[list[dict]] = mapped_column(JSONB)
-    test_id: Mapped[UUID_ID] = mapped_column(GUID, ForeignKey("practice_test_table.id"))
+    test_id: Mapped[UUID_ID] = mapped_column(UUID, ForeignKey("practice_test_table.id"))
     practice_test: Mapped["PracticeTest"] = relationship(back_populates="transcription")
 
 
 class Analytics(Base):
     __tablename__ = "analytics_table"
 
-    id: Mapped[UUID_ID] = mapped_column(GUID, primary_key=True, default=uuid.uuid4)
+    id: Mapped[UUID_ID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
     user_id: Mapped[UUID_ID] = mapped_column(
-        GUID, ForeignKey("user_table.id"), index=True
+        UUID, ForeignKey("user_table.id"), index=True
     )
     user: Mapped[User] = relationship(back_populates="analytics")
     practice_time: Mapped[int] = mapped_column(Integer, default=0)
@@ -162,10 +167,29 @@ class Analytics(Base):
     streak_days: Mapped[int] = mapped_column(Integer, default=0)
 
 
+class Questionnaire(Base):
+    __tablename__ = "questionnaire_table"
+
+    id: Mapped[UUID_ID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
+    user: Mapped[User] = relationship(back_populates="questionnaire_answers")
+    user_id: Mapped[UUID_ID] = mapped_column(
+        UUID, ForeignKey("user_table.id"), index=True
+    )
+
+    heard_from: Mapped[str] = mapped_column(String(100), nullable=True)
+    previous_score: Mapped[float] = mapped_column(Float, nullable=True)
+    role: Mapped[str] = mapped_column(String(50), nullable=True)
+
+    test_experience: Mapped[float] = mapped_column(Float, nullable=True)
+    ui_intuitivity: Mapped[float] = mapped_column(Float, nullable=True)
+    eval_accuracy: Mapped[float] = mapped_column(Float, nullable=True)
+    suggestion: Mapped[str] = mapped_column(String(300), nullable=True)
+
+
 class QuestionCard(Base):
     __tablename__ = "question_cards_table"
 
-    id: Mapped[UUID_ID] = mapped_column(GUID, primary_key=True, default=uuid.uuid4)
+    id: Mapped[UUID_ID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
     part: Mapped[int] = mapped_column(Integer)
     topic: Mapped[str] = mapped_column(String(512))
     questions: Mapped[list[str]] = mapped_column(ARRAY(String))
@@ -174,7 +198,7 @@ class QuestionCard(Base):
 class ReadingCard(Base):
     __tablename__ = "reading_cards_table"
 
-    id: Mapped[UUID_ID] = mapped_column(GUID, primary_key=True, default=uuid.uuid4)
+    id: Mapped[UUID_ID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
     topic: Mapped[str] = mapped_column(String(128))
     text: Mapped[str] = mapped_column(Text)
     practice_id: Mapped[UUID_ID] = mapped_column(
@@ -186,7 +210,7 @@ class ReadingCard(Base):
 class PracticeTest(Base):
     __tablename__ = "practice_test_table"
 
-    id: Mapped[UUID_ID] = mapped_column(GUID, primary_key=True, default=uuid.uuid4)
+    id: Mapped[UUID_ID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
     user_id: Mapped[UUID_ID] = mapped_column(ForeignKey("user_table.id"), index=True)
     user: Mapped[User] = relationship(back_populates="practice_tests")
     result: Mapped[Result] = relationship(
@@ -203,10 +227,10 @@ class PracticeTest(Base):
     test_date: Mapped[datetime] = mapped_column(DateTime, default=datetime.now())
 
     part_one_card_id = mapped_column(
-        GUID, ForeignKey("question_cards_table.id"), index=True
+        UUID, ForeignKey("question_cards_table.id"), index=True
     )
     part_two_card_id = mapped_column(
-        GUID, ForeignKey("question_cards_table.id"), index=True
+        UUID, ForeignKey("question_cards_table.id"), index=True
     )
     part_one_card: Mapped[QuestionCard] = relationship(
         "QuestionCard", foreign_keys=[part_one_card_id]
@@ -222,9 +246,9 @@ class PracticeTest(Base):
 class Notifications(Base):
     __tablename__ = "notifications_table"
 
-    id: Mapped[UUID_ID] = mapped_column(GUID, primary_key=True, default=uuid.uuid4)
+    id: Mapped[UUID_ID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
     user_id: Mapped[UUID_ID] = mapped_column(
-        GUID, ForeignKey("user_table.id"), index=True
+        UUID, ForeignKey("user_table.id"), index=True
     )
     user: Mapped[User] = relationship(back_populates="notificates")
     type: Mapped[str] = mapped_column(String(30))
@@ -235,10 +259,10 @@ class Notifications(Base):
 class Subscription(Base):
     __tablename__ = "subscriptions_table"
 
-    id: Mapped[UUID_ID] = mapped_column(GUID, primary_key=True, default=uuid.uuid4)
+    id: Mapped[UUID_ID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
     user: Mapped[User] = relationship(back_populates="subscription")
     user_id: Mapped[UUID_ID] = mapped_column(
-        GUID, ForeignKey("user_table.id"), index=True
+        UUID, ForeignKey("user_table.id"), index=True
     )
 
     status: Mapped[str] = mapped_column(String(50), nullable=True)
@@ -271,7 +295,7 @@ class Subscription(Base):
 class CreditCard(Base):
     __tablename__ = "credit_card_table"
 
-    id: Mapped[UUID_ID] = mapped_column(GUID, primary_key=True, default=uuid.uuid4)
+    id: Mapped[UUID_ID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
     subscription: Mapped[Subscription] = relationship(back_populates="credit_card")
     subscription_id: Mapped[UUID_ID] = mapped_column(
         ForeignKey("subscriptions_table.id")

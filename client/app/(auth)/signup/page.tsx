@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import logoText from "@/assets/images/logo-text2.png";
-import talkingWoman from "@/assets/images/person1.jpg";
+import talkingWoman from "@/assets/images/talkingWoman.jpg";
 import person1 from "@/assets/images/person1.jpg";
 import person2 from "@/assets/images/person2.jpg";
 import person3 from "@/assets/images/person3.jpg";
@@ -15,6 +15,7 @@ import { UserData, useUserStore } from "@/lib/userStorage";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { authorizeGoogle } from "@/lib/queries";
+import LogoWithIcon from "@/components/LogoWithIcon";
 
 export default function Page() {
   const router = useRouter();
@@ -73,15 +74,14 @@ export default function Page() {
   };
 
   return (
-    <div className="h-full lg:min-h-screen w-full px-4 py-6 pt-10 lg:pt-6 flex items-center justify-center lg:px-20 xl:px-40 font-geist">
-      <section className=" shadow-md bg-white w-full lg:flex lg:flex-row lg:shadow-lg shadow-slate-200 rounded-lg">
-        <div className="flex flex-col p-6 px-8 justify-center gap-16 lg:flex-1/2 lg:items-center lg:p-10">
+    <div className="h-full lg:min-h-screen font-geist">
+      <section className="min-h-screen shadow-md bg-white w-full lg:flex lg:flex-row lg:shadow-lg shadow-slate-200 rounded-lg">
+        <div className="flex flex-col p-6 px-8 justify-start gap-18 lg:flex-1/3 lg:items-center lg:p-10">
           <div className="flex items-center justify-start gap-2 mb-auto lg:self-start">
-            {/* <Image src={logoIcon} alt="iconLogo" className="w-6" /> */}
-            <Image src={logoText} alt="iconText" className="w-16" />
+            <LogoWithIcon />
           </div>
           <form
-            className="flex flex-col items-center justify-center gap-4 px-3 pb-6 lg:pb-10 lg:w-3/4 xl:w-[65%]"
+            className="flex flex-col items-center justify-center gap-4 px-3 pb-6 lg:pb-10 lg:w-3/4 xl:w-[65%] mb-auto"
             onSubmit={handleSubmit(submit)}
           >
             <div className="space-y-1">
@@ -188,7 +188,7 @@ export default function Page() {
             alt="talkingWoman"
             className="h-full object-cover brightness-75 rounded-r-lg"
           />
-          <div className="absolute top-1/2 xl:top-3/5 w-full pr-12 flex flex-col items-end gap-6 p-4 drop-shadow-2xl drop-shadow-gray-600">
+          <div className="absolute top-2/3 xl:top-3/4 w-full pr-12 flex flex-col items-end gap-6 p-4 drop-shadow-2xl drop-shadow-gray-600">
             <h2 className="font-bold leading-[1.3] tracking-tight text-3xl text-white w-[90%] xl:w-3/4 text-right text-shadow-sm">
               Unlock Your IELTS Success with AI-Powered Speaking Practice. Join
               ISTAI today.

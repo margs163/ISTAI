@@ -105,7 +105,7 @@ export default function AllPracticeTests() {
 
   return (
     <section className="px-4 lg:px-6 w-full flex flex-col gap-6">
-      <div className="p-5 w-full flex flex-col gap-6 bg-white rounded-lg border border-gray-200/80">
+      <div className="p-5 w-full flex flex-col gap-6 bg-white rounded-lg border border-gray-200/80 min-h-[500px]">
         <header className="w-full flex flex-row justify-between items-center px-1 gap-4">
           <div className="flex flex-row items-center justify-start gap-2">
             {/* <BriefcaseBusiness className="size-5 text-gray-700" /> */}
@@ -145,7 +145,7 @@ export default function AllPracticeTests() {
           </Link>
         </header>
         <div className="space-y-3">
-          {allPracticeTests && searched.length > 2 ? (
+          {allPracticeTests && searched.length > 0 ? (
             searched.map((item, index) => (
               <PracticeTest key={index} test={item} />
             ))

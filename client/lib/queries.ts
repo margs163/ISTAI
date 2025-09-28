@@ -4,6 +4,8 @@ import {
   AnalyticsSchema,
   AnalyticsType,
   CreditCardType,
+  FeedbackSchema,
+  FeedbackType,
   GrammarCommonMistakeType,
   NotificationType,
   PracticeTestSchema,
@@ -12,6 +14,9 @@ import {
   PronunciationTestSchema,
   PronunciationTestType,
   QuestionCardType,
+  QuestionnaireFormSchema,
+  QuestionnaireFormType,
+  QuestionnaireType,
   ReadingCardType,
   ResultSchema,
   ResultType,
@@ -90,6 +95,170 @@ export async function requestTransactionCreation(priceId: string) {
   } catch (error) {
     toast("Error Creating Transaction", {
       description: "Could not create a transaction",
+      action: {
+        label: "Log",
+        onClick: () => console.log(error),
+      },
+    });
+  }
+}
+
+export async function postQuestionnaireAnswers(data: QuestionnaireFormType) {
+  try {
+    const validated = await QuestionnaireFormSchema.safeParseAsync(data);
+
+    if (validated.error) {
+      throw validated.error;
+    }
+
+    console.log("Mutating...");
+    console.log(data);
+
+    const response = await axios.post<{ data: QuestionnaireType }>(
+      `${process.env.NEXT_PUBLIC_FASTAPI}/questionnaire/`,
+      validated.data,
+      { withCredentials: true }
+    );
+
+    console.log("Succesfully updated the records");
+    console.log(response.data.data);
+    return response.data.data;
+  } catch (error) {
+    toast("Error Sending Answers", {
+      description: "Could not send answers",
+      action: {
+        label: "Log",
+        onClick: () => console.log(error),
+      },
+    });
+  }
+}
+
+export async function feedbackResults(data: FeedbackType) {
+  try {
+    const validated = await FeedbackSchema.safeParseAsync(data);
+
+    if (validated.error) {
+      throw validated.error;
+    }
+
+    console.log("Mutating...");
+    console.log(data);
+
+    const response = await axios.post<{ data: QuestionnaireType }>(
+      `${process.env.NEXT_PUBLIC_FASTAPI}/questionnaire/`,
+      validated.data,
+      { withCredentials: true }
+    );
+
+    console.log("Succesfully updated the records");
+    console.log(response.data.data);
+    return response.data.data;
+  } catch (error) {
+    toast("Error Sending Answers", {
+      description: "Could not send answers",
+      action: {
+        label: "Log",
+        onClick: () => console.log(error),
+      },
+    });
+  }
+}
+
+export async function getWordsPronunciation(words: string[]) {
+  try {
+    const params = Object.fromEntries(words.map((item) => ["words", item]));
+    const search = new URLSearchParams(params).toString();
+
+    const response = await axios.get<{ urls: { word: string; url: string }[] }>(
+      `/pronunciation?${search}`,
+      {
+        withCredentials: true,
+      }
+    );
+
+    const urls = response.data.urls;
+    return urls;
+  } catch (error) {
+    toast("Error Fetching Pronunciation", {
+      description: "Could not fetch pronunciation",
+      action: {
+        label: "Log",
+        onClick: () => console.log(error),
+      },
+    });
+  }
+}
+
+export async function checkFeedbackRecord() {
+  try {
+    const response = await axios.get<{
+      status: "abscent" | "success";
+      data: undefined | QuestionnaireType;
+    }>(`${process.env.NEXT_PUBLIC_FASTAPI}/questionnaire/`, {
+      withCredentials: true,
+    });
+
+    console.log(response.data);
+
+    if (response.data.status === "success") {
+      if (
+        response.data.data?.test_experience &&
+        response.data.data?.eval_accuracy &&
+        response.data.data.ui_intuitivity
+      ) {
+        return true;
+      }
+    }
+    return false;
+  } catch (error) {
+    toast("Error Fetching Questionnaire", {
+      description: "Could not fetch record",
+      action: {
+        label: "Log",
+        onClick: () => console.log(error),
+      },
+    });
+  }
+}
+
+export async function checkQuestRecord() {
+  try {
+    const response = await axios.get<{
+      status: "abscent" | "success";
+      data: undefined | QuestionnaireType;
+    }>(`${process.env.NEXT_PUBLIC_FASTAPI}/questionnaire/`, {
+      withCredentials: true,
+    });
+
+    console.log(response.data);
+    if (response.data.status === "success") {
+      return true;
+    }
+    return false;
+  } catch (error) {
+    toast("Error Fetching Questionnaire", {
+      description: "Could not fetch record",
+      action: {
+        label: "Log",
+        onClick: () => console.log(error),
+      },
+    });
+  }
+}
+
+export async function createQuestionnaireRecord() {
+  try {
+    const response = await axios.post(
+      `${process.env.NEXT_PUBLIC_FASTAPI}/questionnaire/new`,
+      undefined,
+      { withCredentials: true }
+    );
+
+    return true;
+  } catch (error) {
+    toast("Error Creating Questionnaire", {
+      description: "Could not create record",
       action: {
         label: "Log",
         onClick: () => console.log(error),
@@ -638,6 +807,7 @@ export async function fetchAnalytics(
     if (validated.error) {
       throw validated.error;
     }
+    console.log(validated.data);
     setAnalytics(validated.data);
     return validated.data;
   } catch (error) {

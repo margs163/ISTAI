@@ -6,6 +6,15 @@ import { ForwardRefExoticComponent, RefAttributes, useState } from "react";
 import { FloaterAction, TipsFloaterAction } from "./FloaterAction";
 import MainButton from "../MainButton";
 import PronCheckDialog from "./PronCheckDialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 function getColor(color: string): [string, string] {
   return [`bg-${color}-50`, `text-${color}-600`];
@@ -19,6 +28,7 @@ type Action = {
   description: string;
   popular?: boolean;
   new?: boolean;
+  soon?: boolean;
   color: string;
 };
 
@@ -27,7 +37,7 @@ const actions: Action[] = [
     title: "Quick 5-min Practice",
     description: "Fast speaking drill to warm up",
     icon: Zap,
-    popular: true,
+    soon: true,
     color: "yellow",
   },
   {
@@ -40,7 +50,7 @@ const actions: Action[] = [
     title: "Daily Challenge",
     description: "Today's speaking challenge",
     icon: Calendar,
-    new: true,
+    soon: true,
     color: "green",
   },
   {
@@ -70,10 +80,16 @@ export function Action({ action }: { action: Action }) {
                 ? "bg-amber-100 text-amber-700"
                 : action.new
                 ? "bg-green-100 text-green-700"
+                : action.soon
+                ? "bg-gray-100 text-gray-700"
                 : "hidden"
             )}
           >
-            {action.popular ? "Popular" : action.new && "New"}
+            {action.popular
+              ? "Popular"
+              : action.new
+              ? "New"
+              : action.soon && "Soon"}
           </p>
         </div>
         <p className="text-xs font-normal text-gray-600">
@@ -116,10 +132,16 @@ export function PronunciationAction({
                   ? "bg-amber-100 text-amber-700"
                   : action.new
                   ? "bg-green-100 text-green-700"
+                  : action.soon
+                  ? "bg-gray-100 text-gray-700"
                   : "hidden"
               )}
             >
-              {action.popular ? "Popular" : action.new && "New"}
+              {action.popular
+                ? "Popular"
+                : action.new
+                ? "New"
+                : action.soon && "Soon"}
             </p>
           </div>
           <p className="text-xs font-normal text-gray-600">
@@ -153,6 +175,8 @@ export function TipsAction({ action }: { action: Action }) {
                   ? "bg-amber-100 text-amber-700"
                   : action.new
                   ? "bg-green-100 text-green-700"
+                  : action.soon
+                  ? "bg-gray-100 text-gray-700"
                   : "hidden"
               )}
             >
@@ -185,7 +209,7 @@ export default function QuickActions() {
           </div>
           <Link href={"#"}>
             <p className="font-medium text-xs text-gray-800 p-1 hover:text-gray-700 active:text-gray-700">
-              5 available
+              4 available
             </p>
           </Link>
         </header>
@@ -197,19 +221,66 @@ export default function QuickActions() {
                 key={index}
                 action={item}
               />
+            ) : item.title === "Speaking Tips" ? (
+              <TipsAction key={index} action={item} />
             ) : (
-              // ) : item.title === "Speaking Tips" ? (
-              //   <TipsAction key={index} action={item} />
               <Action key={index} action={item} />
             )
           )}
         </div>
         <hr className="h-[1px] text-gray-300 w-[95%] mx-auto" />
+        <QuickActionsDialog
+          openPronDialog={openPronDialog}
+          setOpenPronDialog={setOpenPronDialog}
+        />
+      </div>
+    </section>
+  );
+}
 
+export function QuickActionsDialog({
+  openPronDialog,
+  setOpenPronDialog,
+}: {
+  openPronDialog: boolean;
+  setOpenPronDialog: React.Dispatch<React.SetStateAction<boolean>>;
+}) {
+  return (
+    <Dialog>
+      <DialogTrigger>
         <div className="text-sm font-medium text-gray-800 px-4 py-2 border rounded-md border-gray-300 text-center">
           View All Features
         </div>
-      </div>
-    </section>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader className="text-start">
+          <div className="flex flex-row items-center justify-start gap-2">
+            <DialogTitle className="font-semibold text-lg text-gray-800">
+              Quick Actions
+            </DialogTitle>
+          </div>
+          <Link href={"#"}>
+            <p className="font-medium text-xs text-gray-800 p-1 hover:text-gray-700 active:text-gray-700">
+              4 available
+            </p>
+          </Link>
+        </DialogHeader>
+        <div className="space-y-4 mb-4">
+          {actions.map((item, index) =>
+            item.title === "Pronunciation Check" ? (
+              <PronunciationAction
+                setDialogOpen={setOpenPronDialog}
+                key={index}
+                action={item}
+              />
+            ) : item.title === "Speaking Tips" ? (
+              <TipsAction key={index} action={item} />
+            ) : (
+              <Action key={index} action={item} />
+            )
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }

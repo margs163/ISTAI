@@ -56,11 +56,13 @@ export function BandScoreCard({ score }: { score: Score }) {
       </div>
       {score.trend === "up" ? (
         <h3 className="text-xl text-green-500 font-semibold ml-auto flex flex-row items-center gap-2">
-          <TrendingUp className="text-green-500 size-5.5" /> {score.delta}
+          <TrendingUp className="text-green-500 size-5.5" />{" "}
+          {score.delta.toFixed(1)}
         </h3>
       ) : (
         <h3 className="text-xl text-red-500 font-semibold ml-auto flex flex-row items-center gap-2">
-          <TrendingDown className="text-red-500 size-5.5" /> {score.delta}
+          <TrendingDown className="text-red-500 size-5.5" />{" "}
+          {score.delta.toFixed(1)}
         </h3>
       )}
     </div>
@@ -69,6 +71,7 @@ export function BandScoreCard({ score }: { score: Score }) {
 export default function BandScoreCards() {
   const averageScores = useAnalyticsStore((state) => state.average_band_scores);
   const scoreIncreases = useAnalyticsStore((state) => state.scores_increase);
+  console.log(scoreIncreases);
   const scores: Score[] = [
     {
       icon: Mic,

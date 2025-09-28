@@ -114,7 +114,7 @@ export default function RecentPracticeTests() {
 
   return (
     <section className="px-6 lg:pr-0 w-full flex flex-col gap-6">
-      <div className="p-5 w-full flex flex-col gap-6 bg-white rounded-lg border border-gray-200/80 min-h-[320px]">
+      <div className="p-5 w-full flex flex-col gap-6 bg-white rounded-lg border border-gray-200/80 lg:min-h-[417px]">
         <header className="w-full flex flex-row justify-between items-center px-1">
           <div className="flex flex-row items-center justify-start gap-2">
             <h3 className="font-semibold text-lg text-gray-800">

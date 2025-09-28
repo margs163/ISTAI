@@ -152,6 +152,37 @@ export const ChatSocketResponseSchema = z.object({
 
 export type ChatSocketResponse = z.infer<typeof ChatSocketResponseSchema>;
 
+export const QuestionnaireSchema = z.object({
+  id: z.string().nullable().optional(),
+  user_id: z.string().nullable().optional(),
+  heard_from: z.string().nullable().optional(),
+  previous_score: z.float32().nullable().optional(),
+  role: z.string().nullable().optional(),
+  test_experience: z.float32().nullable().optional(),
+  ui_intuitivity: z.float32().nullable().optional(),
+  eval_accuracy: z.float32().nullable().optional(),
+  suggestion: z.string().nullable().optional(),
+});
+
+export const QuestionnaireFormSchema = z.object({
+  heard_from: z
+    .enum(["search", "youtube", "instagram", "reddit", "twitter", "friend"])
+    .nullable()
+    .optional(),
+  previous_score: z.float32().multipleOf(0.5).nullable().optional(),
+  role: z
+    .enum(["student", "teacher", "guest", "influencer"])
+    .nullable()
+    .optional(),
+});
+
+export const FeedbackSchema = z.object({
+  test_experience: z.float32().optional(),
+  ui_intuitivity: z.float32().optional(),
+  eval_accuracy: z.float32().optional(),
+  suggestion: z.string().optional(),
+});
+
 const CriterionScoresSchema = z.object({
   fluency: z.float32().multipleOf(0.5),
   grammar: z.float32().multipleOf(0.5),
@@ -481,3 +512,6 @@ export type VocabularyCommonMistakeType = z.infer<
 export type PronunciationCommonMistakeType = z.infer<
   typeof PronunciationCommonMistake
 >;
+export type QuestionnaireType = z.infer<typeof QuestionnaireSchema>;
+export type QuestionnaireFormType = z.infer<typeof QuestionnaireFormSchema>;
+export type FeedbackType = z.infer<typeof FeedbackSchema>;

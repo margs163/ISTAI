@@ -2,6 +2,9 @@ import asyncio
 from pprint import pprint
 from langchain_core.runnables import RunnableConfig
 from langchain_core.messages import HumanMessage, AIMessageChunk
+
+from .auth_db import get_async_session
+from ..schemas.db_tables import QuestionCard, ReadingCard
 from .conv_agent import part1_graph
 from .conversation_agents import agent_part1, agent_part3
 from ..dependencies import get_polly_client, get_s3_client
@@ -39,6 +42,53 @@ async def download():
             Bucket=bucket_name, Key=reading_audio_path, Filename=local_path
         )
     print("DOWNLOADED SUCCESSFULLY!")
+
+
+async def insert_questions():
+    async for session in get_async_session():
+        async with session.begin():
+            with open("./app/data/questions.json", "r") as file:
+                contents: dict = json.loads(file.read())
+                records_part1 = [
+                    QuestionCard(
+                        part=1,
+                        topic=question["Topic"],
+                        questions=[
+                            value
+                            for key, value in question.items()
+                            if key.startswith("Question")
+                        ],
+                    )
+                    for question in contents["part1"]
+                ]
+                records_part2 = [
+                    QuestionCard(
+                        part=2,
+                        topic=question["Topic"],
+                        questions=[
+                            value
+                            for key, value in question.items()
+                            if key.startswith("Question")
+                        ],
+                    )
+                    for question in contents["part2"]
+                ]
+
+                session.add_all(records_part1)
+                session.add_all(records_part2)
+
+
+async def insert_cards():
+    async for session in get_async_session():
+        async with session.begin():
+            with open("./app/data/readingcards.json", "r") as file:
+                contents: dict = json.loads(file.read())
+                reading_cards = [
+                    ReadingCard(topic=question["topic"], text=question["text"])
+                    for question in contents
+                ]
+
+                session.add_all(reading_cards)
 
 
 async def polly():
@@ -247,9 +297,12 @@ async def convert_to_wav_aio(input_path: str, output_path: str) -> None:
     if process.returncode != 0:
         raise RuntimeError(f"FFmpeg failed: {stderr.decode()}")
 
+async def main():
+    await asyncio.gather(insert_questions(), insert_cards())
+
 
 if __name__ == "__main__":
-    pass
+    asyncio.run(main())
     # asyncio.run(
     #     convert_to_wav_aio(
     #         "./app/data/pronunciation-6aac544f-726a-4fde-ba30-f07d142c1b0d.wav",

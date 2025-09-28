@@ -48,6 +48,7 @@ async def get_analytics(
             "practice_time": analytic.practice_time,
             "tests_completed": analytic.tests_completed,
             "current_bandscore": analytic.current_bandscore,
+            "scores_increase": analytic.scores_increase,
             "average_band_scores": deepcopy(analytic.average_band_scores),
             "average_band": analytic.average_band,
             "grammar_common_mistakes": (
@@ -188,6 +189,7 @@ async def update_analytics(
                 "pronunciation": new_avg_bands["pronunciation"] - pronunciation_avg,
             }
 
+            print("SCORE INCREASES:", scores_increase)
             analytic.scores_increase = scores_increase
 
         if update.current_bandscore:

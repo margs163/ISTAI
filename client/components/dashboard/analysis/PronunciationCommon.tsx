@@ -72,12 +72,17 @@ function CommonPronunciationMistake({
         </h3>
       </header>
       {/* <p className="text-sm font-medium text-gray-600">{mistake.}</p> */}
-      <main className="space-y-1 p-4 rounded-md flex flex-col gap-1 items-start bg-white">
+      <main className="space-y-1 p-4 rounded-md flex flex-col gap-1 items-start bg-white w-full">
         <h3 className="text-xs font-medium text-gray-600">Phonetic Guide:</h3>
-        <code className="text-xs text-purple-800 font-medium border border-purple-200 bg-purple-50 rounded-sm py-1.5 px-3">
-          <span>{mistake.user_phonemes}</span> vs{" "}
-          <span>{mistake.correct_phonemes}</span>
-        </code>
+        <div className="flex justify-between w-full items-center">
+          <p className="text-sm font-medium text-gray-800">
+            {mistake.word[0].toUpperCase() + mistake.word.slice(1)}
+          </p>
+          <code className="text-xs text-purple-800 font-medium border border-purple-200 bg-purple-50 rounded-sm py-1.5 px-3">
+            <span>{mistake.user_phonemes}</span> vs{" "}
+            <span>{mistake.correct_phonemes}</span>
+          </code>
+        </div>
       </main>
     </div>
   );

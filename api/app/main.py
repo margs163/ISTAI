@@ -22,6 +22,7 @@ from .routers.chat import router as chat_router
 from .routers.avatar import router as avatar_router
 from .routers.notifications import router as notification_router
 from .routers.pronunciation_test import router as pronunciation_test_router
+from .routers.questionnaire import router as questionnaire_router
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from .dependencies import limiter
@@ -44,7 +45,6 @@ seqlog.log_to_seq(
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    await create_db_and_tables()
     yield
 
 
@@ -142,6 +142,10 @@ app.include_router(notification_router, prefix="/notifications", tags=["notifica
 
 app.include_router(
     pronunciation_test_router, prefix="/pronunciation-test", tags=["pronunciation test"]
+)
+
+app.include_router(
+    questionnaire_router, prefix="/questionnaire", tags=["questionnaire"]
 )
 
 

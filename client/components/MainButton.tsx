@@ -20,7 +20,7 @@ const MainButton = forwardRef<HTMLButtonElement, MainButtonProps>(
       className={cn(
         "px-3 py-2 rounded-md text-sm font-medium flex flex-row gap-2 items-center transition-colors ml-auto",
         variant === "primary"
-          ? "bg-gray-800 brightness-95 hover:bg-gray-900 active:bg-gray-900 text-white"
+          ? "bg-gray-800 brightness-95 hover:bg-gray-900 active:bg-gray-900 text-white disabled:bg-gray-600 disabled:text-gray-100"
           : "bg-gray-100 hover:bg-gray-200 active:bg-gray-200 text-gray-800",
         className
       )}
