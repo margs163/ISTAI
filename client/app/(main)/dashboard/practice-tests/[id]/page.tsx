@@ -17,20 +17,46 @@ import DialogWeakSides from "@/components/dashboard/practiceDialog/DialogWeakSid
 import LoadingSmallUI from "@/components/loadingSmallUI";
 import { useGlobalPracticeTestsStore } from "@/lib/practiceTestStore";
 import { useUserStore } from "@/lib/userStorage";
-import React, { use, useRef } from "react";
+import React, { use, useEffect, useMemo, useRef } from "react";
 import html2canvas from "html2canvas-pro";
 import { jsPDF } from "jspdf";
 import { QuestionCardType } from "@/lib/types";
+import { useQuery } from "@tanstack/react-query";
+import { getWordsPronunciation } from "@/lib/queries";
+import { useWordsTTSStore } from "@/lib/ttsStore";
 
 export default function Page({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const getTest = useGlobalPracticeTestsStore((state) => state.getPracticeByID);
-  const practiceTest = getTest(id);
+  const practiceTest = useMemo(() => getTest(id), [id]);
   const firstName = useUserStore((state) => state.firstName);
   const lastName = useUserStore((state) => state.lastName);
   const printRef = useRef<HTMLDivElement>(null);
+  const setTTSWords = useWordsTTSStore((state) => state.setUrls);
 
-  console.log(practiceTest);
+  useQuery({
+    queryKey: ["tts-get"],
+    queryFn: async () => {
+      if (
+        practiceTest &&
+        practiceTest.result &&
+        practiceTest.result.pronunciation_issues
+      ) {
+        const audioUrls = await getWordsPronunciation(
+          practiceTest.result.pronunciation_issues.map((item) => item.word)
+        );
+
+        console.log(audioUrls);
+
+        if (audioUrls) {
+          setTTSWords(audioUrls);
+        }
+
+        return audioUrls;
+      }
+    },
+    enabled: !!practiceTest,
+  });
 
   if (!practiceTest || !practiceTest.result) {
     return <LoadingSmallUI />;

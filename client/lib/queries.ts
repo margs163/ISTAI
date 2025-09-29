@@ -167,11 +167,12 @@ export async function feedbackResults(data: FeedbackType) {
 
 export async function getWordsPronunciation(words: string[]) {
   try {
-    const params = Object.fromEntries(words.map((item) => ["words", item]));
-    const search = new URLSearchParams(params).toString();
+    const queryString = `?${words
+      .map((word) => `words=${encodeURIComponent(word)}`)
+      .join("&")}`;
 
     const response = await axios.get<{ urls: { word: string; url: string }[] }>(
-      `/pronunciation?${search}`,
+      `/api/pronunciation${queryString}`,
       {
         withCredentials: true,
       }

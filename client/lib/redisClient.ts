@@ -1,6 +1,6 @@
 import { createClient, RedisClientType } from "redis";
 
-export const client = createClient({ url: "redis://redis:6379" });
+export const client = createClient({ url: "redis://localhost:6379" });
 
 export async function connectRedis() {
   await client.connect();

@@ -1,23 +1,13 @@
 import { useLocalPracticeTestStore } from "@/lib/practiceTestStore";
+import { useWordsTTSStore } from "@/lib/ttsStore";
 import { PronunciationErrorType } from "@/lib/types";
+import { cn } from "@/lib/utils";
 import { Info, Mic, Volume2 } from "lucide-react";
-import React from "react";
-
-const pronunMistakes = [
-  {
-    word: "comfortable",
-    issue: "Missing syllable",
-    correction: "COM-for-ta-ble",
-  },
-  {
-    word: "specific",
-    issue: "Wrong stress",
-    correction: "spe-CI-fic",
-  },
-];
+import React, { useCallback, useEffect, useRef } from "react";
 
 export function DialogPronunMistake({
   mistake,
+  url,
 }: {
   mistake: {
     word: string;
@@ -25,12 +15,35 @@ export function DialogPronunMistake({
     user_phonemes: string;
     correct_phonemes: string;
   };
+  url?: string;
 }) {
+  const audioRef = useRef<HTMLAudioElement>(null);
+
+  const playCallback = useCallback(() => {
+    if (audioRef.current && audioRef.current.paused) {
+      audioRef.current?.play();
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!audioRef.current && url) {
+      audioRef.current = new Audio(url);
+    }
+  }, [url]);
+
   return (
     <div className="flex flex-col gap-4 lg:gap-4 justify-start items-start p-6 lg:p-6 w-full bg-purple-50/50 border border-gray-200 rounded-md">
       <div className="flex flex-row gap-3 items-center justify-start">
-        <div className="flex items-center justify-center bg-purple-100 rounded-full p-2.5 lg:px-3 lg:py-[13px]">
-          <Volume2 className="text-purple-600 shrink-0 size-5 lg:size-6" />
+        <div
+          className="flex items-center justify-center bg-purple-100 rounded-full p-2.5 lg:px-3 lg:py-[13px] disabled:cursor-not-allowed cursor-pointer hover:bg-purple-200/80 active:bg-purple-200/80 transition-colors"
+          onClick={playCallback}
+          aria-disabled={!url}
+        >
+          <Volume2
+            className={cn(
+              "text-purple-600 shrink-0 size-5 lg:size-6 transition-colors"
+            )}
+          />
         </div>
         <h3 className="text-base lg:text-lg font-medium">{mistake.word}</h3>
       </div>
@@ -57,6 +70,7 @@ export default function DialogPronunciationIssues({
 }: {
   pronunIssues: PronunciationErrorType[];
 }) {
+  const wordsTTS = useWordsTTSStore((state) => state.urls);
   return (
     <section className="w-full lg:col-span-2">
       <div className="p-6 lg:p-8 border border-gray-200 rounded-lg bg-white flex flex-col gap-4 shadow-none">
@@ -68,7 +82,15 @@ export default function DialogPronunciationIssues({
         </header>
         <main className="flex flex-col gap-4 lg:flex-row lg:gap-6">
           {pronunIssues?.map((item, index) => (
-            <DialogPronunMistake mistake={item} key={index} />
+            <DialogPronunMistake
+              mistake={item}
+              key={index}
+              url={
+                wordsTTS.find(
+                  (tts) => tts.word.toLowerCase() === item.word.toLowerCase()
+                )?.url
+              }
+            />
           ))}
         </main>
       </div>

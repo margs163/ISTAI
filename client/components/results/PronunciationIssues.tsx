@@ -21,9 +21,7 @@ export function PronunMistake({
 
   const playCallback = useCallback(() => {
     if (audioRef.current && audioRef.current.paused) {
-      audioRef.current.oncanplaythrough = () => {
-        audioRef.current?.play();
-      };
+      audioRef.current?.play();
     }
   }, []);
 
@@ -37,7 +35,7 @@ export function PronunMistake({
     <div className="flex flex-col gap-4 lg:gap-6 justify-start items-start p-6 lg:p-8 w-full bg-purple-50/50 border border-gray-200 rounded-md lg:flex-1/4">
       <div className="flex flex-row gap-3 items-center justify-start">
         <div
-          className="flex items-center justify-center bg-purple-100 aria-disabled:bg-gray-100 transition-colors cursor-not-allowed rounded-full p-2.5 lg:px-3 lg:py-[13px]"
+          className="flex items-center justify-center bg-purple-100 aria-disabled:bg-gray-100 cursor-not-allowed rounded-full p-2.5 lg:px-3 lg:py-[13px] active:bg-purple-200/80 hover:bg-purple-200/80 transition-colors"
           onClick={playCallback}
           aria-disabled={!url}
         >

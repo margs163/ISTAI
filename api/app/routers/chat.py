@@ -11,9 +11,10 @@ from langchain_core.runnables import RunnableConfig
 from langchain_core.messages import AIMessageChunk
 from dotenv import load_dotenv
 
-from ..dependencies import get_polly_client, get_s3_client
+from ..dependencies import get_openai_client, get_s3_client, get_polly_client
 from ..schemas.chat import AssistantEnumSchema
 from ..lib.conversation_agents import agent_part1, agent_part3
+from openai import OpenAI, HttpxBinaryResponseContent
 import uuid
 import os
 
@@ -27,7 +28,7 @@ router = APIRouter()
 async def chat_websocket(
     websocket: WebSocket,
     s3_client: Annotated[Any, Depends(get_s3_client)],
-    polly_client: Annotated[Any, Depends(get_polly_client)],
+    openai_client: Annotated[OpenAI, Depends(get_openai_client)],
 ):
     thread_id = str(uuid.uuid4())
     config: RunnableConfig = {"configurable": {"thread_id": thread_id}}
@@ -120,23 +121,24 @@ async def chat_websocket(
                 voice_id = ""
                 tts_filename = f"tts-files/test-{uuid.uuid4()}.mp3"
                 if data["assistant"] == "Emma":
-                    voice_id = "Ruth"
+                    voice_id = "coral"
                 else:
-                    voice_id = "Stephen"
+                    voice_id = "fable"
 
-                response = await polly_client.synthesize_speech(
-                    Text=full_text_response,
-                    OutputFormat="mp3",
-                    VoiceId=voice_id,
-                    Engine="neural",
+                response: HttpxBinaryResponseContent = openai_client.audio.speech.create(
+                    model="tts-1",
+                    voice=voice_id,
+                    input=full_text_response,
                 )
 
-                byte_body = await response["AudioStream"].read()
+
+                # byte_body = b"".join(response.read())  # Read the ReadableStream into bytes
 
                 await s3_client.put_object(
                     Bucket=bucket_name,
                     Key=tts_filename,
-                    Body=byte_body,
+                    Body=response.content,
+                    # ContentType="audio/mpeg",  # Optional: specify MP3 content type
                 )
 
                 print(

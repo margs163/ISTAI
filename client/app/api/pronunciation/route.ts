@@ -15,57 +15,74 @@ export async function GET(request: NextRequest) {
     const words = searchParams.getAll("words");
     const audioURLs = [];
 
+    console.log("Words TTS endpoint was hit!", { words });
+
     for (const word of words) {
+      const fileKey = `words/${word.toLowerCase()}.mp3`;
+
       try {
-        const command_head = new HeadObjectCommand({
-          Bucket: S3_BUCKET_NAME,
-          Key: `words/${word.toLowerCase()}.mp3`,
+        const headCommand = new HeadObjectCommand({
+          Bucket: process.env.S3_BUCKET_NAME,
+          Key: fileKey,
         });
 
-        await s3_client.send(command_head);
+        await s3_client.send(headCommand);
+        console.log(`File found in S3: ${fileKey}`);
 
-        const command_get = new GetObjectCommand({
-          Bucket: S3_BUCKET_NAME,
-          Key: `words/${word.toLowerCase()}.mp3`,
+        const getCommand = new GetObjectCommand({
+          Bucket: process.env.S3_BUCKET_NAME,
+          Key: fileKey,
         });
 
-        const url = await getSignedUrl(s3_client, command_get, {
+        const url = await getSignedUrl(s3_client, getCommand, {
           expiresIn: 7200,
         });
-        audioURLs.push({ word: word, url: url });
+        audioURLs.push({ word, url });
       } catch (error) {
-        if (error.name == "Not Found") {
-          console.log("File is not found!");
+        if (
+          error.name === "NoSuchKey" ||
+          error.$metadata?.httpStatusCode === 404
+        ) {
+          console.log(`File not found in S3: ${fileKey}, generating new audio`);
+
           const mp3 = await openai.audio.speech.create({
-            model: "gpt-4o-mini-tts",
+            model: "tts-1",
             voice: "coral",
             input: word,
             instructions: "Pronounce a word correctly.",
           });
 
           const buffer = Buffer.from(await mp3.arrayBuffer());
-          const filePath = `words/${word.toLowerCase()}.mp3`;
 
-          const command_put = new PutObjectCommand({
-            Bucket: S3_BUCKET_NAME,
-            Key: filePath,
+          const putCommand = new PutObjectCommand({
+            Bucket: process.env.S3_BUCKET_NAME,
+            Key: fileKey,
             Body: buffer,
             ContentType: "audio/mp3",
           });
 
-          await s3_client.send(command_put);
+          await s3_client.send(putCommand);
+          console.log(`Uploaded new file to S3: ${fileKey}`);
 
-          const audioBlob = new Blob([buffer], { type: "audio/mp3" });
-          const url = URL.createObjectURL(audioBlob);
-          audioURLs.push({ word: word, url: url });
+          const getCommand = new GetObjectCommand({
+            Bucket: process.env.S3_BUCKET_NAME,
+            Key: fileKey,
+          });
+
+          const url = await getSignedUrl(s3_client, getCommand, {
+            expiresIn: 7200,
+          });
+          audioURLs.push({ word, url });
+        } else {
+          console.error(`Error checking S3 file ${fileKey}:`, error);
+          throw error;
         }
       }
     }
 
     return NextResponse.json({ urls: audioURLs }, { status: 200 });
   } catch (error) {
-    console.log("Catched an error!");
-    console.log(error);
-    return NextResponse.json({ error: error }, { status: 500 });
+    console.error("Error in TTS endpoint:", error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

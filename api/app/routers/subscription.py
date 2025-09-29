@@ -116,7 +116,13 @@ async def paddle_webhook(
                     customer_id = data["data"]["customer_id"]
                     subscription = None
                     customer = None
+
+                    if data['event_type'] != "subscription.activated":
+                        continue
+
                     if subscription_id and customer_id:
+                        pprint(data)
+                        # pprint(subscription_id, customer_id)
                         subscription = paddle.subscriptions.get(subscription_id)
                         customer = paddle.customers.get(customer_id)
                         print("Subscription and customer records were retrieved")
@@ -135,7 +141,7 @@ async def paddle_webhook(
                                 status_code=status.HTTP_400_BAD_REQUEST,
                                 detail=f"No transaction was found",
                             )
-                        user_email = redis_client.get(last_transaction.id)
+                        user_email: str = redis_client.get(last_transaction.id)
 
                         if not user_email:
                             print(
@@ -384,13 +390,15 @@ async def paddle_webhook(
             return {"status": "success"}
         except Exception as e:
             print(f"Failed to parse webhook data: {e}")
-            return {"exception": e}
+            raise e
+            return {"exception": "exception"}
             # return HTTPException(status_code=400, detail=f"{e}")
 
     except Exception as e:
         await session.rollback()
         print("Catched an exception:", e)
-        return {"exception": e}
+        raise e
+        return {"exception": "exception"}
         # raise HTTPException(
         #     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         #     detail=f"Could process webhook record: {e}",
