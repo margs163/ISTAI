@@ -306,6 +306,8 @@ Other: Any other grammatical errors (e.g., missing auxiliary verbs, incorrect wo
 Range and Complexity: Note limited use of complex structures (e.g., conditionals, relative clauses) if it contributes to errors or restricts expression.
 Impact on Communication: Assess whether errors cause confusion or merely minor inaccuracies.
 
+IGNORE PUNCTUATION MISTAKES.
+
 Select 3–5 sentence examples with clear grammar mistakes. If fewer than 3 errors exist, select sentences with minor issues or potential for more complex structures, and classify the issues as "minor" or "potential for improvement." Sentences should be diverse across parts when possible.
 For each example:
 Identify and classify specific grammar mistakes by type (e.g., "Subject-Verb Agreement").
