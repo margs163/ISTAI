@@ -21,6 +21,10 @@
   backdrop-filter: brightness(125%);
 }
 
+.link-legal {
+  @apply text-indigo-600 uppercase font-medium visited:text-indigo-600 active:text-indigo-700 hover:text-indigo-700 text-sm;
+}
+
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);

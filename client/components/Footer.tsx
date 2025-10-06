@@ -1,9 +1,15 @@
+import { cn } from "@/lib/utils";
 import { MoveUpRight } from "lucide-react";
 import Link from "next/link";
 
-export default function Footer() {
+export default function Footer({ className }: { className?: string }) {
   return (
-    <footer className="flex flex-col gap-6 p-8 lg:px-20 xl:px-36 lg:gap-12 pt-0 font-mont">
+    <footer
+      className={cn(
+        "flex flex-col gap-6 p-8 lg:px-20 xl:px-36 lg:gap-12 pt-0 font-mont w-full",
+        className
+      )}
+    >
       <div className="flex flex-col lg:flex-row lg:justify-between lg:items-end gap-10 w-full">
         <div className="flex flex-col gap-3 lg:gap-5 justify-start items-start">
           <h1 className="text-3xl lg:text-4xl font-bold">Fluent Flow</h1>
@@ -73,7 +79,11 @@ export default function Footer() {
           </Link>
           <hr className="w-[2px] h-4 text-gray-200 bg-gray-200" />
           <Link href={"#"} className="text-gray-700 text-sm font-normal">
-            terms & conditions
+            Terms & Conditions
+          </Link>
+          <hr className="w-[2px] h-4 text-gray-200 bg-gray-200" />
+          <Link href={"#"} className="text-gray-700 text-sm font-normal">
+            Cookies policy
           </Link>
           <hr className="w-[2px] h-4 text-gray-200 bg-gray-200" />
           <Link href={"#"} className=" text-gray-700 text-sm font-normal">
