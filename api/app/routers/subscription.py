@@ -6,13 +6,16 @@ from fastapi import APIRouter, Body, Depends, HTTPException, Query, Request, sta
 from redis import Redis
 from sqlalchemy import select
 from sqlalchemy.orm import joinedload
+from polar_sdk import Polar
+from polar_sdk.webhooks import validate_event, WebhookVerificationError, WebhoookPayload
+from polar_sdk.models import Customer, SubscriptionRecurringInterval
 
 from ..lib.send_notification import create_notification
 from ..schemas.notifications import NotificationTypeEnum
-from ..dependencies import get_redis_client, limiter
+from ..dependencies import get_redis_client, limiter, get_pollar_client
 
 from ..lib.auth_db import get_async_session
-from ..schemas.db_tables import CreditCard, Subscription, User
+from ..schemas.db_tables import Subscription, User
 from ..schemas.subscriptions import (
     CreditCardSchema,
     SubscriptionSchema,
@@ -95,314 +98,181 @@ def verify_paddle_signature(request: Request, body: bytes) -> bool:
 async def paddle_webhook(
     request: Request,
     session: Annotated[AsyncSession, Depends(get_async_session)],
+    polar_client: Annotated[Polar, Depends(get_pollar_client)],
     redis_client: Annotated[Redis, Depends(get_redis_client)],
 ):
     try:
-        body = await request.body()
-        # raw_body = body.decode("utf-8")
-        if not verify_paddle_signature(request, body):
-            print("Could not verify paddle signature")
-            raise HTTPException(status_code=401, detail="Invalid signature")
+        request_body = await request.body()
+        event: WebhoookPayload = validate_event(
+            body=request_body,
+            headers=request.headers,
+            secret=os.getenv("POLAR_WEBHOOK_SECRET"),
+        )
 
-        try:
-            # webhook_data = WebhookEvent.model_validate_json(await request.json())
-            data = await request.json()
-            event_id = data["event_id"]
-            events = paddle.events.list(ListEvents(Pager(after=event_id)))
+        print("EVENT WAS HIT!", event.TYPE)
 
-            for event in events:
-                if event.event_type.value == EventTypeName.SubscriptionActivated.value:
-                    subscription_id = data["data"]["id"]
-                    customer_id = data["data"]["customer_id"]
-                    subscription = None
-                    customer = None
+        if event.TYPE == "subscription.created":
+            customer_id = event.data.customer_id
+            subscription_id = event.data.id
+            user_email = event.data.metadata.get("userEmail")
 
-                    if data['event_type'] != "subscription.activated":
-                        continue
+            if not user_email:
+                raise Exception("No user email was found in metadata")
+            
+            user = await session.scalar(select(User).where(User.email == user_email))
 
-                    if subscription_id and customer_id:
-                        pprint(data)
-                        # pprint(subscription_id, customer_id)
-                        subscription = paddle.subscriptions.get(subscription_id)
-                        customer = paddle.customers.get(customer_id)
-                        print("Subscription and customer records were retrieved")
+            user_subscription = await session.scalar(
+                select(Subscription).where(Subscription.user_id == user.id)
+            )
 
-                    if subscription and customer:
-                        sub_item = subscription.items[0]
-                        credits_purchased = 0
-                        transaction = paddle.transactions.list(
-                            ListTransactions(subscription_ids=[subscription_id])
-                        )
-                        transactions: list[Transaction] = transaction.items
-                        last_transaction = transactions[0]
+            if not user_subscription:
+                raise Exception("No subscription record was found")
 
-                        if not last_transaction:
-                            raise HTTPException(
-                                status_code=status.HTTP_400_BAD_REQUEST,
-                                detail=f"No transaction was found",
-                            )
-                        user_email: str = redis_client.get(last_transaction.id)
+            customer: Customer = polar_client.customers.get(id=customer_id)
 
-                        if not user_email:
-                            print(
-                                "No user email was found with transaction id:",
-                                last_transaction.id,
-                            )
-                            raise HTTPException(
-                                status_code=status.HTTP_400_BAD_REQUEST,
-                                detail=f"No user email was found",
-                            )
+            if not customer:
+                raise Exception(f"No customer was found with id {customer_id}")
 
-                        user = await session.scalar(
-                            select(User).where(User.email == user_email)
-                        )
+            polar_product_id = event.data.product_id
+            polar_price_id = event.data.prices[0].id
 
-                        if not user:
-                            raise HTTPException(
-                                status_code=status.HTTP_400_BAD_REQUEST,
-                                detail=f"No user was found with email {customer.email}",
-                            )
-                        subscription_record = await session.scalar(
-                            select(Subscription).where(Subscription.user_id == user.id)
-                        )
+            user_subscription.polar_product_id = polar_product_id
+            user_subscription.polar_subscription_id = subscription_id
+            user_subscription.polar_price_id = polar_price_id
+            user_subscription.polar_customer_id = customer_id
 
-                        if sub_item.product.name == "Starter":
-                            credits_purchased = 300
-                        elif sub_item.product.name == "Pro":
-                            credits_purchased = 800
+            polar_product_name = event.data.product.name
 
-                        if not subscription_record:
-                            raise HTTPException(
-                                status_code=status.HTTP_400_BAD_REQUEST,
-                                detail="No subscription was found",
-                            )
 
-                        subscription_record.paddle_product_id = sub_item.product.id
-                        subscription_record.paddle_subscription_id = subscription_id
-                        subscription_record.paddle_price_id = sub_item.price.id
-                        subscription_record.subscription_tier = sub_item.product.name
-                        subscription_record.paddle_subscription_status = (
-                            sub_item.status.value
-                        )
-                        subscription_record.subscription_created_at = make_naive(
-                            sub_item.created_at
-                        )
-                        if sub_item.next_billed_at:
-                            subscription_record.subscription_next_billed_at = (
-                                make_naive(sub_item.next_billed_at)
-                            )
-                        subscription_record.total_money_spent = (
-                            float(sub_item.price.unit_price.amount) / 100
-                        )
-                        subscription_record.credits_total_purchased = credits_purchased
-                        subscription_record.credits_left = credits_purchased
-                        subscription_record.billing_interval = (
-                            subscription.billing_cycle.interval.value
-                        )
-                        subscription_record.billing_frequency = (
-                            subscription.billing_cycle.frequency
-                        )
+            user_subscription.polar_subscription_status = event.data.status.value
 
-                        subscription_record.status = subscription.status.value
+            created_at = event.data.current_period_start
+            next_billed_at = event.data.current_period_end
 
-                        if (
-                            subscription.management_urls
-                            and subscription.management_urls.update_payment_method
-                        ):
-                            subscription_record.paddle_cancel_url = (
-                                subscription.management_urls.cancel
-                            )
-                            subscription_record.paddle_update_url = (
-                                subscription.management_urls.update_payment_method
-                            )
+            user_subscription.subscription_created_at = make_naive(created_at)
+            user_subscription.subscription_next_billed_at = make_naive(next_billed_at)
 
-                        await create_notification(
-                            user_id=str(user.id),
-                            session=session,
-                            type=NotificationTypeEnum.CREDIT_PURCHASE,
-                            message=f"You have successfully started a {sub_item.product.name} plan",
-                        )
-                        await session.commit()
+            money_spent = float(event.data.amount / 100)
+            user_subscription.total_money_spent += money_spent
 
-                    print("Subscription record was updated!")
+            recurring_interval = event.data.recurring_interval
 
-                if event.event_type.value == EventTypeName.SubscriptionCreated.value:
-                    print("Subscription created")
+            if recurring_interval == SubscriptionRecurringInterval.MONTH:
+                user_subscription.billing_interval = "month" 
+                user_subscription.billing_frequency = 1
+            elif recurring_interval == SubscriptionRecurringInterval.YEAR:
+                user_subscription.billing_interval = "year"
+                user_subscription.billing_frequency = 12
 
-                if event.event_type.value == EventTypeName.SubscriptionCanceled.value:
-                    print("Cancelling your subscription")
-                    subscription_id = data["data"]["id"]
-                    customer_id: str = data["data"]["customer_id"]
+            if polar_product_name.startswith("Starter"):
+                user_subscription.subscription_tier = TierEnum.STARTER.value
 
-                    customer = paddle.customers.get(customer_id)
-                    subscription = paddle.subscriptions.get(subscription_id)
+                if recurring_interval == SubscriptionRecurringInterval.MONTH:
+                    user_subscription.credits_total_purchased += 300
+                    user_subscription.credits_left += 300
+                elif recurring_interval == SubscriptionRecurringInterval.YEAR:
+                    user_subscription.credits_total_purchased += 3600
+                    user_subscription.credits_left += 3600
 
-                    if not subscription.canceled_at:
-                        raise HTTPException(
-                            status_code=status.HTTP_400_BAD_REQUEST,
-                            detail="Invalid subscription object",
-                        )
+                user_subscription.pronunciation_tests_left = 6
+            else:
+                user_subscription.subscription_tier = TierEnum.PRO.value
 
-                    if subscription and customer:
-                        user_email = redis_client.get(subscription_id)
+                if recurring_interval == SubscriptionRecurringInterval.MONTH:
+                    user_subscription.credits_total_purchased += 800
+                    user_subscription.credits_left += 800
+                elif recurring_interval == SubscriptionRecurringInterval.YEAR:
+                    user_subscription.credits_total_purchased += 9600
+                    user_subscription.credits_left += 9600
 
-                        if not user_email:
-                            raise HTTPException(
-                                status_code=status.HTTP_400_BAD_REQUEST,
-                                detail="Invalid subscription object",
-                            )
+                user_subscription.pronunciation_tests_left = 10
 
-                        user = await session.scalar(
-                            select(User).where(User.email == user_email)
-                        )
+            print("Subscription record was updated.")
+            await session.commit()
 
-                        if not user:
-                            raise HTTPException(
-                                status_code=status.HTTP_400_BAD_REQUEST,
-                                detail=f"No user was found with email {customer.email}",
-                            )
-                        subscription_record = await session.scalar(
-                            select(Subscription).where(Subscription.user_id == user.id)
-                        )
+        if event.TYPE == "subscription.canceled":
+            subscription_id = event.data.id
+            customer_id = event.data.customer_id
+            user_email = redis_client.get(customer_id)
 
-                        if not subscription_record:
-                            raise HTTPException(
-                                status_code=status.HTTP_400_BAD_REQUEST,
-                                detail="No subscription was found",
-                            )
+            if not user_email:
+                raise Exception(f"No user email was found in redis for customer id {customer_id}")
 
-                        subscription_record.status = subscription.status.value
+            user = await session.scalar(
+                select(User).where(User.email == user_email)
+            )
 
-                        await session.commit()
+            if not user:
+                raise Exception(f"No user was found with email {user_email}")
 
-                        await create_notification(
-                            user_id=str(user.id),
-                            session=session,
-                            type=NotificationTypeEnum.PLAN_CHANGE,
-                            message="Your subscription has been cancelled",
-                        )
-                        print("Subscription was cancelled")
+            user_subscription = await session.scalar(
+                select(Subscription).where(Subscription.user_id == user.id)
+            )
 
-                if event.event_type.value == EventTypeName.PaymentMethodSaved.value:
-                    customer_id: str = data["data"]["customer_id"]
-                    address_id: str = data["data"]["address_id"]
-                    subscription_id = data["data"]["id"]
+            if not user_subscription:
+                raise Exception("No subscription record was found") 
 
-                    subscription = paddle.subscriptions.get(subscription_id)
-                    customer = paddle.customers.get(customer_id)
-                    address = paddle.addresses.get(customer_id, address_id)
+            user_subscription.polar_subscription_status = "canceled"
+            user_subscription.subscription_cancelled_at = make_naive(event.data.canceled_at)
+            user_subscription.cancellation_reason = event.data.customer_cancellation_reason
+            user_subscription.cancellation_comment = event.data.customer_cancellation_comment
 
-                    transaction = paddle.transactions.list(
-                        ListTransactions(subscription_ids=[subscription_id])
-                    )
-                    transactions: list[Transaction] = transaction.items
-                    last_transaction = transactions[0]
-                    payment_details = last_transaction.payments[0].method_details
+            await session.commit()
+            print("Subscription was canceled.")
+        
+        if event.TYPE == "subscription.revoked":
+            subscription_id = event.data.id
+            customer_id = event.data.customer_id
+            user_email = redis_client.get(customer_id)
 
-                    if not last_transaction:
-                        raise HTTPException(
-                            status_code=status.HTTP_400_BAD_REQUEST,
-                            detail=f"No transaction was found",
-                        )
-                    user_email = redis_client.get(last_transaction.id)
+            if not user_email:
+                raise Exception(f"No user email was found in redis for customer id {customer_id}")
 
-                    if not user_email:
-                        print(
-                            "No user email was found with transaction id:",
-                            last_transaction.id,
-                        )
-                        raise HTTPException(
-                            status_code=status.HTTP_400_BAD_REQUEST,
-                            detail=f"No user email was found",
-                        )
+            user = await session.scalar(
+                select(User).where(User.email == user_email)
+            )
 
-                    if subscription and customer:
-                        user = await session.scalar(
-                            select(User).where(User.email == user_email)
-                        )
+            if not user:
+                raise Exception(f"No user was found with email {user_email}")
 
-                        if not user:
-                            raise HTTPException(
-                                status_code=status.HTTP_400_BAD_REQUEST,
-                                detail=f"No user was found with email {customer.email}",
-                            )
-                        subscription_record = await session.scalar(
-                            select(Subscription).where(Subscription.user_id == user.id)
-                        )
+            user_subscription = await session.scalar(
+                select(Subscription).where(Subscription.user_id == user.id)
+            )
 
-                        if not subscription_record:
-                            raise HTTPException(
-                                status_code=status.HTTP_400_BAD_REQUEST,
-                                detail="No subscription was found",
-                            )
+            if not user_subscription:
+                raise Exception("No subscription record was found")
 
-                        if not payment_details.card:
-                            raise HTTPException(
-                                status_code=status.HTTP_400_BAD_REQUEST,
-                                detail="No card details were found",
-                            )
+            user_subscription.polar_subscription_status = "revoked"
+            user_subscription.credits_left = 0
+            user_subscription.subscription_tier = TierEnum.FREE.value
+            user_subscription.subscription_cancelled_at = make_naive(event.data.canceled_at)
 
-                        if not subscription_record.credit_card:
-                            new_credit_card = CreditCardSchema(
-                                subscription_id=str(subscription_record.id),
-                                payment_method=payment_details.type.value,
-                                card_holder_name=payment_details.card.cardholder_name,
-                                card_type=payment_details.card.type.value,
-                                last_four=payment_details.card.last4,
-                                expiry_month=payment_details.card.expiry_month,
-                                expiry_year=payment_details.card.expiry_year,
-                                country=address.country_code.value,
-                            )
+            user_subscription.polar_product_id = None
+            user_subscription.polar_price_id = None
+            user_subscription.polar_subscription_id = None
+            user_subscription.polar_customer_id = None
 
-                            credit_card_record = CreditCard(
-                                **new_credit_card.model_dump()
-                            )
+            await session.commit()
+            print("Subscription was revoked.")
 
-                            session.add(credit_card_record)
+        return {"status": "success"}
 
-                        else:
-                            subscription_record.credit_card.payment_method = (
-                                payment_details.type.value
-                            )
-                            if payment_details.card.cardholder_name:
-                                subscription_record.credit_card.card_holder_name = (
-                                    payment_details.card.cardholder_name
-                                )
-                            subscription_record.credit_card.card_type = (
-                                payment_details.card.type.value
-                            )
-                            subscription_record.credit_card.last_four = (
-                                payment_details.card.last4
-                            )
-                            subscription_record.credit_card.expiry_month = (
-                                payment_details.card.expiry_month
-                            )
-                            subscription_record.credit_card.expiry_year = (
-                                payment_details.card.expiry_year
-                            )
-                            subscription_record.credit_card.country = (
-                                address.country_code.value
-                            )
-
-                        await session.commit()
-                        pprint("Credit card was set/updated!")
-
-            return {"status": "success"}
-        except Exception as e:
-            print(f"Failed to parse webhook data: {e}")
-            raise e
-            return {"exception": "exception"}
-            # return HTTPException(status_code=400, detail=f"{e}")
-
+    except WebhookVerificationError as e:
+        print(f"Error processing webhook: {e}")
+        return {"status": "error"}
+        # raise HTTPException(
+        #     status_code=status.HTTP_403_FORBIDDEN,
+        #     detail=f"Could not process webhook record: {e}",
+        # )
     except Exception as e:
         await session.rollback()
-        print("Catched an exception:", e)
-        raise e
-        return {"exception": "exception"}
+        print(f"Error processing webhook: {e}")
+        return {"status": "error"}
         # raise HTTPException(
         #     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        #     detail=f"Could process webhook record: {e}",
+        #     detail=f"Could not process webhook record: {e}",
         # )
+  
 
 
 @router.get("/me")
@@ -416,7 +286,6 @@ async def get_my_subscription(
         record = await session.scalar(
             select(Subscription)
             .where(Subscription.user_id == user.id)
-            .options(joinedload(Subscription.credit_card))
         )
 
         if not record:
@@ -444,6 +313,7 @@ async def create_subscription(
             subscription_tier=TierEnum.FREE.value,
             credits_total_purchased=0,
             credits_left=20,
+            pronunciation_tests_left=2,
         )
         subscriptions_record = Subscription(**new_subscription.model_dump())
         session.add(subscriptions_record)
@@ -543,23 +413,35 @@ async def update_subscription(
         if not record:
             raise Exception("No record was found.")
 
-        if update.paddle_product_id:
-            record.paddle_product_id = update.paddle_product_id
+        if update.polar_product_id:
+            record.polar_product_id = update.polar_product_id
 
-        if update.paddle_price_id:
-            record.paddle_price_id = update.paddle_price_id
+        if update.polar_price_id:
+            record.polar_price_id = update.polar_price_id
 
-        if update.paddle_subscription_id:
-            record.paddle_subscription_id = update.paddle_subscription_id
+        if update.polar_subscription_id:
+            record.polar_subscription_id = update.polar_subscription_id
 
-        if update.paddle_subscription_status:
-            record.paddle_subscription_status = update.paddle_subscription_status
+        if update.polar_customer_id:
+            record.polar_customer_id = update.polar_customer_id
+
+        if update.polar_subscription_status:
+            record.polar_subscription_status = update.polar_subscription_status
 
         if update.subscription_created_at:
             record.subscription_created_at = update.subscription_created_at
 
         if update.subscription_next_billed_at:
             record.subscription_next_billed_at = update.subscription_next_billed_at
+        
+        if update.subscription_cancelled_at:
+            record.subscription_cancelled_at = update.subscription_cancelled_at
+        
+        if update.cancellation_reason:
+            record.cancellation_reason = update.cancellation_reason
+        
+        if update.cancellation_comment:
+            record.cancellation_comment = update.cancellation_comment
 
         if update.total_money_spent:
             record.total_money_spent += update.total_money_spent
@@ -567,17 +449,14 @@ async def update_subscription(
         if update.credits_left:
             record.credits_left -= update.credits_left
 
+        if update.pronunciation_tests_left:
+            record.pronunciation_tests_left = update.pronunciation_tests_left
+
         if update.credits_total_purchased:
             record.credits_total_purchased += update.credits_total_purchased
 
         if update.subscription_tier:
             record.subscription_tier = update.subscription_tier
-
-        if update.paddle_cancel_url:
-            record.paddle_cancel_url = update.paddle_cancel_url
-
-        if update.paddle_update_url:
-            record.paddle_cancel_url = update.paddle_update_url
 
         await session.commit()
 

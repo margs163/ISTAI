@@ -96,6 +96,7 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
                     user_id=str(user.id),
                     subscription_tier=TierEnum.FREE.value,
                     credits_total_purchased=0,
+                    pronunciation_tests_left=2, 
                     credits_left=20,
                 )
 

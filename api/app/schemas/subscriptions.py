@@ -62,45 +62,59 @@ class SubscriptionSchema(BaseModel):
     user_id: str | None = Field(default=None)
 
     status: str | None = Field(default=None)
-    paddle_product_id: str | None = Field(default=None)
-    paddle_subscription_id: str | None = Field(default=None)
-    paddle_price_id: str | None = Field(default=None)
+    polar_product_id: str | None = Field(default=None)
+    polar_subscription_id: str | None = Field(default=None)
+    polar_price_id: str | None = Field(default=None)
+    polar_customer_id: str | None = Field(default=None)
 
     subscription_tier: TierEnum | str = Field(default="Free")
-    paddle_subscription_status: str | None = Field(default=None)
+    polar_subscription_status: str | None = Field(default=None)
     subscription_created_at: datetime | None = Field(default=None)
     subscription_next_billed_at: datetime | None = Field(default=None)
+
+    subscription_cancelled_at: datetime | None = Field(default=None)
+    cancellation_reason: str | None = Field(default=None)
+    cancellation_comment: str | None = Field(default=None)
+
     total_money_spent: float = Field(default=0)
 
-    credit_card: CreditCardSchema | None = Field(default=None)
+    # credit_card: CreditCardSchema | None = Field(default=None)
     credits_total_purchased: int = Field(default=0)
     credits_left: int = Field(default=20)
+    pronunciation_tests_left: int = Field(default=2)
 
     billing_interval: str | None = Field(default=None)
     billing_frequency: int | None = Field(default=None)
 
-    paddle_update_url: str | None = Field(default=None)
-    paddle_cancel_url: str | None = Field(default=None)
+    # paddle_update_url: str | None = Field(default=None)
+    # paddle_cancel_url: str | None = Field(default=None)
 
 
 class SubscriptionUpdateSchema(BaseModel):
     status: str | None = Field(default=None)
-    paddle_product_id: str | None = Field(default=None)
-    paddle_subscription_id: str | None = Field(default=None)
-    paddle_price_id: str | None = Field(default=None)
+    polar_product_id: str | None = Field(default=None)
+    polar_subscription_id: str | None = Field(default=None)
+    polar_price_id: str | None = Field(default=None)
+    polar_customer_id: str | None = Field(default=None)
 
     subscription_tier: TierEnum | str | None = Field(default=None)
-    paddle_subscription_status: str | None = Field(default=None)
+    polar_subscription_status: str | None = Field(default=None)
     subscription_created_at: datetime | None = Field(default=None)
     subscription_next_billed_at: datetime | None = Field(default=None)
+
+    subscription_cancelled_at: datetime | None = Field(default=None)
+    cancellation_reason: str | None = Field(default=None)
+    cancellation_comment: str | None = Field(default=None)
+
     total_money_spent: float | None = Field(default=0)
 
-    credit_card: CreditCardSchema | None = Field(default=None)
+    # credit_card: CreditCardSchema | None = Field(default=None)
     credits_total_purchased: int | None = Field(default=0)
     credits_left: int | None = Field(default=None)
+    pronunciation_tests_left: int = Field(default=2)
 
     billing_interval: str | None = Field(default=None)
     billing_frequency: int | None = Field(default=None)
 
-    paddle_update_url: str | None = Field(default=None)
-    paddle_cancel_url: str | None = Field(default=None)
+    # paddle_update_url: str | None = Field(default=None)
+    # paddle_cancel_url: str | None = Field(default=None)

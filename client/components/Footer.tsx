@@ -74,15 +74,21 @@ export default function Footer({ className }: { className?: string }) {
       <hr className="w-full h-[1px] text-gray-200" />
       <div className="flex flex-col gap-6">
         <div className="flex flex-row flex-wrap items-center justify-start gap-6">
-          <Link href={"#"} className="text-gray-700 text-sm font-normal">
+          <Link href={"/privacy"} className="text-gray-700 text-sm font-normal">
             Privacy policy
           </Link>
           <hr className="w-[2px] h-4 text-gray-200 bg-gray-200" />
-          <Link href={"#"} className="text-gray-700 text-sm font-normal">
+          <Link
+            href={"/terms-conditions"}
+            className="text-gray-700 text-sm font-normal"
+          >
             Terms & Conditions
           </Link>
           <hr className="w-[2px] h-4 text-gray-200 bg-gray-200" />
-          <Link href={"#"} className="text-gray-700 text-sm font-normal">
+          <Link
+            href={"/cookie-policy"}
+            className="text-gray-700 text-sm font-normal"
+          >
             Cookies policy
           </Link>
           <hr className="w-[2px] h-4 text-gray-200 bg-gray-200" />

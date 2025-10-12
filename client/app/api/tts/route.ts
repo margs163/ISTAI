@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
 
     const chunks: Buffer[] = [];
     // @ts-expect-error Body object is an iterator
-    for await (const chunk of Body) {
+    for await (const chunk of Body.transformToByteArray()) {
       chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
     }
     const buffer = Buffer.concat(chunks);

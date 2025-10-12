@@ -7,7 +7,7 @@ import token from "@/assets/images/token.svg";
 import { useSubscriptionStore } from "@/lib/subscriptionStore";
 import { getPreciseTimeAgo, getPreciseTimeFuture } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
-import { fetchSubscription } from "@/lib/queries";
+import { fetchSubscription, redirectToCustomerPortal } from "@/lib/queries";
 import UpgradePlan from "./UpgradePlan";
 import { setSubscriptionEmail } from "@/lib/actions";
 import { useUserStore } from "@/lib/userStorage";
@@ -16,7 +16,7 @@ export default function UserBilling() {
   const creditsLeft = useSubscriptionStore((state) => state.credits_left);
   const subscription = useSubscriptionStore((state) => state);
   const email = useUserStore((store) => store.email);
-  const creditCard = useSubscriptionStore((state) => state.credit_card);
+  const customerId = useSubscriptionStore((store) => store.polar_customer_id);
   const nextBillingDate = subscription.subscription_next_billed_at;
   const setSubscription = useSubscriptionStore((state) => state.setSubData);
 
@@ -96,7 +96,7 @@ export default function UserBilling() {
               Your payment methods
             </p>
           </div>
-          {creditCard && nextBillingDate && (
+          {nextBillingDate && (
             <div className="flex flex-row gap-4 items-start p-5 w-full rounded-md border border-blue-200 bg-blue-50">
               <Image
                 src={visa}
@@ -104,14 +104,14 @@ export default function UserBilling() {
                 alt="visa"
               />
               <div className="space-y-1">
-                <h3 className="text-blue-900 font-medium text-sm">
+                {/* <h3 className="text-blue-900 font-medium text-sm">
                   {creditCard.card_type[0].toUpperCase() +
                     creditCard.card_type.slice(1)}{" "}
                   ending in {creditCard.last_four}
                 </h3>
                 <p className="text-blue-800 font-normal text-sm">
                   Expiry {creditCard.expiry_month}/{creditCard.expiry_year}
-                </p>
+                </p> */}
                 <p className="mt-2 text-gray-600 font-normal text-sm">
                   Next billing on{" "}
                   <strong>{new Date(nextBillingDate).toDateString()}</strong>
@@ -122,30 +122,34 @@ export default function UserBilling() {
           {/* <div className="max-w-[320px] lg:max-w-full mt-4">
             <BillingHistory />
             </div> */}
-          <div className="flex flex-row items-center justify-between gap-6 w-full">
-            <Link
-              href={subscription.paddle_cancel_url ?? "#"}
-              className="flex flex-row items-center gap-2 self-end"
-            >
-              <button
-                onClick={async () =>
-                  await setSubscriptionEmail(subscription.id, email)
-                }
-                className="text-gray-600 hover:text-gray-800 active:text-gray-800 transition-colors font-normal text-sm"
+          {customerId && email && (
+            <div className="flex flex-row items-center justify-between gap-6 w-full">
+              <Link href={"#"} className="">
+                <button
+                  onClick={async () =>
+                    await redirectToCustomerPortal(customerId, email)
+                  }
+                  className="text-gray-600 hover:text-gray-800 active:text-gray-800 transition-colors font-normal text-sm"
+                >
+                  Cancel Subscription
+                </button>
+              </Link>
+              <Link
+                href={"#"}
+                className="flex flex-row items-center gap-2 self-end"
               >
-                Cancel Subscription
-              </button>
-            </Link>
-            <Link
-              href={subscription.paddle_update_url ?? "#"}
-              className="flex flex-row items-center gap-2 self-end"
-            >
-              <Plus className="size-4 text-gray-600" />{" "}
-              <p className="text-gray-600 hover:text-gray-800 active:text-gray-800 transition-colors font-normal text-sm">
-                Change payment method
-              </p>
-            </Link>
-          </div>
+                <Plus className="size-4 text-gray-600" />{" "}
+                <button
+                  onClick={async () =>
+                    await redirectToCustomerPortal(customerId, email)
+                  }
+                  className="text-gray-600 hover:text-gray-800 active:text-gray-800 transition-colors font-normal text-sm"
+                >
+                  Change payment method
+                </button>
+              </Link>
+            </div>
+          )}
         </div>
       </div>
     </section>

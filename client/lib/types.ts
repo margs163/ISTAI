@@ -404,24 +404,30 @@ export const SubscriptionSchema = z.object({
   user_id: z.string(),
 
   status: z.string().nullable().optional(),
-  paddle_product_id: z.string().optional().nullable(),
-  paddle_subscription_id: z.string().optional().nullable(),
-  paddle_price_id: z.string().optional().nullable(),
+  polar_product_id: z.string().optional().nullable(),
+  polar_subscription_id: z.string().optional().nullable(),
+  polar_customer_id: z.string().optional().nullable(),
+  polar_price_id: z.string().optional().nullable(),
   subscription_tier: z.enum(["Free", "Starter", "Pro"]),
-  paddle_subscription_status: z.string().optional().nullable(),
+  polar_subscription_status: z.string().optional().nullable(),
   subscription_created_at: z.string().optional().nullable(),
   subscription_next_billed_at: z.string().optional().nullable(),
+
+  subscription_cancelled_at: z.string().optional().nullable(),
+  cancellation_reason: z.string().optional().nullable(),
+  cancellation_comment: z.string().optional().nullable(),
+
   total_money_spent: z.float32(),
 
-  credit_card: CreditCardSchema.optional().nullable(),
+  // credit_card: CreditCardSchema.optional().nullable(),
   credits_total_purchased: z.number(),
   credits_left: z.number(),
 
   billing_interval: z.string().nullable(),
   billing_frequency: z.int().nullable(),
 
-  paddle_update_url: z.string().nullable().optional(),
-  paddle_cancel_url: z.string().nullable().optional(),
+  // paddle_update_url: z.string().nullable().optional(),
+  // paddle_cancel_url: z.string().nullable().optional(),
 });
 
 export const SubscriptionUpdateSchema = z.object({

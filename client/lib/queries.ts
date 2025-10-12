@@ -191,6 +191,41 @@ export async function getWordsPronunciation(words: string[]) {
   }
 }
 
+export async function openCheckoutRequest(
+  productId: string,
+  userEmail: string
+) {
+  const userEmailJSON = encodeURIComponent(JSON.stringify({ userEmail }));
+  try {
+    window.location.href = `http://localhost:3000/api/checkout?products=${productId}&metadata=${userEmailJSON}`;
+  } catch (error) {
+    toast.error("Error Opening Checkout", {
+      description: "Could not open a checkout",
+      action: {
+        label: "Log",
+        onClick: () => console.log(error),
+      },
+    });
+  }
+}
+
+export async function redirectToCustomerPortal(
+  customerId: string,
+  userEmail: string
+) {
+  try {
+    window.location.href = `http://localhost:3000/api/portal?customerId=${customerId}&userEmail=${userEmail}`;
+  } catch (error) {
+    toast("Error Fetching Subscription", {
+      description: "Could not fetch subscription",
+      action: {
+        label: "Log",
+        onClick: () => console.log(error),
+      },
+    });
+  }
+}
+
 export async function checkFeedbackRecord() {
   try {
     const response = await axios.get<{

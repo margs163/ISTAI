@@ -66,6 +66,7 @@ class User(Base, SQLAlchemyBaseUserTableUUID):
     updatedAt: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.now(), nullable=True, onupdate=datetime.now()
     )
+    last_login_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now(), nullable=True)
     subscription: Mapped["Subscription"] = relationship(
         back_populates="user", lazy="joined"
     )
@@ -262,50 +263,61 @@ class Subscription(Base):
     id: Mapped[UUID_ID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
     user: Mapped[User] = relationship(back_populates="subscription")
     user_id: Mapped[UUID_ID] = mapped_column(
-        UUID, ForeignKey("user_table.id"), index=True
+       UUID, ForeignKey("user_table.id"), index=True
     )
 
     status: Mapped[str] = mapped_column(String(50), nullable=True)
-    paddle_product_id: Mapped[str] = mapped_column(String(150), nullable=True)
-    paddle_subscription_id: Mapped[str] = mapped_column(String(150), nullable=True)
-    paddle_price_id: Mapped[str] = mapped_column(String(150), nullable=True)
+    polar_product_id: Mapped[str] = mapped_column(String(150), nullable=True)
+    polar_subscription_id: Mapped[str] = mapped_column(String(150), nullable=True)
+    polar_customer_id: Mapped[str] = mapped_column(String(150), nullable=True)
+    polar_price_id: Mapped[str] = mapped_column(String(150), nullable=True)
 
     subscription_tier: Mapped[str] = mapped_column(
         String(20), nullable=True, default="Free"
     )
-    paddle_subscription_status: Mapped[str] = mapped_column(String(20), nullable=True)
+    polar_subscription_status: Mapped[str] = mapped_column(String(20), nullable=True)
     subscription_created_at: Mapped[datetime] = mapped_column(DateTime, nullable=True)
     subscription_next_billed_at: Mapped[datetime] = mapped_column(
         DateTime, nullable=True
     )
+    subscription_cancelled_at: Mapped[datetime] = mapped_column(
+        DateTime, nullable=True
+    )
+    cancellation_reason: Mapped[str] = mapped_column(
+        Text, nullable=True
+    )
+    cancellation_comment: Mapped[str] = mapped_column(
+        Text, nullable=True
+    )
     total_money_spent: Mapped[float] = mapped_column(Float, default=0, nullable=True)
 
-    credit_card: Mapped["CreditCard"] = relationship(
-        back_populates="subscription", lazy="joined"
-    )
+    # credit_card: Mapped["CreditCard"] = relationship(
+    #     back_populates="subscription", lazy="joined"
+    # )
     credits_total_purchased: Mapped[int] = mapped_column(Integer)
     credits_left: Mapped[int] = mapped_column(Integer)
+    pronunciation_tests_left: Mapped[int] = mapped_column(Integer, default=2, nullable=True)
 
     billing_interval: Mapped[str] = mapped_column(String(20), nullable=True)
     billing_frequency: Mapped[int] = mapped_column(Integer, nullable=True)
-    paddle_update_url: Mapped[str] = mapped_column(String(2000), nullable=True)
-    paddle_cancel_url: Mapped[str] = mapped_column(String(2000), nullable=True)
+    # polar_update_url: Mapped[str] = mapped_column(String(2000), nullable=True)
+    # polar_cancel_url: Mapped[str] = mapped_column(String(2000), nullable=True)
 
 
-class CreditCard(Base):
-    __tablename__ = "credit_card_table"
+# class CreditCard(Base):
+#     __tablename__ = "credit_card_table"
 
-    id: Mapped[UUID_ID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
-    subscription: Mapped[Subscription] = relationship(back_populates="credit_card")
-    subscription_id: Mapped[UUID_ID] = mapped_column(
-        ForeignKey("subscriptions_table.id")
-    )
+#     id: Mapped[UUID_ID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
+#     subscription: Mapped[Subscription] = relationship(back_populates="credit_card")
+#     subscription_id: Mapped[UUID_ID] = mapped_column(
+#         ForeignKey("subscriptions_table.id")
+#     )
 
-    payment_id: Mapped[str] = mapped_column(String(150), nullable=True)
-    payment_method: Mapped[str] = mapped_column(String(64), nullable=False)
-    card_holder_name: Mapped[str | None] = mapped_column(String(150), nullable=True)
-    card_type: Mapped[str] = mapped_column(String(30))
-    last_four: Mapped[str] = mapped_column(String(4), nullable=False)
-    expiry_month: Mapped[int] = mapped_column(Integer)
-    expiry_year: Mapped[int] = mapped_column(Integer)
-    country: Mapped[str] = mapped_column(String(50))
+#     payment_id: Mapped[str] = mapped_column(String(150), nullable=True)
+#     payment_method: Mapped[str] = mapped_column(String(64), nullable=False)
+#     card_holder_name: Mapped[str | None] = mapped_column(String(150), nullable=True)
+#     card_type: Mapped[str] = mapped_column(String(30))
+#     last_four: Mapped[str] = mapped_column(String(4), nullable=False)
+#     expiry_month: Mapped[int] = mapped_column(Integer)
+#     expiry_year: Mapped[int] = mapped_column(Integer)
+#     country: Mapped[str] = mapped_column(String(50))

@@ -44,6 +44,25 @@ export function RegularLegalParagraph({
   );
 }
 
+export function RegularLegalSmallHeader({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <h3
+      className={cn(
+        "[&:not(:first-child)]:mt-6 leading-7 tracking-tight scroll-m-20 font-semibold text-base lg:text-lg text-gray-700",
+        className
+      )}
+    >
+      {children}
+    </h3>
+  );
+}
+
 export function RegularLegalHeader({
   children,
   className,
@@ -73,7 +92,7 @@ export function LegalBullitLi({
   return (
     <li
       className={cn(
-        "text-sm lg:text-base font-normal leading-6 text-gray-700",
+        "text-sm lg:text-base font-normal leading-6 text-gray-600",
         className
       )}
     >
@@ -94,7 +113,7 @@ export function LegalBullitList({
   return (
     <div className={cn("space-y-4")}>
       {description && (
-        <p className="text-sm mt-4 lg:text-base font-normal text-gray-700">
+        <p className="text-sm mt-4 lg:text-base font-normal text-gray-600">
           {description}
         </p>
       )}
