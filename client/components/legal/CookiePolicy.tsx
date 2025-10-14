@@ -15,11 +15,12 @@ export default function CookiePolicy() {
       </MainLegalHeader>
       <section>
         <RegularLegalParagraph>
-          This Cookie Policy explains how FluentFlow LLC ("Company," "we," "us,"
-          and "our") uses cookies and similar technologies to recognize you when
-          you visit our website at https://fluentflow.com ("Website"). It
-          explains what these technologies are and why we use them, as well as
-          your rights to control our use of them.
+          This Cookie Policy explains how FluentFlow (&quot;Company,&quot;
+          &quot;we,&quot; &quot;us,&quot; and &quot;our&quot;) uses cookies and
+          similar technologies to recognize you when you visit our website at
+          https://fluentflow.com (&quot;Website&quot;). It explains what these
+          technologies are and why we use them, as well as your rights to
+          control our use of them.
         </RegularLegalParagraph>
         <RegularLegalParagraph>
           In some cases we may use cookies to collect personal information, or
@@ -36,11 +37,11 @@ export default function CookiePolicy() {
           efficiently, as well as to provide reporting information.
         </RegularLegalParagraph>
         <RegularLegalParagraph>
-          Cookies set by the website owner (in this case, FluentFlow LLC) are
-          called "first-party cookies." Cookies set by parties other than the
-          website owner are called "third-party cookies." Third-party cookies
-          enable third-party features or functionality to be provided on or
-          through the website (e.g., advertising, interactive content, and
+          Cookies set by the website owner (in this case, FluentFlow) are called
+          &quot;first-party cookies.&quot; Cookies set by parties other than the
+          website owner are called &quot;third-party cookies.&quot; Third-party
+          cookies enable third-party features or functionality to be provided on
+          or through the website (e.g., advertising, interactive content, and
           analytics). The parties that set these third-party cookies can
           recognize your computer both when it visits the website in question
           and also when it visits certain other websites.
@@ -51,12 +52,12 @@ export default function CookiePolicy() {
         <RegularLegalParagraph>
           We use first- and third-party cookies for several reasons. Some
           cookies are required for technical reasons in order for our Website to
-          operate, and we refer to these as "essential" or "strictly necessary"
-          cookies. Other cookies also enable us to track and target the
-          interests of our users to enhance the experience on our Online
-          Properties. Third parties serve cookies through our Website for
-          advertising, analytics, and other purposes. This is described in more
-          detail below.
+          operate, and we refer to these as &quot;essential&quot; or
+          &quot;strictly necessary&quot; cookies. Other cookies also enable us
+          to track and target the interests of our users to enhance the
+          experience on our Online Properties. Third parties serve cookies
+          through our Website for advertising, analytics, and other purposes.
+          This is described in more detail below.
         </RegularLegalParagraph>
       </section>
       <section>
@@ -88,7 +89,7 @@ export default function CookiePolicy() {
           How can I control cookies on my browser?
         </RegularLegalHeader>
         <LegalBullitList
-          description={`As the means by which you can refuse cookies through your web browser controls vary from browser to browser, you should visit your browser's help menu for more information. The following is information about how to manage cookies on the most popular browsers:`}
+          description={`As the means by which you can refuse cookies through your web browser controls vary from browser to browser, you should visit your browser&apos;s help menu for more information. The following is information about how to manage cookies on the most popular browsers:`}
         >
           <LegalBullitLi>
             <a
@@ -169,17 +170,18 @@ export default function CookiePolicy() {
         <RegularLegalParagraph>
           Cookies are not the only way to recognize or track visitors to a
           website. We may use other, similar technologies from time to time,
-          like web beacons (sometimes called "tracking pixels" or "clear gifs").
-          These are tiny graphics files that contain a unique identifier that
-          enables us to recognize when someone has visited our Website or opened
-          an email including them. This allows us, for example, to monitor the
-          traffic patterns of users from one page within a website to another,
-          to deliver or communicate with cookies, to understand whether you have
-          come to the website from an online advertisement displayed on a
-          third-party website, to improve site performance, and to measure the
-          success of email marketing campaigns. In many instances, these
-          technologies are reliant on cookies to function properly, and so
-          declining cookies will impair their functioning.
+          like web beacons (sometimes called &quot;tracking pixels&quot; or
+          &quot;clear gifs&quot;). These are tiny graphics files that contain a
+          unique identifier that enables us to recognize when someone has
+          visited our Website or opened an email including them. This allows us,
+          for example, to monitor the traffic patterns of users from one page
+          within a website to another, to deliver or communicate with cookies,
+          to understand whether you have come to the website from an online
+          advertisement displayed on a third-party website, to improve site
+          performance, and to measure the success of email marketing campaigns.
+          In many instances, these technologies are reliant on cookies to
+          function properly, and so declining cookies will impair their
+          functioning.
         </RegularLegalParagraph>
       </section>
       <section>
@@ -187,10 +189,10 @@ export default function CookiePolicy() {
           Do you use Flash cookies or Local Shared Objects?
         </RegularLegalHeader>
         <RegularLegalParagraph>
-          Websites may also use so-called "Flash Cookies" (also known as Local
-          Shared Objects or "LSOs") to, among other things, collect and store
-          information about your use of our services, fraud prevention, and for
-          other site operations.
+          Websites may also use so-called &quot;Flash Cookies&quot; (also known
+          as Local Shared Objects or &quot;LSOs&quot;) to, among other things,
+          collect and store information about your use of our services, fraud
+          prevention, and for other site operations.
         </RegularLegalParagraph>
         <RegularLegalParagraph>
           If you do not want Flash Cookies stored on your computer, you can
@@ -199,11 +201,11 @@ export default function CookiePolicy() {
           Panel. You can also control Flash Cookies by going to the Global
           Storage Settings Panel and following the instructions (which may
           include instructions that explain, for example, how to delete existing
-          Flash Cookies (referred to "information" on the Macromedia site), how
-          to prevent Flash LSOs from being placed on your computer without your
-          being asked, and (for Flash Player 8 and later) how to block Flash
-          Cookies that are not being delivered by the operator of the page you
-          are on at the time).
+          Flash Cookies (referred to &quot;information&quot; on the Macromedia
+          site), how to prevent Flash LSOs from being placed on your computer
+          without your being asked, and (for Flash Player 8 and later) how to
+          block Flash Cookies that are not being delivered by the operator of
+          the page you are on at the time).
         </RegularLegalParagraph>
         <RegularLegalParagraph>
           Please note that setting the Flash Player to restrict or limit
@@ -256,13 +258,13 @@ export default function CookiePolicy() {
           technologies, please contact us at:
         </RegularLegalParagraph>
         <RegularLegalParagraph className="leading-4">
-          FluentFlow LLC
+          FluentFlow
         </RegularLegalParagraph>
         <RegularLegalParagraph className="leading-4">
           Kazakhstan
         </RegularLegalParagraph>
         <RegularLegalParagraph className="leading-4">
-          aldanovdaniyal@gmail.com
+          info@fluentflow.space
         </RegularLegalParagraph>
       </section>
     </div>

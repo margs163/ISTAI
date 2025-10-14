@@ -771,7 +771,7 @@ export async function updateSubscription(updateSchema: SubscriptionUpdateType) {
       }
     );
   } catch (error) {
-    toast("Error Updating Subscription", {
+    toast.error("Error Updating Subscription", {
       description: "Could not update subscription",
       action: {
         label: "Log",

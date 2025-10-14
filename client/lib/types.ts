@@ -445,6 +445,7 @@ export const SubscriptionUpdateSchema = z.object({
   credit_card: CreditCardSchema.optional().nullable(),
   credits_total_purchased: z.number().optional().nullable(),
   credits_left: z.number().optional().nullable(),
+  refund_credits: z.number().optional().nullable(),
   pronunciation_tests_left: z.number().optional().nullable(),
 
   billing_interval: z.string().optional().nullable(),

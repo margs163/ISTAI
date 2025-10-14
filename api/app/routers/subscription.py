@@ -448,6 +448,9 @@ async def update_subscription(
 
         if update.credits_left:
             record.credits_left -= update.credits_left
+        
+        if update.refund_credits:
+            record.credits_left += update.refund_credits
 
         if update.pronunciation_tests_left:
             record.pronunciation_tests_left = update.pronunciation_tests_left

@@ -21,7 +21,6 @@ load_dotenv()
 import uuid
 import os
 
-
 async def s3():
     client = next(get_s3_client())
     bucket_name = os.getenv("S3_BUCKET_NAME")

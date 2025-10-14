@@ -111,6 +111,7 @@ class SubscriptionUpdateSchema(BaseModel):
     # credit_card: CreditCardSchema | None = Field(default=None)
     credits_total_purchased: int | None = Field(default=0)
     credits_left: int | None = Field(default=None)
+    refund_credits: int | None = Field(default=None)
     pronunciation_tests_left: int = Field(default=2)
 
     billing_interval: str | None = Field(default=None)

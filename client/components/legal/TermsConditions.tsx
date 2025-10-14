@@ -18,11 +18,12 @@ export default function TermsConditions() {
           AGREEMENT TO OUR LEGAL TERMS
         </RegularLegalHeader>
         <RegularLegalParagraph>
-          We are FluentFLow LLC ("Company", "we", "us", or "our") a company
-          registered in Kazakhstan. We operate the website
-          https://fluentflow.space (the "Site"), as well as any other related
-          products and services that refer or link to these legal terms (the
-          "Legal Terms") (collectively, the "Services").
+          We are FluentFLow (&quot;Company&quot;, &quot;we&quot;,
+          &quot;us&quot;, or &quot;our&quot;) a company registered in
+          Kazakhstan. We operate the website https://fluentflow.space (the
+          &quot;Site&quot;), as well as any other related products and services
+          that refer or link to these legal terms (the &quot;Legal Terms&quot;)
+          (collectively, the &quot;Services&quot;).
         </RegularLegalParagraph>
         <RegularLegalParagraph>
           An innovative platform designed to enhance IELTS Speaking skills
@@ -32,8 +33,8 @@ export default function TermsConditions() {
         </RegularLegalParagraph>
         <RegularLegalParagraph>
           These Legal Terms constitute a legally binding agreement made between
-          you, whether personally or on behalf of an entity ("you"), and
-          FluentFlow LLC, concerning your access to and use of the Services. You
+          you, whether personally or on behalf of an entity (&quot;you&quot;),
+          and FluentFlow, concerning your access to and use of the Services. You
           agree that by accessing the Services, you have read, understood, and
           agreed to be bound by all of these Legal Terms. IF YOU DO NOT AGREE
           WITH ALL OF THESE LEGAL TERMS, THEN YOU ARE EXPRESSLY PROHIBITED FROM
@@ -44,13 +45,14 @@ export default function TermsConditions() {
           the Services from time to time are hereby expressly incorporated
           herein by reference. We reserve the right, in our sole discretion, to
           make changes or modifications to these Legal Terms from time to time.
-          We will alert you about any changes by updating the "Last updated"
-          date of these Legal Terms, and you waive any right to receive specific
-          notice of each such change. It is your responsibility to periodically
-          review these Legal Terms to stay informed of updates. You will be
-          subject to, and will be deemed to have been made aware of and to have
-          accepted, the changes in any revised Legal Terms by your continued use
-          of the Services after the date such revised Legal Terms are posted.
+          We will alert you about any changes by updating the &quot;Last
+          updated&quot; date of these Legal Terms, and you waive any right to
+          receive specific notice of each such change. It is your responsibility
+          to periodically review these Legal Terms to stay informed of updates.
+          You will be subject to, and will be deemed to have been made aware of
+          and to have accepted, the changes in any revised Legal Terms by your
+          continued use of the Services after the date such revised Legal Terms
+          are posted.
         </RegularLegalParagraph>
         <RegularLegalParagraph>
           Services are intended for users who are at least 13 years of age. All
@@ -217,8 +219,9 @@ export default function TermsConditions() {
           We are the owner or the licensee of all intellectual property rights
           in our Services, including all source code, databases, functionality,
           software, website designs, audio, video, text, photographs, and
-          graphics in the Services (collectively, the "Content"), as well as the
-          trademarks, service marks, and logos contained therein (the "Marks")
+          graphics in the Services (collectively, the &quot;Content&quot;), as
+          well as the trademarks, service marks, and logos contained therein
+          (the &quot;Marks&quot;)
         </RegularLegalParagraph>
         <RegularLegalParagraph>
           Our Content and Marks are protected by copyright and trademark laws
@@ -226,13 +229,13 @@ export default function TermsConditions() {
           laws) and treaties around the world.
         </RegularLegalParagraph>
         <RegularLegalParagraph>
-          The Content and Marks are provided in or through the Services "AS IS"
-          for your personal, non-commercial use only.
+          The Content and Marks are provided in or through the Services &quot;AS
+          IS&quot; for your personal, non-commercial use only.
         </RegularLegalParagraph>
         <RegularLegalSmallHeader>
           Your use of our Services
         </RegularLegalSmallHeader>
-        <LegalBullitList description="Subject to your compliance with these Legal Terms, including the 'PROHIBITED ACTIVITIES' section below, we grant you a non-exclusive, non-transferable, revocable license to:">
+        <LegalBullitList description='Subject to your compliance with these Legal Terms, including the "PROHIBITED ACTIVITIES" section below, we grant you a non-exclusive, non-transferable, revocable license to:'>
           <LegalBullitLi>access the Services; and</LegalBullitLi>
           <LegalBullitLi>
             download or print a copy of any portion of the Content to which you
@@ -372,7 +375,7 @@ export default function TermsConditions() {
           We respect the intellectual property rights of others. If you believe
           that any material available on or through the Services infringes upon
           any copyright you own or control, please immediately refer to the
-          "COPYRIGHT INFRINGEMENTS" section below.
+          &quot;COPYRIGHT INFRINGEMENTS&quot; section below.
         </RegularLegalParagraph>
       </section>
       <section id="representations">
@@ -541,9 +544,10 @@ export default function TermsConditions() {
             Upload or transmit (or attempt to upload or to transmit) any
             material that acts as a passive or active information collection or
             transmission mechanism, including without limitation, clear graphics
-            interchange formats ("gifs"), 1×1 pixels, web bugs, cookies, or
-            other similar devices (sometimes referred to as "spyware" or
-            "passive collection mechanisms" or "pcms").
+            interchange formats (&quot;gifs&quot;), 1x1 pixels, web bugs,
+            cookies, or other similar devices (sometimes referred to as
+            &quot;spyware&quot; or &quot;passive collection mechanisms&quot; or
+            &quot;pcms&quot;).
           </LegalBullitLi>
           <LegalBullitLi>
             Interfere with, disrupt, or create an undue burden on the Services
@@ -558,8 +562,8 @@ export default function TermsConditions() {
             or restrict access to the Services, or any portion of the Services.
           </LegalBullitLi>
           <LegalBullitLi>
-            Copy or adapt the Services' software, including but not limited to
-            Flash, PHP, HTML, JavaScript, or other code.
+            Copy or adapt the Services&apos; software, including but not limited
+            to Flash, PHP, HTML, JavaScript, or other code.
           </LegalBullitLi>
           <LegalBullitLi>
             Except as permitted by applicable law, decipher, decompile,
@@ -599,7 +603,7 @@ export default function TermsConditions() {
       <section id="generated-contributions">
         <RegularLegalHeader>8. USER GENERATED CONTRIBUTIONS</RegularLegalHeader>
         <LegalBullitList
-          description={`The Services may invite you to chat, contribute to, or participate in blogs, message boards, online forums, and other functionality, and may provide you with the opportunity to create, submit, post, display, transmit, perform, publish, distribute, or broadcast content and materials to us or on the Services, including but not limited to text, writings, video, audio, photographs, graphics, comments, suggestions, or personal information or other material (collectively, "Contributions"). Contributions may be viewable by other users of the Services and through third-party websites. As such, any Contributions you transmit may be treated as non-confidential and non-proprietary. When you create or make available any Contributions, you thereby represent and warrant that:`}
+          description={`The Services may invite you to chat, contribute to, or participate in blogs, message boards, online forums, and other functionality, and may provide you with the opportunity to create, submit, post, display, transmit, perform, publish, distribute, or broadcast content and materials to us or on the Services, including but not limited to text, writings, video, audio, photographs, graphics, comments, suggestions, or personal information or other material (collectively, &quot;Contributions&quot;). Contributions may be viewable by other users of the Services and through third-party websites. As such, any Contributions you transmit may be treated as non-confidential and non-proprietary. When you create or make available any Contributions, you thereby represent and warrant that:`}
         >
           <LegalBullitLi>
             The creation, distribution, transmission, public display, or
@@ -756,13 +760,13 @@ export default function TermsConditions() {
         </RegularLegalHeader>
         <RegularLegalParagraph>
           The Services may contain (or you may be sent via the Site) links to
-          other websites ("Third-Party Websites") as well as articles,
+          other websites (&quot;Third-Party Websites&quot;) as well as articles,
           photographs, text, graphics, pictures, designs, music, sound, video,
           information, applications, software, and other content or items
-          belonging to or originating from third parties ("Third-Party
-          Content"). Such Third-Party Websites and Third-Party Content are not
-          investigated, monitored, or checked for accuracy, appropriateness, or
-          completeness by us, and we are not responsible for any Third-Party
+          belonging to or originating from third parties (&quot;Third-Party
+          Content&quot;). Such Third-Party Websites and Third-Party Content are
+          not investigated, monitored, or checked for accuracy, appropriateness,
+          or completeness by us, and we are not responsible for any Third-Party
           Websites accessed through the Services or any Third-Party Content
           posted on, available through, or installed from the Services,
           including the content, accuracy, offensiveness, opinions, reliability,
@@ -828,12 +832,12 @@ export default function TermsConditions() {
           We respect the intellectual property rights of others. If you believe
           that any material available on or through the Services infringes upon
           any copyright you own or control, please immediately notify us using
-          the contact information provided below (a "Notification"). A copy of
-          your Notification will be sent to the person who posted or stored the
-          material addressed in the Notification. Please be advised that
-          pursuant to applicable law you may be held liable for damages if you
-          make material misrepresentations in a Notification. Thus, if you are
-          not sure that material located on or linked to by the Services
+          the contact information provided below (a &quot;Notification&quot;). A
+          copy of your Notification will be sent to the person who posted or
+          stored the material addressed in the Notification. Please be advised
+          that pursuant to applicable law you may be held liable for damages if
+          you make material misrepresentations in a Notification. Thus, if you
+          are not sure that material located on or linked to by the Services
           infringes your copyright, you should consider first contacting an
           attorney.
         </RegularLegalParagraph>
@@ -894,9 +898,9 @@ export default function TermsConditions() {
         <RegularLegalHeader>17. GOVERNING LAW</RegularLegalHeader>
         <RegularLegalParagraph>
           These Legal Terms shall be governed by and defined following the laws
-          of Kazakhstan. FluentFlow LLC and yourself irrevocably consent that
-          the courts of Kazakhstan shall have exclusive jurisdiction to resolve
-          any dispute which may arise in connection with these Legal Terms.
+          of Kazakhstan. FluentFlow and yourself irrevocably consent that the
+          courts of Kazakhstan shall have exclusive jurisdiction to resolve any
+          dispute which may arise in connection with these Legal Terms.
         </RegularLegalParagraph>
       </section>
       <section id="corrections">
@@ -919,14 +923,14 @@ export default function TermsConditions() {
           INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF
           MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND
           NON-INFRINGEMENT. WE MAKE NO WARRANTIES OR REPRESENTATIONS ABOUT THE
-          ACCURACY OR COMPLETENESS OF THE SERVICES' CONTENT OR THE CONTENT OF
-          ANY WEBSITES OR MOBILE APPLICATIONS LINKED TO THE SERVICES AND WE WILL
-          ASSUME NO LIABILITY OR RESPONSIBILITY FOR ANY (1) ERRORS, MISTAKES, OR
-          INACCURACIES OF CONTENT AND MATERIALS, (2) PERSONAL INJURY OR PROPERTY
-          DAMAGE, OF ANY NATURE WHATSOEVER, RESULTING FROM YOUR ACCESS TO AND
-          USE OF THE SERVICES, (3) ANY UNAUTHORIZED ACCESS TO OR USE OF OUR
-          SECURE SERVERS AND/OR ANY AND ALL PERSONAL INFORMATION AND/OR
-          FINANCIAL INFORMATION STORED THEREIN, (4) ANY INTERRUPTION OR
+          ACCURACY OR COMPLETENESS OF THE SERVICES&apos; CONTENT OR THE CONTENT
+          OF ANY WEBSITES OR MOBILE APPLICATIONS LINKED TO THE SERVICES AND WE
+          WILL ASSUME NO LIABILITY OR RESPONSIBILITY FOR ANY (1) ERRORS,
+          MISTAKES, OR INACCURACIES OF CONTENT AND MATERIALS, (2) PERSONAL
+          INJURY OR PROPERTY DAMAGE, OF ANY NATURE WHATSOEVER, RESULTING FROM
+          YOUR ACCESS TO AND USE OF THE SERVICES, (3) ANY UNAUTHORIZED ACCESS TO
+          OR USE OF OUR SECURE SERVERS AND/OR ANY AND ALL PERSONAL INFORMATION
+          AND/OR FINANCIAL INFORMATION STORED THEREIN, (4) ANY INTERRUPTION OR
           CESSATION OF TRANSMISSION TO OR FROM THE SERVICES, (5) ANY BUGS,
           VIRUSES, TROJAN HORSES, OR THE LIKE WHICH MAY BE TRANSMITTED TO OR
           THROUGH THE SERVICES BY ANY THIRD PARTY, AND/OR (6) ANY ERRORS OR
@@ -1053,13 +1057,13 @@ export default function TermsConditions() {
           at:
         </RegularLegalParagraph>
         <RegularLegalParagraph className="leading-4">
-          FluentFlow LLC
+          FluentFlow
         </RegularLegalParagraph>
         <RegularLegalParagraph className="leading-4">
           Kazakhstan
         </RegularLegalParagraph>
         <RegularLegalParagraph className="leading-4">
-          aldanovdaniyal@gmail.com
+          info@fluentflow.space
         </RegularLegalParagraph>
       </section>
     </div>

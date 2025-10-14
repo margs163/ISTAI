@@ -4,7 +4,7 @@ import React from "react";
 export default function Advantages() {
   return (
     <section
-      id="advatnages"
+      id="advantages"
       className=" w-full flex flex-col items-center justify-center p-8 lg:gap-20 lg:p-20 max-w-[1400px] mx-auto"
     >
       <h1 className="font-bold text-3xl lg:text-5xl text-gray-800 text-center leading-[1.3]">

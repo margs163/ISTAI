@@ -1,7 +1,6 @@
 "use client";
 import PlansPricing from "@/components/home/PlansPricing";
 import NavBar from "@/components/NavBar";
-import { setTransactionEmail } from "@/lib/actions";
 import { openCheckoutRequest, requestTransactionCreation } from "@/lib/queries";
 import { useUserStore } from "@/lib/userStorage";
 import { initializePaddle, Paddle } from "@paddle/paddle-js";

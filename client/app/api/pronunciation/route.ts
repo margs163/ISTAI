@@ -40,7 +40,9 @@ export async function GET(request: NextRequest) {
         audioURLs.push({ word, url });
       } catch (error) {
         if (
+          // @ts-expect-error Body object is an iterator
           error.name === "NoSuchKey" ||
+          // @ts-expect-error Body object is an iterator
           error.$metadata?.httpStatusCode === 404
         ) {
           console.log(`File not found in S3: ${fileKey}, generating new audio`);
@@ -83,6 +85,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ urls: audioURLs }, { status: 200 });
   } catch (error) {
     console.error("Error in TTS endpoint:", error);
+    // @ts-expect-error Body object is an iterator
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

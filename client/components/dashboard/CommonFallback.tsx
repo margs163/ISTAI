@@ -30,7 +30,7 @@ export default function CommonMistakesFallback({
         </p>
         <NewTest>
           <MainButton
-            className={"ml-0 mt-4 lg:mt-8 lg:text-sm lg:px-6 lg:py-2.5"}
+            className={"ml-0 mt-4 lg:mt-8 lg:text-sm lg:px-5 lg:py-2.5"}
           >
             <span className="text-xs font-medium font-geist">
               Take your First Test

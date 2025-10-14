@@ -63,7 +63,7 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
     verification_token_secret = SECRET
 
     async def on_after_register(self, user: User, request: Optional[Request] = None):
-        html = "<p>Hi, you have successfully registered in <strong>AIELTSTalk!</strong> Visit the dashboard to learn more.</p>"
+        html = "<p>Hi, you have successfully registered in <strong>FluentFlow!</strong> Visit the dashboard to learn more.</p>"
 
         message = MessageSchema(
             subject="Successful Registration in AIELTSTalk",
@@ -101,7 +101,7 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
                 )
 
                 hello_message = (
-                    "Hello, welcome to AIELTSTalk! You have successfully registered."
+                    "Hello, welcome to FluentFlow! You have successfully registered."
                 )
 
                 new_message = NotificationsSchema(
@@ -174,7 +174,7 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
                 </html>"""
 
         message = MessageSchema(
-            subject="Account Verification in AIELTSTalk",
+            subject="Account Verification in FluentFlow",
             recipients=[user.email],
             body=html,
             subtype=MessageType.html,
@@ -226,8 +226,6 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
 
                 print("Last login is set!", user_record.last_login_at)
                 
-                
-
         # if response is not None:
         #     response.status_code = 307
         #     response.headers["Location"] = "http://localhost:3000/dashboard"

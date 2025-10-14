@@ -35,13 +35,6 @@ SECRET = os.getenv("SECRET")
 if not SECRET:
     raise Exception("Google OAuth Secret empty")
 
-seqlog.log_to_seq(
-    server_url="http://localhost:5341/",
-    level=logging.INFO,
-    batch_size=10,
-    auto_flush_timeout=10,
-)
-
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):

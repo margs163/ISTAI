@@ -54,18 +54,18 @@ export default function Footer({ className }: { className?: string }) {
           <div className="flex flex-col items-start justify-start gap-6">
             <div className="space-y-3">
               <h3 className="uppercase font-semibold text-base lg:text-lg text-gray-800">
-                PHONE:
+                SUPPORT EMAIL:
               </h3>
               <p className="text-sm font-normal lg:text-base text-gray-600">
-                +7 705 676 4416
+                info@fluentflow.space
               </p>
             </div>
             <div className="space-y-3">
               <h3 className="uppercase font-semibold text-base lg:text-lg text-gray-800">
-                EMAIL:
+                BUSINESS EMAIL:
               </h3>
               <p className="text-sm font-normal lg:text-base text-gray-600">
-                daniyal@istai.com
+                info@fluentflow.space
               </p>
             </div>
           </div>

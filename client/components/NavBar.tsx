@@ -55,7 +55,7 @@ export default function NavBar() {
   return (
     <header
       className={cn(
-        "w-full lg:flex lg:flex-row lg:justify-between lg:items-center lg:px-20 lg:py-5 z-80 transition-colors duration-300",
+        "w-full lg:flex lg:flex-row lg:justify-between lg:items-center lg:px-20 lg:py-5 z-80 transition-colors duration-300 h-full",
         menuPressed && "bg-white fixed top-0 left-0",
         scrolled && "bg-white sticky top-0"
       )}
