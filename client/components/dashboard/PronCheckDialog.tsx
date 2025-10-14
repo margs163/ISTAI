@@ -24,6 +24,7 @@ import { cn } from "@/lib/utils";
 import Loading from "@/app/(auth)/login/loading";
 import { PronunciationTestType } from "@/lib/types";
 import PronCheckResults from "./PronCheckResults";
+import { useSubscriptionStore } from "@/lib/subscriptionStore";
 
 export default function PronCheckDialog({
   dialogOpen,
@@ -46,6 +47,9 @@ export default function PronCheckDialog({
   const [testResults, setTestResults] = useState<
     PronunciationTestType | undefined
   >();
+  const pronunciationChecks = useSubscriptionStore(
+    (state) => state.pronunciation_tests_left
+  );
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["reading-card"],
@@ -206,6 +210,7 @@ export default function PronCheckDialog({
     const results = await mutateAsync({
       audioPath: readingAudioPath,
       readingCard: data,
+      pronunciationChecks: pronunciationChecks,
     });
     setReadingAudioPath("");
     if (!results) {

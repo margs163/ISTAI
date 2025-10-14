@@ -1,4 +1,4 @@
-import { Gem, HatGlasses, TriangleAlert } from "lucide-react";
+import { Crown, Gem, HatGlasses, TriangleAlert } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 
@@ -12,11 +12,15 @@ export default function UpgradePro({
       <div className="border border-gray-200 p-3 rounded-md bg-gray-50 flex flex-row gap-2 items-center justify-start">
         {plan === "Free" ? (
           <TriangleAlert className="fill-yellow-500 text-gray-50 size-4.5" />
+        ) : plan === "Starter" ? (
+          <Crown className="text-blue-600 size-4.5" />
         ) : (
-          <Gem className="text-indigo-600 size-4.5" />
+          <Gem className="text-purple-600 size-4.5" />
         )}
         {plan === "Free" ? (
           <p className="text-gray-600 text-sm">Free Trial</p>
+        ) : plan === "Starter" ? (
+          <p className="text-gray-600 text-sm">Starter Member</p>
         ) : (
           <p className="text-gray-600 text-sm">Pro Member</p>
         )}

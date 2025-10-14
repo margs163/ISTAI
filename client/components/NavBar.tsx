@@ -13,7 +13,7 @@ import { useSubscriptionStore } from "@/lib/subscriptionStore";
 import { useUserStore } from "@/lib/userStorage";
 import { useAvatarStore } from "@/lib/avatarStore";
 import { useQuery } from "@tanstack/react-query";
-import { fetchAvatar } from "@/lib/queries";
+import { fetchAvatar, fetchUser } from "@/lib/queries";
 
 export default function NavBar() {
   const [menuPressed, setMenuPressed] = useState(false);
@@ -27,6 +27,7 @@ export default function NavBar() {
   const avatarPath = useUserStore((state) => state.avatar_path);
   const setAvatarUrl = useAvatarStore((state) => state.setUrl);
   const avatarUrl = useAvatarStore((state) => state.url);
+  const setUserData = useUserStore((state) => state.setUserData);
 
   console.log(userEmail);
 

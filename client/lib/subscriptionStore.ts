@@ -26,6 +26,7 @@ export const useSubscriptionStore = create<SubscriptionStoreType>()(
       total_money_spent: 0,
       credits_total_purchased: 0,
       credits_left: 0,
+      pronunciation_tests_left: 0,
       billing_interval: null,
       billing_frequency: null,
       setSubData: (data) => set({ ...data }),

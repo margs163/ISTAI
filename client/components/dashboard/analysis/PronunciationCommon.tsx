@@ -109,7 +109,7 @@ export default function PronunciationCommon() {
         </h3>
       </header>
       {!pronunciationCommonMistake ? (
-        <CommonMistakesFallback />
+        <CommonMistakesFallback order={2} />
       ) : (
         <div className="flex flex-col gap-6">
           <main className="space-y-4">

@@ -2,7 +2,7 @@ import { setCustomerEmail } from "@/lib/actions";
 import { CustomerPortal } from "@polar-sh/nextjs";
 import { NextRequest } from "next/server";
 
-const access_token = process.env.POLAR_ACCESS_TOKEN;
+const access_token = process.env.POLAR_ACCESS_TOKEN_TEST;
 
 if (!access_token) {
   throw new Error("POLAR_ACCESS_TOKEN is not defined");

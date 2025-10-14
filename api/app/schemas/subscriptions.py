@@ -40,7 +40,7 @@ class CardTypeEnum(StrEnum):
 class TierEnum(StrEnum):
     FREE = "Free"
     STARTER = "Starter"
-    PRO = "PRO"
+    PRO = "Pro"
 
 
 class CreditCardSchema(BaseModel):

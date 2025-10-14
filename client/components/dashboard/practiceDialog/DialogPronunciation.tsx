@@ -73,7 +73,7 @@ export default function DialogPronunciationIssues({
   const wordsTTS = useWordsTTSStore((state) => state.urls);
   return (
     <section className="w-full lg:col-span-2">
-      <div className="p-6 lg:p-8 border border-gray-200 rounded-lg bg-white flex flex-col gap-4 shadow-none">
+      <div className="p-6 lg:p-8 border border-gray-200 rounded-lg bg-white flex flex-col gap-4">
         <header className="flex flex-row items-center gap-2">
           <Mic className="size-6 text-indigo-600" />
           <h3 className="font-semibold lg:text-lg text-gray-800 text-lg">

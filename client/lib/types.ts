@@ -422,6 +422,7 @@ export const SubscriptionSchema = z.object({
   // credit_card: CreditCardSchema.optional().nullable(),
   credits_total_purchased: z.number(),
   credits_left: z.number(),
+  pronunciation_tests_left: z.number(),
 
   billing_interval: z.string().nullable(),
   billing_frequency: z.int().nullable(),
@@ -435,18 +436,19 @@ export const SubscriptionUpdateSchema = z.object({
   paddle_product_id: z.string().optional().nullable(),
   paddle_subscription_id: z.string().optional().nullable(),
   paddle_price_id: z.string().optional().nullable(),
-  subscription_tier: z.enum(["Free", "Starter", "Pro"]),
+  subscription_tier: z.enum(["Free", "Starter", "Pro"]).optional().nullable(),
   paddle_subscription_status: z.string().optional().nullable(),
   subscription_created_at: z.string().optional().nullable(),
   subscription_next_billed_at: z.string().optional().nullable(),
-  total_money_spent: z.float32(),
+  total_money_spent: z.float32().optional().nullable(),
 
   credit_card: CreditCardSchema.optional().nullable(),
-  credits_total_purchased: z.number(),
-  credits_left: z.number(),
+  credits_total_purchased: z.number().optional().nullable(),
+  credits_left: z.number().optional().nullable(),
+  pronunciation_tests_left: z.number().optional().nullable(),
 
-  billing_interval: z.string().nullable(),
-  billing_frequency: z.int().nullable(),
+  billing_interval: z.string().optional().nullable(),
+  billing_frequency: z.int().optional().nullable(),
 });
 
 export const NotificationSchema = z.object({
@@ -477,6 +479,7 @@ export const UserSchema = z.object({
   avatar_path: z.string().optional().nullable(),
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
+  last_login_at: z.coerce.date(),
   subscription: SubscriptionSchema.optional(),
   practice_tests: z.array(PracticeTestSchema).optional(),
   analytics: AnalyticsSchema.optional(),

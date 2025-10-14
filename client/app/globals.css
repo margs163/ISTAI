@@ -21,6 +21,16 @@
   backdrop-filter: brightness(125%);
 }
 
+.hide-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.hide-scroll {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
 .link-legal {
   @apply text-indigo-600 uppercase font-medium visited:text-indigo-600 active:text-indigo-700 hover:text-indigo-700 text-sm;
 }

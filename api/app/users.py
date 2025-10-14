@@ -195,6 +195,9 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
                 analytic = await session.scalar(
                     select(Analytics).where(Analytics.user_id == user.id)
                 )
+                user_record = await session.scalar(select(User).where(User.id == user.id))
+                sub_record = await session.scalar(select(Subscription).where(Subscription.user_id == user.id))
+
                 tests = await session.scalars(
                     select(PracticeTest)
                     .where(PracticeTest.user_id == user.id)
@@ -203,11 +206,27 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
                 result = tests.unique()
                 result = result.all()
 
+
                 if result and analytic:
                     last = result[0]
                     print("LAST DATE:", last.test_date)
                     if datetime.now() - last.test_date > timedelta(days=1):
                         analytic.streak_days = 0
+
+                if user_record.last_login_at is not None and datetime.now() - user_record.last_login_at > timedelta(days=1):
+                    if sub_record.subscription_tier == TierEnum.STARTER.value:
+                        sub_record.pronunciation_tests_left = 6
+                    elif sub_record.subscription_tier == TierEnum.PRO.value:
+                        sub_record.pronunciation_tests_left = 10
+                    else:
+                        sub_record.pronunciation_tests_left = 2
+
+                user_record.last_login_at = datetime.now()
+                await session.commit()
+
+                print("Last login is set!", user_record.last_login_at)
+                
+                
 
         # if response is not None:
         #     response.status_code = 307

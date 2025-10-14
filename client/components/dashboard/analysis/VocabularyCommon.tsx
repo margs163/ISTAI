@@ -104,7 +104,7 @@ export default function VocabularyCommon() {
         </h3>
       </header>
       {!vocabularyCommonMistakes ? (
-        <CommonMistakesFallback />
+        <CommonMistakesFallback order={3} />
       ) : (
         <div className="flex flex-col gap-6">
           <main className="space-y-4">

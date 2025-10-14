@@ -331,9 +331,11 @@ export async function sendReadingCardSpeech(
 export async function PostPronunciationTest({
   audioPath,
   readingCard,
+  pronunciationChecks,
 }: {
   audioPath: string;
   readingCard: ReadingCardType;
+  pronunciationChecks: number;
 }) {
   try {
     const response = await axios.post<{ data: PronunciationTestType }>(
@@ -352,6 +354,10 @@ export async function PostPronunciationTest({
     if (validated.error) {
       throw validated.error;
     }
+
+    await updateSubscription({
+      pronunciation_tests_left: pronunciationChecks - 1,
+    });
 
     return validated.data;
   } catch (error) {

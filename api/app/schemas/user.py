@@ -12,7 +12,7 @@ class UserRead(schemas.BaseUser[uuid.UUID]):
     last_name: str
     updatedAt: datetime.datetime
     createdAt: datetime.datetime
-    last_login_at: datetime.datetime
+    last_login_at: datetime.datetime | None
     avatar_path: str | None
 
 

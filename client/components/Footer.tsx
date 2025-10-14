@@ -6,7 +6,7 @@ export default function Footer({ className }: { className?: string }) {
   return (
     <footer
       className={cn(
-        "flex flex-col gap-6 p-8 lg:px-20 xl:px-36 lg:gap-12 pt-0 font-mont w-full",
+        "flex flex-col gap-6 p-8 lg:px-20 xl:px-32 lg:gap-12 pt-0 font-mont w-full",
         className
       )}
     >

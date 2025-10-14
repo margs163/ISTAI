@@ -100,17 +100,16 @@ export default function AppSidebar() {
   const firstName = useUserStore((state) => state.firstName);
   const lastName = useUserStore((state) => state.lastName);
 
-  const subTier = useSubscriptionStore((state) => state.subscription_tier);
-
   const subscription_tier = useSubscriptionStore(
     (state) => state.subscription_tier
   );
-
+  const resetUserData = useUserStore((state) => state.resetUserData);
   const avatarUrl = useAvatarStore((state) => state.url);
 
   const handleLogout = useCallback(async () => {
     const loggedOut = await logOutUser();
     if (loggedOut) {
+      resetUserData();
       router.replace("/");
     }
   }, [router]);
@@ -184,7 +183,7 @@ export default function AppSidebar() {
             );
           })}
         </SidebarMenu>
-        <UpgradePro plan={subTier} />
+        <UpgradePro plan={subscription_tier} />
         <DropdownMenu>
           <DropdownMenuTrigger
             asChild

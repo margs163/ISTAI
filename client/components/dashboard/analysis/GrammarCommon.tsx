@@ -110,7 +110,7 @@ export default function GrammarCommon() {
         </h3>
       </header>
       {!grammarCommonMistakes ? (
-        <CommonMistakesFallback />
+        <CommonMistakesFallback order={1} />
       ) : (
         <div className="flex flex-col gap-6">
           <main className="space-y-4">
