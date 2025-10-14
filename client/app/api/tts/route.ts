@@ -31,10 +31,10 @@ export async function GET(request: NextRequest) {
     if (!Body) {
       return NextResponse.json({ error: "File not found" }, { status: 404 });
     }
+    // const arrayBody = await Body?.transformToByteArray();
 
     const chunks: Buffer[] = [];
-    // @ts-expect-error Body object is an iterator
-    for await (const chunk of Body) {
+    for await (const chunk of Body as AsyncIterable<Uint8Array>) {
       chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
     }
     const buffer = Buffer.concat(chunks);

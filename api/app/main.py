@@ -4,7 +4,6 @@ import os
 from fastapi import FastAPI, Request
 from dotenv import load_dotenv
 from fastapi.middleware.cors import CORSMiddleware
-import seqlog
 
 from .lib.auth_db import create_db_and_tables
 from .routers.email import router as email_router
@@ -34,14 +33,6 @@ load_dotenv()
 SECRET = os.getenv("SECRET")
 if not SECRET:
     raise Exception("Google OAuth Secret empty")
-
-seqlog.log_to_seq(
-    server_url="http://localhost:5341/",
-    level=logging.INFO,
-    batch_size=10,
-    auto_flush_timeout=10,
-)
-
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):

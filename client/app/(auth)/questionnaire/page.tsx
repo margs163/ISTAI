@@ -19,14 +19,16 @@ const questions = [
   },
   {
     title:
-      "Have you ever passed an IELTS Speaking exam? If so, what was your Speaking score?",
+    "Have you ever passed an IELTS Speaking exam? If so, what was your Speaking score?",
   },
   {
     title: "What is your role?",
   },
 ];
 
-export default function page() {
+export default function Page() {
+  useEffect(() => mutationCreate.mutate(), []);
+
   const {
     register,
     handleSubmit,
@@ -37,6 +39,7 @@ export default function page() {
   } = useForm<QuestionnaireFormType>({
     resolver: zodResolver(QuestionnaireFormSchema),
   });
+
   const [currentStage, setCurrentStage] = useState(0);
   const router = useRouter();
   const [passed, setPassed] = useState(true);
@@ -74,7 +77,6 @@ export default function page() {
 
   if (isLoading) return <LoadingUI />;
 
-  useEffect(() => mutationCreate.mutate(), []);
 
   return (
     <div className="flex flex-col p-4 gap-3 font-geist">
@@ -247,7 +249,7 @@ export default function page() {
                 className="rounded-2xl"
               />
               <label htmlFor="no" className="text-sm font-medium text-gray-800">
-                No, I haven't
+                No, I haven&apos;t
               </label>
             </div>
           </div>

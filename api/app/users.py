@@ -208,9 +208,9 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
                     if datetime.now() - last.test_date > timedelta(days=1):
                         analytic.streak_days = 0
 
-        # if response is not None:
-        #     response.status_code = 307
-        #     response.headers["Location"] = "http://localhost:3000/dashboard"
+        if response is not None:
+            response.status_code = 307
+            response.headers["Location"] = "https://fluentflow.space/dashboard"
 
 
 cookie_transport = CookieTransport(

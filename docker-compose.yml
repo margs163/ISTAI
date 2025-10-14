@@ -15,7 +15,7 @@ services:
     depends_on:
       - app
       - frontend
-      - kv
+      - redis
     networks:
       - app-network
 
@@ -65,9 +65,7 @@ services:
     command: >
       sh -c "
         echo 'Waiting for database...' &&
-        alembic revision --autogenerate &&
-        alembic upgrade head &&
-        uv run -m app.lib.test_agents &&
+        uv run -m upgrade head &&
         uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
       "
 
