@@ -1,3 +1,4 @@
+"use client";
 import { cn } from "@/lib/utils";
 import { type ClassValue } from "clsx";
 import React, { ButtonHTMLAttributes, forwardRef } from "react";

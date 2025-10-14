@@ -63,7 +63,7 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
     verification_token_secret = SECRET
 
     async def on_after_register(self, user: User, request: Optional[Request] = None):
-        html = "<p>Hi, you have successfully registered in <strong>AIELTSTalk!</strong> Visit the dashboard to learn more.</p>"
+        html = "<p>Hi, you have successfully registered in <strong>FluentFlow!</strong> Visit the dashboard to learn more.</p>"
 
         message = MessageSchema(
             subject="Successful Registration in AIELTSTalk",
@@ -96,11 +96,12 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
                     user_id=str(user.id),
                     subscription_tier=TierEnum.FREE.value,
                     credits_total_purchased=0,
+                    pronunciation_tests_left=2, 
                     credits_left=20,
                 )
 
                 hello_message = (
-                    "Hello, welcome to AIELTSTalk! You have successfully registered."
+                    "Hello, welcome to FluentFlow! You have successfully registered."
                 )
 
                 new_message = NotificationsSchema(
@@ -173,7 +174,7 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
                 </html>"""
 
         message = MessageSchema(
-            subject="Account Verification in AIELTSTalk",
+            subject="Account Verification in FluentFlow",
             recipients=[user.email],
             body=html,
             subtype=MessageType.html,
@@ -194,6 +195,9 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
                 analytic = await session.scalar(
                     select(Analytics).where(Analytics.user_id == user.id)
                 )
+                user_record = await session.scalar(select(User).where(User.id == user.id))
+                sub_record = await session.scalar(select(Subscription).where(Subscription.user_id == user.id))
+
                 tests = await session.scalars(
                     select(PracticeTest)
                     .where(PracticeTest.user_id == user.id)
@@ -202,15 +206,29 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
                 result = tests.unique()
                 result = result.all()
 
+
                 if result and analytic:
                     last = result[0]
                     print("LAST DATE:", last.test_date)
                     if datetime.now() - last.test_date > timedelta(days=1):
                         analytic.streak_days = 0
 
-        if response is not None:
-            response.status_code = 307
-            response.headers["Location"] = "https://fluentflow.space/dashboard"
+                if user_record.last_login_at is not None and datetime.now() - user_record.last_login_at > timedelta(days=1):
+                    if sub_record.subscription_tier == TierEnum.STARTER.value:
+                        sub_record.pronunciation_tests_left = 6
+                    elif sub_record.subscription_tier == TierEnum.PRO.value:
+                        sub_record.pronunciation_tests_left = 10
+                    else:
+                        sub_record.pronunciation_tests_left = 2
+
+                user_record.last_login_at = datetime.now()
+                await session.commit()
+
+                print("Last login is set!", user_record.last_login_at)
+                
+        # if response is not None:
+        #     response.status_code = 307
+        #     response.headers["Location"] = "http://localhost:3000/dashboard"
 
 
 cookie_transport = CookieTransport(

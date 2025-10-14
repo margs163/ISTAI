@@ -13,6 +13,7 @@ export type UserData = {
   avatar_path: string | undefined;
   updatedAt?: Date;
   createdAt?: Date;
+  last_login_at?: Date;
 };
 
 export type UserDataServer = {
@@ -26,11 +27,13 @@ export type UserDataServer = {
   avatar_path: string | undefined;
   updatedAt: Date;
   createdAt: Date;
+  last_login_at: Date;
 };
 
 interface UserStoreType extends UserData {
   setUserData: (data: UserData) => void;
   setAvatarPath: (path: string) => void;
+  resetUserData: () => void;
 }
 
 interface AnalyticsStoreType extends Omit<AnalyticsType, "user_id"> {
@@ -50,8 +53,23 @@ export const useUserStore = create<UserStoreType>()(
       avatar_path: "",
       updatedAt: undefined,
       createdAt: undefined,
+      last_login_at: undefined,
       setUserData: (data: UserData) => set({ ...data }),
       setAvatarPath: (path: string) => set({ avatar_path: path }),
+      resetUserData: () =>
+        set({
+          id: "",
+          email: "",
+          isActive: false,
+          isSuperuser: false,
+          isVerified: false,
+          firstName: "",
+          lastName: "",
+          avatar_path: "",
+          updatedAt: undefined,
+          createdAt: undefined,
+          last_login_at: undefined,
+        }),
     }),
     {
       name: "user-storage",

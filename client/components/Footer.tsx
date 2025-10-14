@@ -6,7 +6,7 @@ export default function Footer({ className }: { className?: string }) {
   return (
     <footer
       className={cn(
-        "flex flex-col gap-6 p-8 lg:px-20 xl:px-36 lg:gap-12 pt-0 font-mont w-full",
+        "flex flex-col gap-6 p-8 lg:px-20 xl:px-32 lg:gap-12 pt-0 font-mont w-full",
         className
       )}
     >
@@ -54,18 +54,18 @@ export default function Footer({ className }: { className?: string }) {
           <div className="flex flex-col items-start justify-start gap-6">
             <div className="space-y-3">
               <h3 className="uppercase font-semibold text-base lg:text-lg text-gray-800">
-                PHONE:
+                SUPPORT EMAIL:
               </h3>
               <p className="text-sm font-normal lg:text-base text-gray-600">
-                +7 705 676 4416
+                info@fluentflow.space
               </p>
             </div>
             <div className="space-y-3">
               <h3 className="uppercase font-semibold text-base lg:text-lg text-gray-800">
-                EMAIL:
+                BUSINESS EMAIL:
               </h3>
               <p className="text-sm font-normal lg:text-base text-gray-600">
-                daniyal@istai.com
+                info@fluentflow.space
               </p>
             </div>
           </div>
@@ -74,15 +74,21 @@ export default function Footer({ className }: { className?: string }) {
       <hr className="w-full h-[1px] text-gray-200" />
       <div className="flex flex-col gap-6">
         <div className="flex flex-row flex-wrap items-center justify-start gap-6">
-          <Link href={"#"} className="text-gray-700 text-sm font-normal">
+          <Link href={"/privacy"} className="text-gray-700 text-sm font-normal">
             Privacy policy
           </Link>
           <hr className="w-[2px] h-4 text-gray-200 bg-gray-200" />
-          <Link href={"#"} className="text-gray-700 text-sm font-normal">
+          <Link
+            href={"/terms-conditions"}
+            className="text-gray-700 text-sm font-normal"
+          >
             Terms & Conditions
           </Link>
           <hr className="w-[2px] h-4 text-gray-200 bg-gray-200" />
-          <Link href={"#"} className="text-gray-700 text-sm font-normal">
+          <Link
+            href={"/cookie-policy"}
+            className="text-gray-700 text-sm font-normal"
+          >
             Cookies policy
           </Link>
           <hr className="w-[2px] h-4 text-gray-200 bg-gray-200" />

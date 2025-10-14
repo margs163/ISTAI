@@ -177,7 +177,7 @@ export default function Page() {
         const validated = await ResultSchema.safeParseAsync(data.data);
 
         if (validated.error) {
-          toast("Validation Error", {
+          toast.error("Validation Error", {
             description: "Could not validate a results schema",
             action: {
               label: "Log",
@@ -194,7 +194,7 @@ export default function Page() {
         );
 
         if (!testDuration) {
-          toast("Error posting results", {
+          toast.error("Error posting results", {
             description: "Could not post test results",
             action: {
               label: "Log",

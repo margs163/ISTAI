@@ -15,6 +15,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { useSubscriptionStore } from "@/lib/subscriptionStore";
+import { toast } from "sonner";
 
 function getColor(color: string): [string, string] {
   return [`bg-${color}-50`, `text-${color}-600`];
@@ -100,6 +102,12 @@ export function Action({ action }: { action: Action }) {
   );
 }
 
+const notEnoughCreditsCallback = () => {
+  toast.warning("You don't have enough credits", {
+    description: "Could not create a practice test",
+  });
+};
+
 export function PronunciationAction({
   action,
   setDialogOpen,
@@ -109,12 +117,18 @@ export function PronunciationAction({
 }) {
   const Icon = action.icon;
   const styles = getColor(action.color);
+  const pronunciationChecks = useSubscriptionStore(
+    (state) => state.pronunciation_tests_left
+  );
 
   return (
     <FloaterAction
-      startCallback={setDialogOpen}
+      checksLeft={pronunciationChecks}
+      startCallback={
+        pronunciationChecks <= 0 ? setDialogOpen : notEnoughCreditsCallback
+      }
       title="Want to start a pronunciation check?"
-      desc="You have 5 checks left"
+      desc={`You have ${pronunciationChecks} checks left`}
     >
       <div className="flex flex-row gap-3 items-center justify-start py-1.5 px-2 rounded-lg hover:bg-gray-50 active:bg-gray-50">
         <div className={clsx("p-2 rounded-lg shrink-0 box-content", styles[0])}>

@@ -40,9 +40,9 @@ export async function GET(request: NextRequest) {
         audioURLs.push({ word, url });
       } catch (error) {
         if (
-    // @ts-expect-error Body object is an iterator
+          // @ts-expect-error Body object is an iterator
           error.name === "NoSuchKey" ||
-    // @ts-expect-error Body object is an iterator
+          // @ts-expect-error Body object is an iterator
           error.$metadata?.httpStatusCode === 404
         ) {
           console.log(`File not found in S3: ${fileKey}, generating new audio`);

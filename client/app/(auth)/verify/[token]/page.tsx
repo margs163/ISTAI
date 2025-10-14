@@ -38,7 +38,7 @@ export default function Page({
     },
   });
   useEffect(() => {
-    if (token.length < 256) {
+    if (!token || token.length < 256) {
       router.replace("/");
     } else {
       mutate();

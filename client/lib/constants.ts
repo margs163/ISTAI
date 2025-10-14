@@ -140,3 +140,108 @@ export const scores = {
     code: "C2",
   },
 };
+
+export type Plan = {
+  tier: "Free" | "Starter" | "Pro";
+  price: number;
+  description: string;
+  audience: string;
+  features: string[];
+  productId: string;
+};
+
+export const plansAnnual: Plan[] = [
+  {
+    tier: "Free",
+    price: 0,
+    description: "Per user/month billed annualy",
+    audience: "For testing out our platform and trying out our features.",
+    features: [
+      "30 test credits",
+      "free analysis",
+      "1 assistant available",
+      "2 short practices",
+    ],
+    productId: "",
+  },
+  {
+    tier: "Starter",
+    price: 4,
+    description: "Per user/month billed annualy",
+    audience: "Ideal for students with regular preparation",
+    features: [
+      "300 test credits",
+      "unlimited analysis",
+      "unlimited export",
+      "daily challenges",
+      "6 daily pronunciation checks",
+      "3 assistants available",
+      "30 short practices",
+    ],
+    productId: "4b6527fc-6c9b-421f-94ce-28deb64860c7",
+  },
+  {
+    tier: "Pro",
+    price: 10,
+    description: "Per user/month billed annualy",
+    audience: "Greate for shared users with intensive preparation",
+    features: [
+      "800 test credits",
+      "unlimited analysis",
+      "unlimited export",
+      "daily challenges",
+      "10 daily pronunciation checks",
+      "3 assistants available",
+      "50 short practices",
+    ],
+    productId: "4ec53659-48f1-423d-a749-7020732542dc",
+  },
+];
+
+export const plansMonthly: Plan[] = [
+  {
+    tier: "Free",
+    price: 0,
+    description: "Per user/month billed monthly",
+    audience: "For testing out our platform and trying out our features.",
+    features: [
+      "30 test credits",
+      "free analysis",
+      "1 assistant available",
+      "2 short practices",
+    ],
+    productId: "",
+  },
+  {
+    tier: "Starter",
+    price: 5,
+    description: "Per user/month billed monthly",
+    audience: "Ideal for students with regular preparation",
+    features: [
+      "300 test credits",
+      "unlimited analysis",
+      "unlimited export",
+      "daily challenges",
+      "5 daily pronunciation checks",
+      "2 assistants available",
+      "20 short practices",
+    ],
+    productId: "f8e06f4c-d548-45cb-a3b7-0b2df14c64b1",
+  },
+  {
+    tier: "Pro",
+    price: 12,
+    description: "Per user/month billed monthly",
+    audience: "Greate for shared users with intensive preparation",
+    features: [
+      "800 test credits",
+      "unlimited analysis",
+      "unlimited export",
+      "daily challenges",
+      "30 daily pronunciation checks",
+      "3 assistants available",
+      "50 short practices",
+    ],
+    productId: "17f01020-8e66-4ebc-8d12-9fdf98da2149",
+  },
+];

@@ -18,7 +18,7 @@ from sqlalchemy.orm import joinedload
 
 from ..lib.auth_db import get_async_session
 from ..lib.send_notification import create_notification
-from ..schemas.db_tables import CreditCard, Notifications, Subscription, User
+from ..schemas.db_tables import Notifications, Subscription, User
 from ..schemas.notifications import NotificationTypeEnum, NotificationsSchema
 from ..dependencies import current_active_user, get_s3_client
 from sqlalchemy.ext.asyncio import AsyncSession

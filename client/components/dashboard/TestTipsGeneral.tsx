@@ -20,7 +20,7 @@ const speakingTestParts = [
     subtitle: "Introduction & Interview",
     duration: "4-5 minutes",
     icon: MessageSquare,
-    color: "bg-blue-50 text-blue-700 border-blue-200",
+    color: "bg-blue-100 text-blue-700 border-blue-200",
     description:
       "General questions about yourself, your home, work, studies, and familiar topics",
     tips: [
@@ -37,7 +37,7 @@ const speakingTestParts = [
     subtitle: "Long Turn (Cue Card)",
     duration: "3-4 minutes",
     icon: BookOpen,
-    color: "bg-green-50 text-green-700 border-green-200",
+    color: "bg-green-100 text-green-700 border-green-200",
     description:
       "Speak for 1-2 minutes on a given topic after 1 minute of preparation time",
     tips: [
@@ -54,7 +54,7 @@ const speakingTestParts = [
     subtitle: "Two-way Discussion",
     duration: "4-5 minutes",
     icon: Users,
-    color: "bg-purple-50 text-purple-700 border-purple-200",
+    color: "bg-purple-100 text-purple-700 border-purple-200",
     description:
       "Abstract discussion related to Part 2 topic with more complex questions",
     tips: [
@@ -73,23 +73,23 @@ export function TestTipsGeneral() {
   const currentPart = speakingTestParts.find((part) => part.id === activePart);
 
   return (
-    <div className="bg-white p-4 rounded-xl font-geist max-w-[320px] max-h-[400px] overflow-y-scroll">
+    <div className="bg-white p-4 rounded-xl font-geist max-w-[320px] lg:max-w-[350px] max-h-[400px] overflow-y-scroll hide-scroll">
       <header className="pb-4">
         <div className="flex items-center gap-2 mb-4">
-          <Lightbulb className="h-5 w-5 text-orange-500" />
+          <Lightbulb className="h-6 w-6 text-orange-500" />
           <h2 className="text-lg font-semibold text-gray-900">
             IELTS Speaking Test Tips
           </h2>
         </div>
 
         {/* Part Selection Tabs */}
-        <div className="flex gap-2">
+        <div className="flex gap-2 justify-stretch">
           {speakingTestParts.map((part) => (
             <Button
               key={part.id}
               variant={activePart === part.id ? "default" : "outline"}
               size="sm"
-              className={`gap-2 ${
+              className={`gap-2 flex-1/3 ${
                 activePart === part.id
                   ? "bg-indigo-500 hover:bg-indigo-600 text-white"
                   : "bg-transparent hover:bg-gray-50"
@@ -103,11 +103,11 @@ export function TestTipsGeneral() {
         </div>
       </header>
 
-      <main className="space-y-4">
+      <main className="space-y-6">
         {currentPart && (
           <>
             {/* Part Header */}
-            <div className="space-y-3">
+            <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div
@@ -143,7 +143,7 @@ export function TestTipsGeneral() {
               <div className="space-y-2">
                 {currentPart.tips.map((tip, index) => (
                   <div key={index} className="flex items-start gap-3">
-                    <CheckCircle className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+                    <CheckCircle className="h-4 w-4 text-green-600 mt-1.5 flex-shrink-0" />
                     <p className="text-sm text-gray-700 leading-relaxed">
                       {tip}
                     </p>

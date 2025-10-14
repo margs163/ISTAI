@@ -68,7 +68,7 @@ export default function NewTest({ children }: { children: React.ReactNode }) {
   const onSubmit: SubmitHandler<NewTestFormData> = (data) => {
     if (creditsLeft < 10) {
       setOpen(false);
-      toast("You don't have enough credits", {
+      toast.warning("You don't have enough credits", {
         description: "Could not create a practice test",
       });
       return;

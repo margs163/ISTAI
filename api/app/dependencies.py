@@ -6,6 +6,7 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 from openai import OpenAI
+from polar_sdk import Polar
 import os
 import redis
 
@@ -13,6 +14,7 @@ load_dotenv()
 
 current_active_user = fastapi_users.current_user(active=True)
 limiter = Limiter(key_func=get_remote_address)
+
 
 async def get_openai_client() -> AsyncGenerator[OpenAI, None]:
     client = OpenAI(
@@ -48,5 +50,16 @@ async def get_s3_client() -> AsyncGenerator[Session, None]:
     async with session.client("s3", region_name="eu-central-1") as s3:
         try:
             yield s3
+        finally:
+            pass
+
+
+async def get_pollar_client() -> AsyncGenerator[Polar, None]:
+    async with Polar(
+        access_token=os.getenv("POLAR_ACCESS_TOKEN_TEST"),
+        server="sandbox"
+    ) as polar:
+        try:
+            yield polar
         finally:
             pass

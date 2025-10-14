@@ -10,6 +10,7 @@ const nextConfig: NextConfig = {
     ],
   },
   output: "standalone",
+  allowedDevOrigins: ["http://localhost:3000", "https://sandbox.polar.sh"],
 };
 
 export default nextConfig;

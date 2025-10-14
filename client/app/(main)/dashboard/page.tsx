@@ -39,7 +39,7 @@ export default function Page() {
   const userState = useUserStore((state) => state);
   useEffect(() => {
     if (userState.email && !userState.isVerified) {
-      toast("Please verify your email", {
+      toast.info("Please verify your email", {
         description: "We have sent you an account verification email!",
       });
     }

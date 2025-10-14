@@ -5,111 +5,7 @@ import React, { useState } from "react";
 import MainButton from "../MainButton";
 import { useRouter } from "next/navigation";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
-
-export type Plan = {
-  tier: "Free" | "Starter" | "Pro";
-  price: number;
-  description: string;
-  audience: string;
-  features: string[];
-  priceId: string;
-};
-
-const plansAnnual: Plan[] = [
-  {
-    tier: "Free",
-    price: 0,
-    description: "Per user/month billed annualy",
-    audience: "For testing out our platform and trying out our features.",
-    features: [
-      "30 test credits",
-      "free analysis",
-      "1 assistant available",
-      "2 short practices",
-    ],
-    priceId: "",
-  },
-  {
-    tier: "Starter",
-    price: 4,
-    description: "Per user/month billed annualy",
-    audience: "Ideal for students with regular preparation",
-    features: [
-      "300 test credits",
-      "unlimited analysis",
-      "unlimited export",
-      "daily challenges",
-      "10 daily pronunciation checks",
-      "3 assistants available",
-      "30 short practices",
-    ],
-    priceId: "pri_01k3naxj8kbs1mcqmmbstk3wk2",
-  },
-  {
-    tier: "Pro",
-    price: 10,
-    description: "Per user/month billed annualy",
-    audience: "Greate for shared users with intensive preparation",
-    features: [
-      "800 test credits",
-      "unlimited analysis",
-      "unlimited export",
-      "daily challenges",
-      "30 daily pronunciation checks",
-      "3 assistants available",
-      "50 short practices",
-    ],
-    priceId: "pri_01k3nb5c4wgc1tjewzye9yxg62",
-  },
-];
-
-const plansMonthly: Plan[] = [
-  {
-    tier: "Free",
-    price: 0,
-    description: "Per user/month billed monthly",
-    audience: "For testing out our platform and trying out our features.",
-    features: [
-      "30 test credits",
-      "free analysis",
-      "1 assistant available",
-      "2 short practices",
-    ],
-    priceId: "",
-  },
-  {
-    tier: "Starter",
-    price: 5,
-    description: "Per user/month billed monthly",
-    audience: "Ideal for students with regular preparation",
-    features: [
-      "300 test credits",
-      "unlimited analysis",
-      "unlimited export",
-      "daily challenges",
-      "5 daily pronunciation checks",
-      "2 assistants available",
-      "20 short practices",
-    ],
-    priceId: "pri_01k3nav7xg35tmnt13qcmn8c5a",
-  },
-  {
-    tier: "Pro",
-    price: 12,
-    description: "Per user/month billed monthly",
-    audience: "Greate for shared users with intensive preparation",
-    features: [
-      "800 test credits",
-      "unlimited analysis",
-      "unlimited export",
-      "daily challenges",
-      "30 daily pronunciation checks",
-      "3 assistants available",
-      "50 short practices",
-    ],
-    priceId: "pri_01k3nb492e576cffdj4ssj9scf",
-  },
-];
+import { Plan, plansAnnual, plansMonthly } from "@/lib/constants";
 
 export function PlanCard({
   plan,
@@ -119,7 +15,7 @@ export function PlanCard({
 }: {
   plan: Plan;
   className?: string;
-  openCheckout: (priceId: string) => void;
+  openCheckout: (productId: string) => void;
   router: AppRouterInstance;
 }) {
   return (
@@ -164,9 +60,9 @@ export function PlanCard({
         </ul>
       </div>
       <button
-        onClick={() =>
-          plan.priceId
-            ? openCheckout(plan.priceId)
+        onClick={async () =>
+          plan.productId
+            ? await openCheckout(plan.productId)
             : router.replace("/dashboard")
         }
         className="w-full text-xs lg:text-sm cursor-pointer mt-auto border text-center border-gray-300 bg-slate-100 font-medium text-gray-800 py-2.5 lg:py-3 rounded-md lg:rounded-lg hover:bg-slate-200 active:bg-slate-100 transition-colors"
@@ -180,10 +76,11 @@ export function PlanCard({
 export default function PlansPricing({
   checkoutCallback,
 }: {
-  checkoutCallback: (priceId: string) => void;
+  checkoutCallback: (productId: string) => void;
 }) {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<"month" | "year">("year");
+
   return (
     <section className=" w-full flex flex-col items-center justify-center p-8 lg:p-20 gap-10 lg:gap-10 max-w-[1400px] mx-auto">
       <header className="space-y-2 lg:space-y-4">

@@ -16,7 +16,7 @@ export function PrivacyPolicy() {
       </MainLegalHeader>
       <section className="space-y-0">
         <LegalBullitList
-          description={`This Privacy Notice for FluentFlow LLC (&apos;we,&apos; &apos;us,&apos; or &apos;our&apos;), describes
+          description={`This Privacy Notice for FluentFlow LLC ("we," "us," or "our"), describes
           how and why we might access, collect, store, use, and/or share
           (&apos;process&apos;) your personal information when you use our services
         (&apos;Services&apos;), including when you:`}
@@ -43,7 +43,7 @@ export function PrivacyPolicy() {
           making decisions about how your personal information is processed. If
           you do not agree with our policies and practices, please do not use
           our Services. If you still have any questions or concerns, please
-          contact us at aldanovdaniyal@gmail.com.
+          contact us at info@istai.space.
         </RegularLegalParagraph>
         <RegularLegalParagraph>
           In this paragraph we are gonna be needing this stuff you know
@@ -67,7 +67,7 @@ export function PrivacyPolicy() {
         </RegularLegalParagraph>
         <RegularLegalParagraph>
           Do we process any sensitive personal information? Some of the
-          information may be considered &apos;special&apos; or &apos;sensitive&apos; in certain
+          information may be considered "special" or "sensitive" in certain
           jurisdictions, for example your racial or ethnic origins, sexual
           orientation, and religious beliefs. We do not process sensitive
           personal information.
@@ -220,7 +220,7 @@ export function PrivacyPolicy() {
           like your Facebook, X, or other social media account. If you choose to
           register in this way, we will collect certain profile information
           about you from the social media provider, as described in the section
-          called &quote;HOW DO WE HANDLE YOUR SOCIAL LOGINS?&quot; below.
+          called "HOW DO WE HANDLE YOUR SOCIAL LOGINS?" below.
         </RegularLegalParagraph>
         <RegularLegalParagraph>
           All personal information that you provide to us must be true,
@@ -266,7 +266,7 @@ export function PrivacyPolicy() {
             Services (such as the date/time stamps associated with your usage,
             pages and files viewed, searches, and other actions you take such as
             which features you use), device event information (such as system
-            activity, error reports (sometimes called &quot;crash dumps&quot;), and
+            activity, error reports (sometimes called "crash dumps"), and
             hardware settings).
           </LegalBullitLi>
         </LegalBullitList>
@@ -296,8 +296,8 @@ export function PrivacyPolicy() {
             Services.
           </LegalBullitLi>
           <LegalBullitLi>
-            To save or protect an individual&apos;s vital interest. We may process
-            your information when necessary to save or protect an individual&apos;s
+            To save or protect an individual's vital interest. We may process
+            your information when necessary to save or protect an individual’s
             vital interest, such as to prevent harm.
           </LegalBullitLi>
         </LegalBullitList>
@@ -395,11 +395,11 @@ export function PrivacyPolicy() {
         </RegularLegalParagraph>
         <RegularLegalParagraph>
           To the extent these online tracking technologies are deemed to be a
-          &quot;sale&quot;/&quot;sharing&quot; (which includes targeted advertising, as defined
+          "sale"/"sharing" (which includes targeted advertising, as defined
           under the applicable laws) under applicable US state laws, you can opt
           out of these online tracking technologies by submitting a request as
-          described below under section &quot;DO UNITED STATES RESIDENTS HAVE
-          SPECIFIC PRIVACY RIGHTS?&quot;
+          described below under section "DO UNITED STATES RESIDENTS HAVE
+          SPECIFIC PRIVACY RIGHTS?"
         </RegularLegalParagraph>
         <RegularLegalParagraph>
           Specific information about how we use such technologies and how you
@@ -418,7 +418,7 @@ export function PrivacyPolicy() {
         <RegularLegalParagraph>
           As part of our Services, we offer products, features, or tools powered
           by artificial intelligence, machine learning, or similar technologies
-          (collectively, &quot;AI Products&quot;). These tools are designed to enhance
+          (collectively, "AI Products"). These tools are designed to enhance
           your experience and provide you with innovative solutions. The terms
           in this Privacy Notice govern your use of the AI Products within our
           Services.
@@ -448,7 +448,7 @@ export function PrivacyPolicy() {
           All personal information processed using our AI Products is handled in
           line with our Privacy Notice and our agreement with third parties.
           This ensures high security and safeguards your personal information
-          throughout the process, giving you peace of mind about your data&apos;s
+          throughout the process, giving you peace of mind about your data's
           safety.
         </RegularLegalParagraph>
       </section>
@@ -533,7 +533,7 @@ export function PrivacyPolicy() {
           request human review. In certain circumstances, you may also have the
           right to object to the processing of your personal information. You
           can make such a request by contacting us by using the contact details
-          provided in the section &quot;HOW CAN YOU CONTACT US ABOUT THIS NOTICE?&quot;
+          provided in the section "HOW CAN YOU CONTACT US ABOUT THIS NOTICE?"
           below.
         </RegularLegalParagraph>
         <RegularLegalParagraph>
@@ -597,7 +597,7 @@ export function PrivacyPolicy() {
         </RegularLegalParagraph>
         <RegularLegalParagraph>
           If you have questions or comments about your privacy rights, you may
-          email us at aldanovdaniyal@gmail.com.
+          email us at info@istai.space.
         </RegularLegalParagraph>
       </section>
       <section id="updates">
@@ -610,7 +610,7 @@ export function PrivacyPolicy() {
         </RegularLegalParagraph>
         <RegularLegalParagraph>
           We may update this Privacy Notice from time to time. The updated
-          version will be indicated by an updated &quot;Revised&quot; date at the top of
+          version will be indicated by an updated "Revised" date at the top of
           this Privacy Notice. If we make material changes to this Privacy
           Notice, we may notify you either by prominently posting a notice of
           such changes or by directly sending you a notification. We encourage
@@ -624,11 +624,10 @@ export function PrivacyPolicy() {
         </RegularLegalHeader>
         <RegularLegalParagraph>
           If you have questions or comments about this notice, you may email us
-          at aldanovdaniyal@gmail.com or contact us by post at:
+          at info@fluentflow.space or contact us by post at:
         </RegularLegalParagraph>
-        <RegularLegalParagraph>FluentFLow LLC</RegularLegalParagraph>
-        <RegularLegalParagraph>Akzhol 17</RegularLegalParagraph>
-        <RegularLegalParagraph>Pavlodar, Pavlodar 140003</RegularLegalParagraph>
+        <RegularLegalParagraph>FluentFlow</RegularLegalParagraph>
+        <RegularLegalParagraph>info@fluentflow.space</RegularLegalParagraph>
         <RegularLegalParagraph>Kazakhstan</RegularLegalParagraph>
       </section>
     </div>
