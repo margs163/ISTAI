@@ -5,7 +5,8 @@ import React, { useState } from "react";
 import MainButton from "../MainButton";
 import { useRouter } from "next/navigation";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
-import { Plan, plansAnnual, plansMonthly } from "@/lib/constants";
+import { plansAnnual, plansMonthly } from "@/lib/constants";
+import { Plan } from "@/lib/constants";
 
 export function PlanCard({
   plan,

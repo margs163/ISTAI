@@ -21,7 +21,7 @@ export default function UnexpectedError({
           Something Went Wrong...
         </h1>
         <p className="text-sm lg:text-base font-medium text-gray-500">
-          Sorry, an unexpected error has occurred. Don't worry we have refunded
+          Sorry, an unexpected error has occurred. Don&apos;t worry we have refunded
           your credits for this test. Try again later!
         </p>
         <Link

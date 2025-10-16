@@ -92,7 +92,7 @@ export default function Page() {
   const chatRef = useRef<HTMLDivElement>(null);
 
   const [isRecording, setIsRecording] = useState(false);
-  const [partTwoTime, setPartTwoTime] = useState(20);
+  const [partTwoTime, setPartTwoTime] = useState(120);
   const [dialogOpen, setDialogOpen] = useState(true);
   const [runTour, setRunTour] = useState(false);
   const [controlsDialogOpen, setControlsDialogOpen] = useState(false);

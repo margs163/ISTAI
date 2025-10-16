@@ -66,7 +66,7 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
         html = "<p>Hi, you have successfully registered in <strong>FluentFlow!</strong> Visit the dashboard to learn more.</p>"
 
         message = MessageSchema(
-            subject="Successful Registration in AIELTSTalk",
+            subject="Successful Registration in FluentFlow",
             recipients=[user.email],
             body=html,
             subtype=MessageType.html,

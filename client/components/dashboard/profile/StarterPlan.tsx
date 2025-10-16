@@ -1,5 +1,5 @@
-import { Plan } from "@/components/home/PlansPricing";
 import { cn } from "@/lib/utils";
+import { Plan } from "@/lib/constants";
 import { Check } from "lucide-react";
 import React from "react";
 

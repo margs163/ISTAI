@@ -197,7 +197,7 @@ export async function openCheckoutRequest(
 ) {
   const userEmailJSON = encodeURIComponent(JSON.stringify({ userEmail }));
   try {
-    window.location.href = `http://localhost:3000/api/checkout?products=${productId}&metadata=${userEmailJSON}`;
+    window.location.href = `/api/checkout?products=${productId}&metadata=${userEmailJSON}`;
   } catch (error) {
     toast.error("Error Opening Checkout", {
       description: "Could not open a checkout",
@@ -214,7 +214,7 @@ export async function redirectToCustomerPortal(
   userEmail: string
 ) {
   try {
-    window.location.href = `http://localhost:3000/api/portal?customerId=${customerId}&userEmail=${userEmail}`;
+    window.location.href = `/api/portal?customerId=${customerId}&userEmail=${userEmail}`;
   } catch (error) {
     toast("Error Fetching Subscription", {
       description: "Could not fetch subscription",

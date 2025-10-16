@@ -296,7 +296,7 @@ const ReadingCardSchema = z.object({
 
 const QuestionCardSchema = z.object({
   id: z.string(),
-  part: z.number().gte(0).lte(1),
+  part: z.number().gte(0).lte(2),
   topic: z.string(),
   questions: z.array(z.string()),
 });
