@@ -21,6 +21,7 @@ interface LocalPracticeTestStore extends Omit<PracticeTestType, "user_id"> {
   setReadingAudioPath: (path: string) => void;
   startDatetime: Date;
   setStartDateTime: (date: Date) => void;
+  resetLocalPracticeTest: () => void;
 }
 
 type GlobalPracticeTestStore = {
@@ -60,6 +61,23 @@ export const useLocalPracticeTestStore = create<LocalPracticeTestStore>()(
       setStatus: (status) => set({ status: status }),
       setTestData: (data: PracticeTestType) => set({ ...data }),
       setReadingAudioPath: (path: string) => set({ readingAudioPath: path }),
+      resetLocalPracticeTest: () =>
+        set({
+          id: "",
+          result: null,
+          status: "Ongoing",
+          practice_name: "",
+          assistant: "Ron",
+          transcription: null,
+          test_duration: null,
+          test_date: "",
+          part_one_card_id: null,
+          part_two_card_id: null,
+          part_one_card: null,
+          part_two_card: null,
+          reading_cards: [],
+          readingAudioPath: "",
+        }),
     }),
     {
       name: "local-practice-store",

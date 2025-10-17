@@ -1,3 +1,5 @@
+import { BookOpen, MessageSquare, Users } from "lucide-react";
+
 export const tourSteps = [
   {
     target: ".first-step",
@@ -197,6 +199,81 @@ export const plansAnnual: Plan[] = [
     productId: "4ec53659-48f1-423d-a749-7020732542dc",
   },
 ];
+
+export const speakingTestParts = [
+  {
+    id: "part1",
+    title: "Part 1",
+    subtitle: "Introduction & Interview",
+    duration: "4-5 minutes",
+    icon: MessageSquare,
+    color: "bg-blue-100 text-blue-700 border-blue-200",
+    description:
+      "General questions about yourself, your home, work, studies, and familiar topics",
+    tips: [
+      "Give full answers with examples, not just yes/no responses",
+      "Keep answers natural and conversational, avoid memorized responses",
+      "Practice common topics: work, studies, hometown, hobbies, daily routine",
+      "Extend answers by adding personal details and explanations",
+      "Speak clearly at a natural pace - don't rush your responses",
+    ],
+  },
+  {
+    id: "part2",
+    title: "Part 2",
+    subtitle: "Long Turn (Cue Card)",
+    duration: "3-4 minutes",
+    icon: BookOpen,
+    color: "bg-green-100 text-green-700 border-green-200",
+    description:
+      "Speak for 1-2 minutes on a given topic after 1 minute of preparation time",
+    tips: [
+      "Use the full preparation minute to plan - make notes for each bullet point",
+      "Address all bullet points on the cue card in your response",
+      "Speak for the complete 2 minutes - don't stop early",
+      "Include specific examples and personal experiences to develop your ideas",
+      "Use linking words to connect your ideas smoothly throughout",
+    ],
+  },
+  {
+    id: "part3",
+    title: "Part 3",
+    subtitle: "Two-way Discussion",
+    duration: "4-5 minutes",
+    icon: Users,
+    color: "bg-purple-100 text-purple-700 border-purple-200",
+    description:
+      "Abstract discussion related to Part 2 topic with more complex questions",
+    tips: [
+      "Think before speaking - it's okay to pause and consider your answer",
+      "Use complex sentence structures and advanced vocabulary",
+      "Give balanced arguments and consider different perspectives",
+      "Support opinions with logical reasoning and real-world examples",
+      "Compare past, present, and future situations when relevant",
+    ],
+  },
+];
+
+export const infoParts = {
+  1: {
+    title: "Part 1: Short Introduction & Interview",
+    description:
+      "In part 1, the examiner will first introduce themselves and ask you to confirm your own identity. They will then ask you some general questions on familiar topics such as home, family, work, studies and interests.",
+    time: "4 - 5 min speaking",
+  },
+  2: {
+    title: "Part 2: Individual Long Turn",
+    description:
+      "In Part 2, also known as the 'long turn', requires candidates to speak for 1-2 minutes on a given topic, following a one-minute preparation period. The examiner provides a task card with a specific topic and prompts to guide the candidate's response. ",
+    time: "1 min prep + 2 min speaking",
+  },
+  3: {
+    title: "Part 3: Further Dialog and Discussion",
+    description:
+      "In part 3 of the Speaking test the examiner will ask further questions which are connected to the topics discussed in part 2. This part of the test is designed to give you the opportunity to talk about more abstract issues and ideas.",
+    time: "4 - 5 min speaking",
+  },
+};
 
 export const plansMonthly: Plan[] = [
   {

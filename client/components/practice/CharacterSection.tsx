@@ -50,7 +50,7 @@ export default function CharacterSection({
       <div className="p-6 pb-3 rounded-xl border border-gray-200 flex flex-col justify-between bg-white lg:h-full">
         <div className="lg:grid grid-cols-[0.58fr_0.42fr] gap-4 items-start lg:mb-6">
           <div className="hidden lg:block">
-            <PartInfo currentPart={1} />
+            <PartInfo currentPart={activePart} />
           </div>
           <QuestionCard
             partTwoTime={partTwoTime}

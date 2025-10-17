@@ -946,7 +946,7 @@ export async function cancellPracticeTest(testId: string) {
 
     return response.data;
   } catch (error) {
-    toast("Could not cancell a practice test", {
+    toast.error("Could not cancell a practice test", {
       description: "Could not cancell a practice test",
       action: {
         label: "Log",

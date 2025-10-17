@@ -1,4 +1,5 @@
 "use client";
+import DashboardFooter from "@/components/dashboard/DashboardFooter";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import AvatarInfo from "@/components/dashboard/profile/AvatarInfo";
 import ProfileTitle from "@/components/dashboard/profile/ProfileTitle";
@@ -99,6 +100,7 @@ export default function Page() {
           <UserBilling />
         </div>
       </div>
+      <DashboardFooter className="justify-center lg:px-6" />
     </div>
   );
 }

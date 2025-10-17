@@ -62,8 +62,8 @@ export default function Page({
   };
 
   return (
-    <div className="min-h-screen w-full p-6 flex items-center justify-center lg:px-20 xl:px-40 font-geist">
-      <section className=" shadow-md bg-white w-full lg:flex lg:flex-row lg:shadow-lg shadow-slate-200 rounded-lg lg:min-h-[610px]">
+    <div className="h-full lg:min-h-screen font-geist">
+      <section className="min-h-screen shadow-md bg-white w-full lg:flex lg:flex-row lg:shadow-lg shadow-slate-200 rounded-lg">
         <div className="flex flex-col p-6 justify-center gap-16 lg:flex-1/2 lg:items-center lg:p-10">
           <div className="flex items-center justify-start gap-2 mb-auto lg:self-start">
             <Image src={logoIcon} alt="iconLogo" className="w-6" />

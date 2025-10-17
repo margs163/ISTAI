@@ -9,7 +9,13 @@ import {
   Zap,
 } from "lucide-react";
 import Link from "next/link";
-import { ForwardRefExoticComponent, RefAttributes, useCallback } from "react";
+import {
+  ForwardRefExoticComponent,
+  RefAttributes,
+  useCallback,
+  useState,
+} from "react";
+import { TestTipsDialog } from "../dashboard/TestTipsGeneral";
 
 function getColor(color: string): [string, string] {
   return [`bg-${color}-50`, `text-${color}-600`];
@@ -101,6 +107,7 @@ export default function QuickTestActions({
   instructionsAduio: React.RefObject<HTMLAudioElement | null>;
   audioFile: React.RefObject<HTMLAudioElement | null>;
 }) {
+  const [tipsDialogOpen, setTipsDialogOpen] = useState(false);
   const replayInstructions = useCallback(() => {
     if (instructionsAduio.current && instructionsAduio.current.paused) {
       instructionsAduio.current.play();
@@ -129,19 +136,29 @@ export default function QuickTestActions({
           </Link> */}
         </header>
         <div className="space-y-2 lg:space-y-3">
-          {actions.map((item, index) => (
-            <TestAction
-              callback={
-                index === 0
-                  ? replayInstructions
-                  : index === 2
-                  ? replayQuestion
-                  : () => null
-              }
-              key={index}
-              action={item}
-            />
-          ))}
+          {actions.map((item, index) =>
+            index === actions.length - 1 ? (
+              <TestTipsDialog
+                dialogOpen={tipsDialogOpen}
+                setDialogOpen={setTipsDialogOpen}
+                key={index}
+              >
+                <TestAction action={item} callback={() => null} />
+              </TestTipsDialog>
+            ) : (
+              <TestAction
+                callback={
+                  index === 0
+                    ? replayInstructions
+                    : index === 2
+                    ? replayQuestion
+                    : () => null
+                }
+                key={index}
+                action={item}
+              />
+            )
+          )}
         </div>
       </div>
     </section>

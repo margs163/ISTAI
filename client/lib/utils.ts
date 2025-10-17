@@ -81,12 +81,12 @@ export function getLevelStyle(score: number): string {
   return score <= 4
     ? ""
     : score >= 4.5 && score < 5.5
-    ? "text-red-600"
+    ? "text-red-500"
     : score >= 5.5 && score < 7.0
-    ? "text-orange-600"
+    ? "text-emerald-500"
     : score >= 7.0 && score < 8.5
-    ? "text-blue-600"
-    : "text-purple-600";
+    ? "text-blue-500"
+    : "text-purple-500";
 }
 
 export function parseTimeInt(time: number) {

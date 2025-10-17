@@ -24,6 +24,7 @@ import { QuestionCardType } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
 import { getWordsPronunciation } from "@/lib/queries";
 import { useWordsTTSStore } from "@/lib/ttsStore";
+import DashboardFooter from "@/components/dashboard/DashboardFooter";
 
 export default function Page({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -151,6 +152,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
           <TestTranscripts transcriptions={practiceTest.transcription} />
         </div>
       </div>
+      <DashboardFooter />
     </div>
   );
 }

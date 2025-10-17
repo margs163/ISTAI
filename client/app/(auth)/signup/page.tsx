@@ -174,8 +174,24 @@ export default function Page() {
               >
                 {isSubmitting ? "Signing Up..." : "Sign Up"}
               </button>
-              <Link href={"/login"} aria-disabled={isSubmitting}>
-                <p className="text-center text-xs font-normal text-gray-500 active:text-gray-700 hover:text-gray-700 transition-colors">
+              <p className="text-center mt-2 text-xs font-normal text-gray-500 transition-colors">
+                By creating an account in our services, you agree with our{" "}
+                <Link
+                  href={"/privacy"}
+                  className="text-blue-500 active:text-blue-600 hover:text-blue-600"
+                >
+                  Privacy Policy
+                </Link>{" "}
+                and{" "}
+                <Link
+                  href={"/terms-of-use"}
+                  className="text-blue-500 active:text-blue-600 hover:text-blue-600"
+                >
+                  Terms of Use
+                </Link>
+              </p>
+              <Link href={"/login"} className="" aria-disabled={isSubmitting}>
+                <p className="text-center mt-4 text-xs font-normal text-gray-500 active:text-gray-700 hover:text-gray-700 transition-colors">
                   Already have an account?
                 </p>
               </Link>

@@ -1,26 +1,6 @@
+import { infoParts } from "@/lib/constants";
 import { Info, Timer } from "lucide-react";
 import React from "react";
-
-const infoParts = {
-  1: {
-    title: "Part 1: Short Introduction & Interview",
-    description:
-      "In part 1, the examiner will first introduce themselves and ask you to confirm your own identity. They will then ask you some general questions on familiar topics such as home, family, work, studies and interests.",
-    time: "4 - 5 min speaking",
-  },
-  2: {
-    title: "Part 2: Individual Long Turn",
-    description:
-      "In Part 2, also known as the 'long turn', requires candidates to speak for 1-2 minutes on a given topic, following a one-minute preparation period. The examiner provides a task card with a specific topic and prompts to guide the candidate's response. ",
-    time: "1 min prep + 2 min speaking",
-  },
-  3: {
-    title: "Part 3: Further Dialog and Discussion",
-    description:
-      "In part 3 of the Speaking test the examiner will ask further questions which are connected to the topics discussed in part 2. This part of the test is designed to give you the opportunity to talk about more abstract issues and ideas.",
-    time: "4 - 5 min speaking",
-  },
-};
 
 export default function PartInfo({ currentPart }: { currentPart: 1 | 2 | 3 }) {
   return (

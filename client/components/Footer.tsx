@@ -40,12 +40,12 @@ export default function Footer({ className }: { className?: string }) {
                 </Link>
               </li>
               <li>
-                <Link href={"#"} className="font-normal text-gray-600">
+                <Link href={"/signup"} className="font-normal text-gray-600">
                   Signup
                 </Link>
               </li>
               <li>
-                <Link href={"#"} className="font-normal text-gray-600">
+                <Link href={"/pricing"} className="font-normal text-gray-600">
                   Pricing
                 </Link>
               </li>
@@ -79,10 +79,10 @@ export default function Footer({ className }: { className?: string }) {
           </Link>
           <hr className="w-[2px] h-4 text-gray-200 bg-gray-200" />
           <Link
-            href={"/terms-conditions"}
+            href={"/terms-of-use"}
             className="text-gray-700 text-sm font-normal"
           >
-            Terms & Conditions
+            Terms of Use
           </Link>
           <hr className="w-[2px] h-4 text-gray-200 bg-gray-200" />
           <Link

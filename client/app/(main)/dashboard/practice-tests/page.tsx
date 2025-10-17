@@ -1,3 +1,4 @@
+import DashboardFooter from "@/components/dashboard/DashboardFooter";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import AllTestsHeader from "@/components/dashboard/practice-tests/AllTestsHeader";
 import AllPracticeTests from "@/components/dashboard/PracticeTests";
@@ -9,6 +10,7 @@ export default function Page() {
       <DashboardHeader />
       <AllTestsHeader />
       <AllPracticeTests />
+      <DashboardFooter />
     </div>
   );
 }

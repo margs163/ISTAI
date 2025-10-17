@@ -7,14 +7,10 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
-import ButtonPrimary from "../home/ButtonPrimary";
-import MainButton from "../MainButton";
 import { useTestSessionStore } from "@/lib/testSessionStore";
 import { useMutation } from "@tanstack/react-query";
 import { useLocalPracticeTestStore } from "@/lib/practiceTestStore";
-import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useChatStore } from "@/lib/chatStore";
 import { useTestTranscriptionStore } from "@/lib/testTranscriptionStore";
@@ -31,6 +27,13 @@ export default function PauseDialog({
   const restoreTranscriptions = useTestTranscriptionStore(
     (state) => state.restoreTranscriptions
   );
+  const resetLocalPracticeTest = useLocalPracticeTestStore(
+    (state) => state.resetLocalPracticeTest
+  );
+  const resetTranscriptions = useTestTranscriptionStore(
+    (state) => state.restoreTranscriptions
+  );
+  const resetChatMessages = useChatStore((state) => state.restoreMessages);
   const setTestStatus = useTestSessionStore((state) => state.setStatus);
   const status = useTestSessionStore((state) => state.status);
   const testState = useLocalPracticeTestStore((state) => state.status);
@@ -39,6 +42,11 @@ export default function PauseDialog({
   const quitMutation = useMutation({
     mutationKey: ["cancel-test"],
     mutationFn: cancellPracticeTest,
+    onSuccess: () => {
+      resetChatMessages();
+      resetLocalPracticeTest();
+      resetTranscriptions();
+    },
   });
   return (
     <Dialog

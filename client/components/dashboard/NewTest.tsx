@@ -78,7 +78,6 @@ export default function NewTest({ children }: { children: React.ReactNode }) {
       practice_name: data.testName,
       status: "Ongoing",
     });
-    console.log(createdTest);
     const session: TestSessionType = {
       testName: data.testName,
       assistant: data.assisstant,

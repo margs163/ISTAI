@@ -8,6 +8,7 @@ import MainButton from "../MainButton";
 import PronCheckDialog from "./PronCheckDialog";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -125,7 +126,7 @@ export function PronunciationAction({
     <FloaterAction
       checksLeft={pronunciationChecks}
       startCallback={
-        pronunciationChecks <= 0 ? setDialogOpen : notEnoughCreditsCallback
+        pronunciationChecks <= 0 ? notEnoughCreditsCallback : setDialogOpen
       }
       title="Want to start a pronunciation check?"
       desc={`You have ${pronunciationChecks} checks left`}
@@ -266,7 +267,7 @@ export function QuickActionsDialog({
           View All Features
         </div>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="lg:w-[450px]">
         <DialogHeader className="text-start">
           <div className="flex flex-row items-center justify-start gap-2">
             <DialogTitle className="font-semibold text-lg text-gray-800">
@@ -294,6 +295,15 @@ export function QuickActionsDialog({
             )
           )}
         </div>
+        <DialogFooter className="mt-0">
+          <div className="flex flex-row gap-2 items-start justify-end">
+            <DialogClose asChild>
+              <MainButton variant="secondary" className="ml-0 self-end text-sm">
+                Cancel
+              </MainButton>
+            </DialogClose>
+          </div>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

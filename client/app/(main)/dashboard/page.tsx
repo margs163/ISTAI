@@ -23,6 +23,7 @@ import { useAvatarStore } from "@/lib/avatarStore";
 import html2canvas from "html2canvas-pro";
 import jsPDF from "jspdf";
 import { Feedback } from "@/components/results/Feedback";
+import DashboardFooter from "@/components/dashboard/DashboardFooter";
 
 export default function Page() {
   const setUserData = useUserStore((state) => state.setUserData);
@@ -121,6 +122,7 @@ export default function Page() {
         <RecentPracticeTests />
         <QuickActions />
       </div>
+      <DashboardFooter />
     </div>
   );
 }

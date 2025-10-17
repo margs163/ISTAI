@@ -26,7 +26,6 @@ import { useQuery } from "@tanstack/react-query";
 import { useLocalPracticeTestStore } from "@/lib/practiceTestStore";
 import { toast } from "sonner";
 import { useTestTranscriptionStore } from "@/lib/testTranscriptionStore";
-import Confetti from "react-confetti";
 import {
   fetchPart1QuestionCard,
   fetchPart2QuestionCard,
@@ -35,11 +34,15 @@ import {
 } from "@/lib/queries";
 import { useWindowSize } from "react-use";
 import { getSecondsDifference } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
 const Joyride = dynamic(() => import("react-joyride"), { ssr: false });
+const Confetti = dynamic(() => import("react-confetti"), { ssr: false });
 
 export default function Page() {
   const { width, height } = useWindowSize();
+  const router = useRouter();
+  const localTestId = useLocalPracticeTestStore((state) => state.id);
   const setMetadata = useMetadataStore((state) => state.setMetadataData);
   const addTranscriptionsLocal = useLocalPracticeTestStore(
     (state) => state.setTranscriptions
@@ -51,7 +54,21 @@ export default function Page() {
     (state) => state.addTranscription
   );
   const restoreChatMessages = useChatStore((state) => state.restoreMessages);
-  const transcriptionsState = useTestTranscriptionStore((state) => state);
+  const resetLocalPracticeTest = useLocalPracticeTestStore(
+    (state) => state.resetLocalPracticeTest
+  );
+  const resetTranscriptions = useTestTranscriptionStore(
+    (state) => state.restoreTranscriptions
+  );
+  const partOneTranscription = useTestTranscriptionStore(
+    (state) => state.partOne
+  );
+  const partTwoTranscription = useTestTranscriptionStore(
+    (state) => state.partTwo
+  );
+  const partThreeTranscription = useTestTranscriptionStore(
+    (state) => state.partThree
+  );
   const addMessage = useChatStore((state) => state.addMessage);
   const messages = useChatStore((state) => state.messages);
   const sessionState = useTestSessionStore((state) => state);
@@ -451,6 +468,16 @@ export default function Page() {
       setStartTime(new Date());
     }
 
+    setTimeout(
+      (testId?: string) => {
+        if (!testId) {
+          router.replace("/dashboard");
+        }
+      },
+      300,
+      localTestId
+    );
+
     initializeMediaRecorder();
 
     return () => {
@@ -568,7 +595,7 @@ export default function Page() {
       setDialogOpen(true);
       setStatus("Finished");
       const finalTranscriptions = {
-        part_one: transcriptionsState.partOne,
+        part_one: partOneTranscription,
         part_two: [
           {
             name: "Assistant",
@@ -580,16 +607,17 @@ export default function Page() {
             )}`,
             time: getSecondsDifference(startTime, new Date()),
           },
-          ...transcriptionsState.partTwo,
+          ...partTwoTranscription,
         ],
-        part_three: transcriptionsState.partThree,
+        part_three: partThreeTranscription,
       };
       console.log(`Final Transcriptions:\n${finalTranscriptions}`);
       setRunConfetti(true);
       addTranscriptionsLocal(finalTranscriptions);
       setTestDuration(sessionState.duration);
       restoreChatMessages();
-      transcriptionsState.restoreTranscriptions();
+      resetTranscriptions();
+      resetLocalPracticeTest();
     }
 
     audioChunks.current = [];
@@ -603,7 +631,9 @@ export default function Page() {
     part2Question,
     openReadingCard,
     sessionState,
-    transcriptionsState,
+    partOneTranscription,
+    partTwoTranscription,
+    partThreeTranscription,
   ]);
 
   useEffect(() => {

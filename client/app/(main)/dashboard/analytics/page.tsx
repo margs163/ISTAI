@@ -5,6 +5,7 @@ import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import React from "react";
 import VocabularyCommon from "@/components/dashboard/analysis/VocabularyCommon";
 import PronunciationCommon from "@/components/dashboard/analysis/PronunciationCommon";
+import DashboardFooter from "@/components/dashboard/DashboardFooter";
 
 export default function page() {
   return (
@@ -16,6 +17,7 @@ export default function page() {
         <VocabularyCommon />
         <PronunciationCommon />
       </div>
+      <DashboardFooter />
     </div>
   );
 }

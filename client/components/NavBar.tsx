@@ -29,8 +29,6 @@ export default function NavBar() {
   const avatarUrl = useAvatarStore((state) => state.url);
   const setUserData = useUserStore((state) => state.setUserData);
 
-  console.log(userEmail);
-
   useQuery({
     queryKey: ["avatar-fetch"],
     queryFn: async () => {

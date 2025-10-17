@@ -16,6 +16,7 @@ from botocore.exceptions import ClientError
 import json
 from dotenv import load_dotenv
 from pydub import AudioSegment
+from PIL import Image, ImageDraw
 
 load_dotenv()
 import uuid
@@ -41,6 +42,20 @@ async def download():
             Bucket=bucket_name, Key=reading_audio_path, Filename=local_path
         )
     print("DOWNLOADED SUCCESSFULLY!")
+
+
+async def draw_rainbow():
+    image = Image.new("RGB", (300, 300), 'white')
+    draw = ImageDraw.Draw(image)
+
+    bbox = (50, 50, 250, 250)
+
+    start_angle = 180
+    end_angle = 360
+
+    draw.arc(bbox, start=start_angle, end=end_angle, fill='yellow', width=3)
+
+    image.show()
 
 
 async def insert_questions():
