@@ -14,6 +14,8 @@ import { NewPasswordSchema, NewPasswordType } from "@/lib/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import LogoWithIcon from "@/components/LogoWithIcon";
 
 export default function Page({
   params,
@@ -39,7 +41,6 @@ export default function Page({
     data: NewPasswordType
   ) => {
     try {
-      console.log(data);
       const response = await axios.post(
         `${process.env.NEXT_PUBLIC_FASTAPI}/auth/reset-password`,
         {
@@ -55,23 +56,27 @@ export default function Page({
 
       if (response.status === 200) {
         router.replace("/login");
+        toast.success("Successfully change your password", {
+          description: "Now log in with your new password",
+        });
       }
     } catch (error) {
-      console.error(error);
+      toast.error("Could not change the password", {
+        description: "Sorry, try again later.",
+      });
     }
   };
 
   return (
     <div className="h-full lg:min-h-screen font-geist">
       <section className="min-h-screen shadow-md bg-white w-full lg:flex lg:flex-row lg:shadow-lg shadow-slate-200 rounded-lg">
-        <div className="flex flex-col p-6 justify-center gap-16 lg:flex-1/2 lg:items-center lg:p-10">
+        <div className="flex flex-col p-6 justify-center gap-16 lg:flex-1/3 lg:items-center lg:p-10">
           <div className="flex items-center justify-start gap-2 mb-auto lg:self-start">
-            <Image src={logoIcon} alt="iconLogo" className="w-6" />
-            <Image src={logoText} alt="iconText" className="w-14" />
+            <LogoWithIcon />
           </div>
           <form
             onSubmit={handleSubmit(submit)}
-            className="flex flex-col items-center justify-center gap-8 px-3 pb-6 lg:pb-10 lg:w-3/4 xl:w-[65%] mb-auto"
+            className="flex flex-col items-center justify-center gap-8 px-3 pb-6 lg:pb-10 lg:w-3/4 xl:w-[60%] mb-auto"
           >
             <div className="space-y-1">
               <h1 className="font-semibold text-xl text-gray-800">
@@ -122,7 +127,7 @@ export default function Page({
             alt="talkingWoman"
             className="h-full object-cover brightness-75 rounded-r-lg"
           />
-          <div className="absolute top-1/2 xl:top-3/5 w-full pr-12 flex flex-col items-end gap-6 p-4 drop-shadow-2xl">
+          <div className="absolute top-1/2 xl:top-3/4 w-full pr-12 flex flex-col items-end gap-6 p-4 drop-shadow-2xl">
             <h2 className="font-bold leading-[1.3] tracking-tight text-3xl text-white w-[90%] xl:w-3/4 text-right text-shadow-sm">
               Unlock Your IELTS Success with AI-Powered Speaking Practice. Join
               ISTAI today.

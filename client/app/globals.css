@@ -4,13 +4,19 @@
 @custom-variant dark (&:is(.dark *));
 
 .home-bg {
-  background-image: url("../assets/images/gradient1.png");
+  background-image: url("../assets/compressed/purple-grad-2.jpg");
   background-repeat: no-repeat;
-  background-size: auto;
+  background-size: cover;
   background-blend-mode: normal;
-  background-position: center top;
-  backdrop-filter: blur(4px);
-  backdrop-filter: brightness(100%);
+  background-position: left bottom;
+  /* backdrop-filter: blur(4px); */
+  /* backdrop-filter: brightness(100%); */
+}
+
+@media screen and (max-width: 768px) {
+  .home-bg {
+    background-position: center bottom;
+  }
 }
 
 .grad-bg {

@@ -28,7 +28,7 @@ export default function CharacterSection({
   openReadingCard,
   setOpenReadingCard,
 }: {
-  activePart?: 1 | 2 | 3;
+  activePart: 1 | 2 | 3;
   timerActive: boolean;
   setTimerActive: React.Dispatch<React.SetStateAction<boolean>>;
   startRecording: () => void;

@@ -5,6 +5,8 @@ from fastapi import FastAPI, Request
 from dotenv import load_dotenv
 from fastapi.middleware.cors import CORSMiddleware
 
+from prometheus_fastapi_instrumentator import Instrumentator
+
 from .lib.auth_db import create_db_and_tables
 from .routers.email import router as email_router
 from .routers.questions import router as questions_router
@@ -26,6 +28,7 @@ from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from .dependencies import limiter
 from .users import google_oauth_client
+import logging
 import uvicorn
 
 load_dotenv()
@@ -33,6 +36,13 @@ load_dotenv()
 SECRET = os.getenv("SECRET")
 if not SECRET:
     raise Exception("Google OAuth Secret empty")
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s",
+)
+
+logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -51,6 +61,7 @@ origins = [
     "http://frontend:3000",
     "http://nextjs:3000",
 ]
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -143,8 +154,10 @@ app.include_router(
 @app.get("/")
 @limiter.limit("8/minute")
 async def main(request: Request):
+    logger.info("Root endpoint was hit!")
     return {"message": "Hello, World!"}
 
+Instrumentator().instrument(app).expose(app)
 
 if __name__ == "__main__":
     uvicorn.run(

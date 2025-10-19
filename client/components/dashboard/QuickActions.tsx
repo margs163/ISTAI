@@ -298,8 +298,8 @@ export function QuickActionsDialog({
         <DialogFooter className="mt-0">
           <div className="flex flex-row gap-2 items-start justify-end">
             <DialogClose asChild>
-              <MainButton variant="secondary" className="ml-0 self-end text-sm">
-                Cancel
+              <MainButton variant="secondary" className="ml-0 self-end text-xs">
+                Close
               </MainButton>
             </DialogClose>
           </div>

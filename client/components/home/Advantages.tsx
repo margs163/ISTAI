@@ -5,7 +5,7 @@ export default function Advantages() {
   return (
     <section
       id="advantages"
-      className=" w-full flex flex-col items-center justify-center p-8 lg:gap-20 lg:p-20 max-w-[1400px] mx-auto"
+      className=" w-full flex flex-col items-center justify-center p-8 gap-10 lg:gap-20 lg:p-20 max-w-[1400px] mx-auto"
     >
       <h1 className="font-bold text-3xl lg:text-5xl text-gray-800 text-center leading-[1.3]">
         Smart AI Emulator with <br className="hidden lg:inline-block" />

@@ -128,7 +128,7 @@ export default function RecentPracticeTests() {
           </Link>
         </header>
         <div className="space-y-3">
-          {data && data.length > 0 && lastFive ? (
+          {data && data.length > 0 && lastFive && lastFive.length > 0 ? (
             lastFive.map((item, index) => (
               <PracticeTest key={index} test={item} mutation={mutation} />
             ))

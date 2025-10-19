@@ -25,6 +25,7 @@ import PauseDialog from "@/components/practice/PauseDialog";
 import { useQuery } from "@tanstack/react-query";
 import { useLocalPracticeTestStore } from "@/lib/practiceTestStore";
 import { toast } from "sonner";
+import { toast as rtoast, ToastContainer } from "react-toastify";
 import { useTestTranscriptionStore } from "@/lib/testTranscriptionStore";
 import {
   fetchPart1QuestionCard,
@@ -35,9 +36,20 @@ import {
 import { useWindowSize } from "react-use";
 import { getSecondsDifference } from "@/lib/utils";
 import { useRouter } from "next/navigation";
+import { Msg } from "@/components/ToastCustom";
 
 const Joyride = dynamic(() => import("react-joyride"), { ssr: false });
 const Confetti = dynamic(() => import("react-confetti"), { ssr: false });
+
+const notify = () =>
+  rtoast(Msg, {
+    data: {
+      title: "Please, record your speech!",
+      text: "You are making a long pause.",
+    },
+    theme: "colored",
+    position: "top-center",
+  });
 
 export default function Page() {
   const { width, height } = useWindowSize();
@@ -72,6 +84,7 @@ export default function Page() {
   const addMessage = useChatStore((state) => state.addMessage);
   const messages = useChatStore((state) => state.messages);
   const sessionState = useTestSessionStore((state) => state);
+  const currentPart = useTestSessionStore((state) => state.currentPart);
   const setSession = useTestSessionStore((state) => state.setSessionData);
   const startTime = useLocalPracticeTestStore((state) => state.startDatetime);
   const setStartTime = useLocalPracticeTestStore(
@@ -119,6 +132,8 @@ export default function Page() {
   const [openReadingCard, setOpenReadingCard] = useState(false);
   const [runConfetti, setRunConfetti] = useState(false);
   const [firstMesssage, setFirstMessage] = useState(true);
+  const [pauseTime, setPauseTime] = useState(0);
+  const [didNotifyPause, setDidNotifyPause] = useState(false);
 
   const { data } = useQuery({
     queryKey: ["part1-card"],
@@ -135,6 +150,42 @@ export default function Page() {
     queryKey: ["reading-card"],
     queryFn: async () => await fetchReadingCard(setReadingCard),
   });
+
+  useEffect(() => {
+    if (localTestId) return;
+
+    const timeout = setTimeout(() => {
+      if (!localTestId) {
+        router.replace("/dashboard");
+      }
+    }, 300);
+
+    return () => clearTimeout(timeout);
+  }, [localTestId]);
+
+  useEffect(() => {
+    const timerId = setInterval(() => {
+      if (
+        !isRecording &&
+        currentPart !== 2 &&
+        testStatus !== "Finished" &&
+        testStatus !== "Paused"
+      ) {
+        setPauseTime((prev) => {
+          if (prev >= 10 && !didNotifyPause) {
+            notify();
+            setDidNotifyPause(true);
+          }
+          return prev + 1;
+        });
+      } else {
+        setPauseTime(0);
+        clearInterval(timerId);
+      }
+    }, 1000);
+
+    return () => clearInterval(timerId);
+  }, [isRecording, didNotifyPause, currentPart]);
 
   const playTTSAudio = useCallback(
     async (fileKey: string) => {
@@ -413,6 +464,9 @@ export default function Page() {
         }
       };
     }
+
+    setPauseTime(0);
+    setDidNotifyPause(false);
     audioBlobs.current = null;
   }, [openReadingCard]);
 
@@ -467,16 +521,6 @@ export default function Page() {
       );
       setStartTime(new Date());
     }
-
-    setTimeout(
-      (testId?: string) => {
-        if (!testId) {
-          router.replace("/dashboard");
-        }
-      },
-      300,
-      localTestId
-    );
 
     initializeMediaRecorder();
 
@@ -715,7 +759,7 @@ export default function Page() {
           setIsRecording={setIsRecording}
           videoRef={videoRef}
           audioContext={audioContext}
-          activePart={1}
+          activePart={currentPart as 1}
           timerActive={timerActive}
           setTimerActive={setTimerActive}
           setIsAnsweringQuestion={setIsAnsweringQuestion}
@@ -732,7 +776,7 @@ export default function Page() {
           setIsOpen={setRunTour}
           dialogOpen={dialogOpen}
           dialogInfo={dialogInfo}
-          currentPart={sessionState.currentPart}
+          currentPart={currentPart}
           status={testStatus}
         />
         <PauseDialog
@@ -740,6 +784,7 @@ export default function Page() {
           setDialogOpen={setControlsDialogOpen}
         />
         <Confetti run={runConfetti} width={width} height={height} />
+        <ToastContainer />
       </div>
     </div>
   );

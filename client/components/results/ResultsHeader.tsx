@@ -3,6 +3,7 @@ import { ArrowLeft, Clock, FileInput, Share2 } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 import MainButton from "../MainButton";
+import { parseTimeString } from "@/lib/utils";
 
 function clearSessionStorage() {
   const item = sessionStorage.getItem("local-practice-test");
@@ -11,7 +12,13 @@ function clearSessionStorage() {
   }
 }
 
-export default function ResultsHeader() {
+export default function ResultsHeader({
+  handleExport,
+  testTime,
+}: {
+  handleExport: () => void;
+  testTime: number;
+}) {
   return (
     <header className="text-gray-800 w-full bg-white mb-4 lg:mb-8 fixed top-0">
       <div className="w-full flex flex-row gap-3 lg:gap-12 px-6 lg:px-20 xl:px-24 py-2.5 lg:py-3 items-center justify-start">
@@ -32,7 +39,7 @@ export default function ResultsHeader() {
           <p className="text-xs lg:text-sm font-normal text-gray-600 flex flex-row items-center justify-start gap-1">
             <Clock className="text-gray-600 size-4" />
             {new Date().toDateString()}
-            <span>• 14 min</span>
+            <span>• {parseTimeString(testTime)}</span>
           </p>
         </div>
         <div className="flex flex-row items-center gap-4 ml-auto">
@@ -47,6 +54,7 @@ export default function ResultsHeader() {
           </MainButton>
           <MainButton
             variant="secondary"
+            onClick={handleExport}
             className={
               "bg-white border border-gray-200 hover:bg-gray-50 active:bg-gray-50 flex text-xs lg:text-sm ml-0"
             }

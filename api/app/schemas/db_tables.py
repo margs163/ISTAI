@@ -68,18 +68,18 @@ class User(Base, SQLAlchemyBaseUserTableUUID):
     )
     last_login_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now(), nullable=True)
     subscription: Mapped["Subscription"] = relationship(
-        back_populates="user", lazy="joined"
+        back_populates="user", lazy="joined", cascade="all, delete-orphan"
     )
-    practice_tests: Mapped[list["PracticeTest"]] = relationship(back_populates="user")
-    analytics: Mapped["Analytics"] = relationship(back_populates="user")
-    notificates: Mapped[list["Notifications"]] = relationship(back_populates="user")
-    transcriptions: Mapped[list["Transcription"]] = relationship(back_populates="user")
+    practice_tests: Mapped[list["PracticeTest"]] = relationship(back_populates="user", cascade="all, delete-orphan")
+    analytics: Mapped["Analytics"] = relationship(back_populates="user", cascade="all, delete-orphan")
+    notificates: Mapped[list["Notifications"]] = relationship(back_populates="user", cascade="all, delete-orphan")
+    transcriptions: Mapped[list["Transcription"]] = relationship(back_populates="user", cascade="all, delete-orphan")
     pronunciation_tests: Mapped[list["PronunciationTest"]] = relationship(
-        back_populates="user"
+        back_populates="user", cascade="all, delete-orphan"
     )
-    questionnaire_answers: Mapped["Questionnaire"] = relationship(back_populates="user")
+    questionnaire_answers: Mapped["Questionnaire"] = relationship(back_populates="user", cascade="all, delete-orphan")
     oauth_accounts: Mapped[list["OAuthAccount"]] = relationship(
-        back_populates="user", lazy="joined"
+        back_populates="user", lazy="joined", cascade="all, delete-orphan"
     )
 
 
@@ -172,9 +172,9 @@ class Questionnaire(Base):
     __tablename__ = "questionnaire_table"
 
     id: Mapped[UUID_ID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
-    user: Mapped[User] = relationship(back_populates="questionnaire_answers")
+    user: Mapped[User] = relationship(back_populates="questionnaire_answers", passive_deletes=True)
     user_id: Mapped[UUID_ID] = mapped_column(
-        UUID, ForeignKey("user_table.id"), index=True
+        UUID, ForeignKey("user_table.id", ondelete="CASCADE"), index=True, nullable=True
     )
 
     heard_from: Mapped[str] = mapped_column(String(100), nullable=True)

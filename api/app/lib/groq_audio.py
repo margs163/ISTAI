@@ -3,51 +3,68 @@ from pathlib import Path
 from pydub import AudioSegment
 import json
 from datetime import datetime
+from ..dependencies import celery_app, celery_logger
 import pydub
 import time
 import subprocess
 import os
 import tempfile
 import re
+import asyncio
+import logging
 
 
-def preprocess_audio(input_path: Path) -> Path:
+logger = logging.getLogger(__name__)
+
+
+@celery_app.task
+async def preprocess_audio(input_path: Path) -> Path:
     """
     Preprocess audio file to 16kHz mono FLAC using ffmpeg.
     FLAC provides lossless compression for faster upload times.
     """
+    output_path = None
+
     if not input_path.exists():
         raise FileNotFoundError(f"Input file not found: {input_path}")
 
     with tempfile.NamedTemporaryFile(suffix=".flac", delete=False) as temp_file:
         output_path = Path(temp_file.name)
 
-    print("Converting audio to 16kHz mono FLAC...")
     try:
-        subprocess.run(
-            [
-                "ffmpeg",
-                "-hide_banner",
-                "-loglevel",
-                "error",
-                "-i",
-                input_path,
-                "-ar",
-                "16000",
-                "-ac",
-                "1",
-                "-c:a",
-                "flac",
-                "-y",
-                output_path,
-            ],
-            check=True,
+        process = await asyncio.create_subprocess_exec(
+            "ffmpeg",
+            "-hide_banner",
+            "-loglevel",
+            "error",
+            "-i",
+            str(input_path),
+            "-ar",
+            "16000",
+            "-ac",
+            "1",
+            "-c:a",
+            "flac",
+            "-sample_fmt",
+            "s16",
+            "-threads",
+            "auto",
+            "-y",
+            str(output_path),
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
         )
+
+        stdout, stderr = await process.communicate()
+        if process.returncode != 0:
+            output_path.unlink(missing_ok=True)
+            raise RuntimeError(f"FFmpeg conversion failed: {stderr.decode()}")
+
         return output_path
     # We'll raise an error if our FFmpeg conversion fails
-    except subprocess.CalledProcessError as e:
-        output_path.unlink(missing_ok=True)
-        raise RuntimeError(f"FFmpeg conversion failed: {e.stderr}")
+    except Exception as e:
+        logger.error(f"FFmpeg conversion failed {str(e)}")
+        raise RuntimeError(f"FFmpeg conversion failed: {str(e)}")
 
 
 def transcribe_single_chunk(
@@ -80,7 +97,7 @@ def transcribe_single_chunk(
                     file=("chunk.flac", temp_file, "audio/flac"),
                     model="whisper-large-v3-turbo",
                     language="en",  # We highly recommend specifying the language of your audio if you know it
-                    prompt="IELTS",
+                    prompt="...",
                     response_format="verbose_json",
                 )
                 api_time = time.time() - start_time
@@ -490,7 +507,7 @@ def save_results(result: dict, audio_path: Path) -> Path:
         with open(f"{base_path}_segments.json", "w", encoding="utf-8") as f:
             json.dump(result["segments"], f, indent=2, ensure_ascii=False)
 
-        print(f"\nResults saved to transcriptions folder:")
+        print("\nResults saved to transcriptions folder:")
         print(f"- {base_path}.txt")
         print(f"- {base_path}_full.json")
         print(f"- {base_path}_segments.json")
@@ -502,7 +519,7 @@ def save_results(result: dict, audio_path: Path) -> Path:
         raise
 
 
-def transcribe_audio_in_chunks(
+async def transcribe_audio_in_chunks(
     audio_path: Path, chunk_length: int = 30, overlap: int = 2
 ) -> dict:
     """
@@ -531,24 +548,22 @@ def transcribe_audio_in_chunks(
     processed_path = None
     try:
         # Preprocess audio and get basic info
-        processed_path = preprocess_audio(audio_path)
+        task = preprocess_audio.delay(audio_path)
+        processed_path = await task.get()
+        logger.info(f"Preprocessed audio {audio_path} with FFmpeg")
         try:
             audio = AudioSegment.from_file(processed_path, format="flac")
         except Exception as e:
             raise RuntimeError(f"Failed to load audio: {str(e)}")
 
         duration = len(audio)
-        print(f"Audio duration: {duration/1000:.2f}s")
 
         # Calculate # of chunks
         chunk_ms = chunk_length * 1000
         overlap_ms = overlap * 1000
         stride_ms = chunk_ms - overlap_ms
         total_chunks = (duration + stride_ms - 1) // stride_ms
-        print(
-            f"duration {duration} // (chunks_ms(30.000) - overlap_ms(2)): {total_chunks}"
-        )
-        print(f"Processing {total_chunks} chunks...")
+        logger.info(f"Processing {total_chunks} chunks...")
 
         results = []
         total_transcription_time = float(0)
@@ -564,22 +579,8 @@ def transcribe_audio_in_chunks(
             start_sample = int(start_ms * sample_rate / 1000)
             end_sample = int(end_ms * sample_rate / 1000)
 
-            print(f"\nProcessing chunk {i+1}/{total_chunks}")
-            print(
-                f"Start: {start_ms}ms, type: {type(start_ms)}, Start sample: {start_sample}, type: {type(start_sample)}"
-            )
-            print(
-                f"End: {end_ms}ms, type: {type(end_ms)}, End sample: {end_sample}, type: {type(end_sample)}"
-            )
-            print(f"Time range: {start_ms/1000:.1f}s - {end_ms/1000:.1f}s")
-            print(f"Total Chunks: {total_chunks}, type: {type(total_chunks)}")
-            print(f"Audio object: {audio}, frame_rate={audio.frame_rate}")
-
             try:
                 chunk = audio.get_sample_slice(start_sample, end_sample)
-                print(
-                    f"Chunk created: duration={len(chunk)}ms, frame_rate={chunk.frame_rate}, channels={chunk.channels}"
-                )
 
                 if len(chunk) == 0:
                     raise RuntimeError(
@@ -593,13 +594,16 @@ def transcribe_audio_in_chunks(
                 results.append((result, start_ms))
             except Exception as e:
                 print(e)
+                logger.error(f"Error transcribing single chunk {e}")
                 raise Exception(e)
 
         final_result = merge_transcripts(results)
         # save_results(final_result, audio_path)
-        print("RESULTS AFTER MERGING TRANSCRIPTIONS:", final_result)
+        logger.info("RESULTS AFTER MERGING TRANSCRIPTIONS:", final_result)
 
-        print(f"\nTotal Groq API transcription time: {total_transcription_time:.2f}s")
+        logger.info(
+            f"\nTotal Groq API transcription time: {total_transcription_time:.2f}s"
+        )
 
         return final_result
 

@@ -16,6 +16,7 @@ import { useRouter } from "next/navigation";
 import axios from "axios";
 import { authorizeGoogle } from "@/lib/queries";
 import LogoWithIcon from "@/components/LogoWithIcon";
+import { toast } from "sonner";
 
 export default function Page() {
   const router = useRouter();
@@ -69,7 +70,9 @@ export default function Page() {
       setUserData(json_data);
       router.replace("/login");
     } catch (error) {
-      console.error(error);
+      toast.error("Invalid email", {
+        description: "User with this email already exists",
+      });
     }
   };
 
@@ -100,14 +103,15 @@ export default function Page() {
                   router.push(url);
                 }
               }}
-              className="w-full flex flex-row items-center justify-center gap-2 border-2 border-gray-300/80 rounded-md p-2.5 mt-2"
+              disabled={isSubmitting}
+              className="w-full flex disabled:cursor-not-allowed flex-row cursor-pointer hover:bg-gray-50 active:bg-gray-50 transition-colors items-center justify-center gap-2 border-2 border-gray-300/80 rounded-md p-2.5 mt-2"
             >
               <Image src={googleIcon} alt="google" className="w-6 shrink-0" />
               <p className="text-sm font-medium text-gray-700">
                 Sign Up with Google
               </p>
             </button>
-            <div className="flex flex-row items-center w-full gap-2 mt-2">
+            <div className="flex flex-row items-center w-full gap-2 mt-2.5">
               <hr className="h-[2px] text-gray-200 w-1/2" />
               <p className="text-xs font-medium text-gray-500 pb-1">or</p>
               <hr className="h-[2px] text-gray-200 w-1/2" />
@@ -166,11 +170,20 @@ export default function Page() {
                 )}
               </div>
             </div>
-            <div className="w-full space-y-3 mt-6">
+            <Link
+              href={"/login"}
+              className="self-end"
+              aria-disabled={isSubmitting}
+            >
+              <p className="text-end mt-1.5 self-end text-xs font-normal text-gray-500 active:text-gray-700 hover:text-gray-700 transition-colors">
+                Already have an account?
+              </p>
+            </Link>
+            <div className="w-full space-y-3 mt-5">
               <button
                 disabled={isSubmitting}
                 type="submit"
-                className="w-full disabled:bg-indigo-400 py-2.5 rounded-md bg-indigo-700 hover:bg-indigo-600 text-white font-medium lg:font-semibold text-xs transition-colors"
+                className="w-full cursor-pointer disabled:bg-indigo-400 py-2.5 rounded-md bg-indigo-700 hover:bg-indigo-600 text-white font-medium lg:font-semibold text-xs transition-colors"
               >
                 {isSubmitting ? "Signing Up..." : "Sign Up"}
               </button>
@@ -190,11 +203,6 @@ export default function Page() {
                   Terms of Use
                 </Link>
               </p>
-              <Link href={"/login"} className="" aria-disabled={isSubmitting}>
-                <p className="text-center mt-4 text-xs font-normal text-gray-500 active:text-gray-700 hover:text-gray-700 transition-colors">
-                  Already have an account?
-                </p>
-              </Link>
             </div>
           </form>
         </div>

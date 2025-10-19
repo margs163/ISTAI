@@ -112,6 +112,11 @@ export default function AppSidebar() {
       resetUserData();
       router.replace("/");
     }
+
+    const value = sessionStorage.getItem("close-discount");
+    if (value) {
+      sessionStorage.removeItem("close-discount");
+    }
   }, [router]);
   return (
     <Sidebar className="font-geist bg-white">

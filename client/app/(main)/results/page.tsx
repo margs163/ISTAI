@@ -13,6 +13,8 @@ import ResultsHeader from "@/components/results/ResultsHeader";
 import SentenceImprovements from "@/components/results/SentenceImprovements";
 import StrongAspects from "@/components/results/StrongAspects";
 import WeakAspects from "@/components/results/WeakAspects";
+import html2canvas from "html2canvas-pro";
+import { jsPDF } from "jspdf";
 import { useLocalPracticeTestStore } from "@/lib/practiceTestStore";
 import {
   checkFeedbackRecord,
@@ -22,7 +24,6 @@ import {
 } from "@/lib/queries";
 import { useWordsTTSStore } from "@/lib/ttsStore";
 import {
-  PracticeTestType,
   QuestionCardType,
   ReadingCardType,
   ResultSchema,
@@ -46,9 +47,13 @@ export default function Page() {
   );
   const testId = useLocalPracticeTestStore((state) => state.id);
   const status = useLocalPracticeTestStore((state) => state.status);
+  const practiceName = useLocalPracticeTestStore(
+    (state) => state.practice_name
+  );
   const testDuration = useLocalPracticeTestStore(
     (state) => state.test_duration
   );
+  const printRef = useRef<HTMLDivElement>(null);
   const partTwoCard = useLocalPracticeTestStore((state) => state.part_two_card);
   const setTTSWords = useWordsTTSStore((state) => state.setUrls);
 
@@ -59,7 +64,6 @@ export default function Page() {
 
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
   const [progress, setProgress] = useState(13);
-  const [openFeedbackDialog, setOpenFeedbackDialog] = useState(false);
 
   const { data } = useQuery({
     queryKey: ["feedback-get"],
@@ -281,6 +285,43 @@ export default function Page() {
     testId,
   ]);
 
+  const handleExport = useCallback(async () => {
+    const element = printRef.current;
+    if (!element) return;
+
+    const canvas = await html2canvas(element, {
+      scale: 2,
+      ignoreElements: (el) => el.classList?.contains("no-print"),
+    });
+    const imgData = canvas.toDataURL("image/jpeg");
+
+    const pdf = new jsPDF({
+      orientation: "portrait",
+      unit: "px",
+      format: "a4",
+    });
+
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+
+    const imgProps = pdf.getImageProperties(imgData);
+    const imgWidth = pageWidth;
+    const imgHeight = (imgProps.height * imgWidth) / imgProps.width;
+
+    let y = 0;
+    let pageNum = 0;
+
+    while (y < imgHeight) {
+      if (pageNum > 0) pdf.addPage();
+
+      pdf.addImage(imgData, "PNG", 0, -y, imgWidth, imgHeight);
+      y += pageHeight;
+      pageNum++;
+    }
+
+    pdf.save(`results-${practiceName}.pdf`);
+  }, [practiceName]);
+
   useEffect(() => {
     if (!socketRef.current) {
       socketRef.current = new WebSocket(
@@ -309,8 +350,11 @@ export default function Page() {
   if (!results) return <LoadingProgress step={step} progress={progress} />;
 
   return (
-    <div className="font-geist w-full min-h-screen flex flex-col gap-6 lg:gap-10 bg-gray-50 pt-24 lg:pt-32 pb-0">
-      <ResultsHeader />
+    <div
+      className="font-geist w-full min-h-screen flex flex-col gap-6 lg:gap-10 bg-gray-50 pt-24 lg:pt-32 pb-0"
+      ref={printRef}
+    >
+      <ResultsHeader handleExport={handleExport} testTime={testDuration ?? 0} />
       <Overall score={results.overall_score} />
       <CriterionScores />
       <div className="lg:px-20 lg:grid-cols-2 lg:grid lg:gap-6 space-y-6 lg:space-y-0 xl:px-36">

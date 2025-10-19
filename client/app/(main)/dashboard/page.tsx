@@ -16,7 +16,7 @@ import {
   fetchSubscription,
   fetchUser,
 } from "@/lib/queries";
-import { toast } from "sonner";
+import { toast as stoast } from "sonner";
 import { useSubscriptionStore } from "@/lib/subscriptionStore";
 import { useNotificationsStore } from "@/lib/notificationStore";
 import { useAvatarStore } from "@/lib/avatarStore";
@@ -24,6 +24,8 @@ import html2canvas from "html2canvas-pro";
 import jsPDF from "jspdf";
 import { Feedback } from "@/components/results/Feedback";
 import DashboardFooter from "@/components/dashboard/DashboardFooter";
+import { ToastContainer, toast } from "react-toastify";
+import { Msg } from "@/components/ToastCustom";
 
 export default function Page() {
   const setUserData = useUserStore((state) => state.setUserData);
@@ -40,7 +42,7 @@ export default function Page() {
   const userState = useUserStore((state) => state);
   useEffect(() => {
     if (userState.email && !userState.isVerified) {
-      toast.info("Please verify your email", {
+      stoast.info("Please verify your email", {
         description: "We have sent you an account verification email!",
       });
     }

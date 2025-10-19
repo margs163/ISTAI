@@ -40,17 +40,18 @@ router = APIRouter()
 @router.websocket("/ws")
 async def stt_websocket(websocket: WebSocket):
     transcription = {"text": ""}
+    temp_file_path = f"./app/data/temp_audio_{uuid.uuid4().hex}.webm"
+
     try:
         await websocket.accept()
         while True:
             data = await websocket.receive_bytes()
-            temp_file_path = f"./app/data/temp_audio_{uuid.uuid4().hex}.webm"
 
             with open(temp_file_path, "wb") as file:
                 file.write(data)
 
             try:
-                result = transcribe_audio_in_chunks(Path(temp_file_path))
+                result = await transcribe_audio_in_chunks(Path(temp_file_path))
                 metadata = get_speech_metadata(result)
 
                 for segment in result["segments"]:
@@ -63,8 +64,6 @@ async def stt_websocket(websocket: WebSocket):
                 await websocket.send_json(transcription)
                 transcription = {"text": ""}
 
-                if os.path.exists(temp_file_path):
-                    os.remove(temp_file_path)
             except Exception as e:
                 raise WebSocketException(
                     code=status.WS_1011_INTERNAL_ERROR,
@@ -74,8 +73,11 @@ async def stt_websocket(websocket: WebSocket):
     except WebSocketDisconnect:
         pass
     except Exception as e:
-        print(e)
         raise WebSocketException(
             code=status.WS_1011_INTERNAL_ERROR,
             reason="Could not recieve audio chunks",
         )
+
+    finally:
+        if os.path.exists(temp_file_path):
+            os.remove(temp_file_path)

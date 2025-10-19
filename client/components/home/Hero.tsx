@@ -13,8 +13,8 @@ export default function Hero() {
       <Tag className="lg:text-sm lg:px-4 lg:py-2 lg:rounded-3xl to-indigo-500">
         Speak with Confidence
       </Tag>
-      <div className="flex flex-col gap-4 lg:gap-5 lg:max-w-[1000px] xl:max-w-[1200px] px-4 md:px-20">
-        <h1 className="font-bold text-5xl lg:text-[6rem] text-gray-800 tracking-tighter text-center leading-[1.05]">
+      <div className="flex flex-col gap-3.5 lg:gap-5 lg:max-w-[1000px] xl:max-w-[1200px] px-4 md:px-20">
+        <h1 className="font-bold text-5xl lg:text-[6rem] text-gray-800 tracking-tighter text-center leading-[1.0]">
           Master <span className="text-gray-800">IELTS</span> Speaking with Real
           Practice
         </h1>
@@ -29,22 +29,26 @@ export default function Hero() {
       </div>
       <div className="mt-4 lg:mt-6 lg:space-x-4 space-x-2">
         <Link href={"/signup"}>
-          <ButtonPrimary>Start Free Trial</ButtonPrimary>
+          <ButtonPrimary className="cursor-pointer">
+            Start Free Trial
+          </ButtonPrimary>
         </Link>
         <Link href={"/signup"}>
-          <ButtonSecondary>See How it Works</ButtonSecondary>
+          <ButtonSecondary className="cursor-pointer">
+            See How it Works
+          </ButtonSecondary>
         </Link>
       </div>
       {/* <div> */}
       <div className="flex flex-row gap-2 items-center justify-center absolute w-full mt-8 -bottom-88 lg:-bottom-160">
         <Image
           src={tabletImage}
-          className=" w-84 lg:w-[540px] rounded-xl relative lg:-right-4 -top-12 lg:-top-17 shadow-md"
+          className=" w-84 lg:w-[540px] rounded-xl relative lg:-right-4 -top-13 lg:-top-17 shadow-md"
           alt="phoneIstai"
         />
         <Image
           src={phoneImage}
-          className=" w-40 lg:w-[280px] rounded-[2rem] hidden relative lg:block -left-20 -bottom-4 z-10 shadow-md"
+          className=" w-40 lg:w-[280px] rounded-[2rem] hidden relative lg:block -left-20 -bottom-4 z-0 shadow-md"
           alt="phoneIstai"
         />
       </div>

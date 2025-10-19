@@ -28,7 +28,6 @@ export default function TestMetadata({
   testAssistant: string;
   userName: string;
 }) {
-  console.log(testDuration);
   return (
     <section className="p-6 rounded-xl border border-slate-200/80 space-y-6 bg-white">
       <div className="flex flex-row items-center gap-2">

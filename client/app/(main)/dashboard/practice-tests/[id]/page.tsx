@@ -17,7 +17,7 @@ import DialogWeakSides from "@/components/dashboard/practiceDialog/DialogWeakSid
 import LoadingSmallUI from "@/components/loadingSmallUI";
 import { useGlobalPracticeTestsStore } from "@/lib/practiceTestStore";
 import { useUserStore } from "@/lib/userStorage";
-import React, { use, useEffect, useMemo, useRef } from "react";
+import React, { use, useCallback, useEffect, useMemo, useRef } from "react";
 import html2canvas from "html2canvas-pro";
 import { jsPDF } from "jspdf";
 import { QuestionCardType } from "@/lib/types";
@@ -63,7 +63,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
     return <LoadingSmallUI />;
   }
 
-  const handleExport = async () => {
+  const handleExport = useCallback(async () => {
     const element = printRef.current;
     if (!element) return;
 
@@ -98,7 +98,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
     }
 
     pdf.save(`results-${practiceTest.practice_name}.pdf`);
-  };
+  }, [practiceTest.practice_name]);
 
   return (
     <div className="w-full flex flex-col gap-6 bg-gray-50 pb-6">

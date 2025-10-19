@@ -14,6 +14,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { authorizeGoogle, checkQuestRecord } from "@/lib/queries";
 import LogoWithIcon from "@/components/LogoWithIcon";
+import { toast } from "sonner";
 
 export default function Page() {
   const router = useRouter();
@@ -52,15 +53,16 @@ export default function Page() {
         throw new Error("Could not login");
       }
       const hasRecord = await checkQuestRecord();
-      console.log("Has record:", hasRecord);
 
       if (!hasRecord) {
         router.replace("/questionnaire");
       } else {
-        router.replace("/");
+        router.replace("/dashboard");
       }
     } catch (error) {
-      console.error(error);
+      toast.error("Could not login", {
+        description: "Email or password are invalid",
+      });
     }
   };
 
@@ -91,14 +93,15 @@ export default function Page() {
                   router.push(url);
                 }
               }}
-              className="w-full flex flex-row items-center justify-center gap-2 border-2 border-gray-300/80 rounded-md p-2.5 mt-2"
+              disabled={isSubmitting}
+              className="w-full flex disabled:cursor-not-allowed flex-row cursor-pointer hover:bg-gray-50 active:bg-gray-50 transition-colors items-center justify-center gap-2 border-2 border-gray-300/80 rounded-md p-2.5 mt-2"
             >
               <Image src={googleIcon} alt="google" className="w-6 shrink-0" />
               <p className="text-sm font-medium text-gray-700">
                 Log In with Google
               </p>
             </button>
-            <div className="flex flex-row items-center w-full gap-2 mt-2">
+            <div className="flex flex-row items-center w-full gap-2 mt-2.5">
               <hr className="h-[2px] text-gray-200 w-1/2" />
               <p className="text-xs font-medium text-gray-500 pb-1">or</p>
               <hr className="h-[2px] text-gray-200 w-1/2" />
@@ -128,7 +131,7 @@ export default function Page() {
                     errors.password.message}
                 </p>
               </div>
-              <Link href={"/password-reset"} className="ml-auto mt-1">
+              <Link href={"/password-reset"} className="ml-auto mt-0">
                 <p className="text-xs text-gray-600 hover:text-gray-800 transition-colors">
                   Forgot password
                 </p>
@@ -138,7 +141,7 @@ export default function Page() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full disabled:bg-indigo-500 py-2.5 rounded-md bg-indigo-700 text-white font-medium lg:font-semibold text-xs hover:bg-indigo-600 transition-colors"
+                className="w-full disabled:bg-indigo-500 cursor-pointer py-2.5 rounded-md bg-indigo-700 text-white font-medium lg:font-semibold text-xs hover:bg-indigo-600 transition-colors"
               >
                 {isSubmitting ? "Logging in..." : "Log In"}
               </button>
@@ -156,7 +159,7 @@ export default function Page() {
             alt="talkingWoman"
             className="h-full object-cover brightness-75 rounded-r-lg"
           />
-          <div className="absolute top-2/3 xl:top-3/4 w-full pr-12 flex flex-col items-end gap-6 p-4 drop-shadow-2xl drop-shadow-gray-600">
+          <div className="absolute top-1/2 xl:top-3/4 w-full pr-12 flex flex-col items-end gap-6 p-4 drop-shadow-2xl drop-shadow-gray-600">
             <h2 className="font-bold leading-[1.3] tracking-tight text-3xl text-white w-[90%] xl:w-3/4 text-right text-shadow-sm">
               Unlock Your IELTS Success with AI-Powered Speaking Practice. Join
               ISTAI today.

@@ -15,7 +15,7 @@ export default function UpgradePro({
         ) : plan === "Starter" ? (
           <Crown className="text-blue-600 size-4.5" />
         ) : (
-          <Gem className="text-purple-600 size-4.5" />
+          <Gem className="text-indigo-600 size-4.5" />
         )}
         {plan === "Free" ? (
           <p className="text-gray-600 text-sm">Free Trial</p>

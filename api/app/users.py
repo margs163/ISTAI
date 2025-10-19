@@ -19,7 +19,9 @@ from .schemas.notifications import NotificationTypeEnum, NotificationsSchema
 from .schemas.subscriptions import SubscriptionSchema, TierEnum
 from .lib.auth_db import User, get_async_session, get_user_db
 from fastapi import Request, Depends, Response
+from fastapi.responses import RedirectResponse
 from httpx_oauth.clients.google import GoogleOAuth2
+from .dependencies import celery_app
 from typing import Optional
 import uuid
 from dotenv import load_dotenv
@@ -43,7 +45,7 @@ conf = ConnectionConfig(
     MAIL_FROM=mail_address,
     MAIL_PORT=587,
     MAIL_SERVER="smtp.gmail.com",
-    MAIL_FROM_NAME="AIELTSTalk",
+    MAIL_FROM_NAME="Fluent Flow",
     MAIL_STARTTLS=True,
     MAIL_SSL_TLS=False,
     USE_CREDENTIALS=True,
@@ -57,6 +59,10 @@ google_oauth_client = GoogleOAuth2(
     CLIENT_ID, CLIENT_SECRET, scopes=["openid", "email", "profile"]
 )
 
+@celery_app.task(ignore_result=True)
+async def send_email_offload(message: MessageSchema, conf: ConnectionConfig) -> None:
+    fm = FastMail(conf)
+    await fm.send_message(message=message)
 
 class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
     reset_password_token_secret = SECRET
@@ -122,8 +128,9 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
                     f"Could not create analytics record after registering.\nError: {e}"
                 )
 
-        fm = FastMail(conf)
-        await fm.send_message(message=message)
+        # fm = FastMail(conf)
+        # await fm.send_message(message=message)
+        await send_email_offload(message, conf)
         print(f"User {user.id} has registered.")
 
     async def on_after_forgot_password(
@@ -145,14 +152,15 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
                 </html>"""
 
         message = MessageSchema(
-            subject="Password Reset in AIELTSTalk",
+            subject="Password Reset in FluentFlow",
             recipients=[user.email],
             body=html,
             subtype=MessageType.html,
         )
 
-        fm = FastMail(conf)
-        await fm.send_message(message=message)
+        # fm = FastMail(conf)
+        # await fm.send_message(message=message)
+        await send_email_offload(message, conf)
         print(f"User {user.id} has forgot their password. Reset token: {token}")
 
     async def on_after_request_verify(
@@ -180,8 +188,9 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
             subtype=MessageType.html,
         )
 
-        fm = FastMail(conf)
-        await fm.send_message(message=message)
+        # fm = FastMail(conf)
+        # await fm.send_message(message=message)
+        await send_email_offload(message, conf)
         print(f"Verification requested for user {user.id}. Verification token: {token}")
 
     async def on_after_login(
@@ -226,9 +235,8 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
 
                 print("Last login is set!", user_record.last_login_at)
                 
-        # if response is not None:
-        #     response.status_code = 307
-        #     response.headers["Location"] = "http://localhost:3000/dashboard"
+        if response is not None:
+            return RedirectResponse(url="http://localhost:3000/dashboard")
 
 
 cookie_transport = CookieTransport(

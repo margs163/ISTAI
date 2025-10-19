@@ -145,7 +145,7 @@ export default function NewTest({ children }: { children: React.ReactNode }) {
               >
                 <option value="">Select</option>
                 <option value="Ron">Ron</option>
-                <option value="Emma">Emma</option>
+                {/* <option value="Emma">Emma</option> */}
               </select>
               {errors.assisstant && (
                 <p className="text-red-700 font-normal text-xs">

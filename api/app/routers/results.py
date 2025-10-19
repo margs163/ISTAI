@@ -43,33 +43,49 @@ import azure.cognitiveservices.speech as speechsdk
 from sqlalchemy.ext.asyncio import AsyncSession
 from dotenv import load_dotenv
 from ..dependencies import limiter
-import logging as LOGGER
+from ..dependencies import celery_app
+import logging
 import os
 
 load_dotenv()
 
+logger = logging.getLogger(__name__)
 
+
+@celery_app.task
 async def convert_to_wav(input_path: str, output_path: str) -> None:
+    if not os.path.exists(input_path):
+        raise FileNotFoundError(f"Input file with path {input_path} does not exist")
+
     command = [
         "ffmpeg",
         "-i",
-        input_path,
+        str(input_path),
         "-ac",
         "1",  # Mono
         "-ar",
         "16000",  # Sample rate
         "-sample_fmt",
         "s16",  # Sample width (16-bit = 2 bytes)
-        output_path,
+        "-threads",
+        "auto",
+        "-y",
+        str(output_path),
     ]
-    process = await asyncio.create_subprocess_exec(
-        *command, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
-    )
-    LOGGER.info("Converted an audio file to a wav format")
-    stdout, stderr = await process.communicate()
-    if process.returncode != 0:
-        LOGGER.error("FFmpeg could not convert audio to a wav format")
-        raise RuntimeError(f"FFmpeg failed: {stderr.decode()}")
+
+    try:
+        process = await asyncio.create_subprocess_exec(
+            *command, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
+        )
+        logger.info("Converted an audio file to a wav format")
+        stdout, stderr = await process.communicate()
+
+        if process.returncode != 0:
+            raise RuntimeError(f"FFmpeg failed: {stderr.decode()}")
+
+    except Exception as e:
+        logger.error(f"FFmpeg conversion to wav failed: {str(e)}")
+        raise RuntimeError(f"FFmpeg conversion to wav failed: {str(e)}")
 
 
 def round_to_half(value: float) -> float:
@@ -103,7 +119,7 @@ async def post_results(
         await websocket.accept()
         while True:
             data = await websocket.receive_json()
-            LOGGER.info("Recieved data")
+            logger.info("Recieved data")
             validated = WebSocketInputData(**data)
 
             test = await session.scalars(
@@ -112,9 +128,9 @@ async def post_results(
                 )
             )
             test = test.first()
-            LOGGER.info("Got the test")
+            logger.info("Got the test")
             if not test:
-                LOGGER.error("Could not find a test with a specified id")
+                logger.error("Could not find a test with a specified id")
                 raise WebSocketException(
                     code=status.HTTP_400_BAD_REQUEST,
                     reason="Could not find a test with specified id",
@@ -131,7 +147,7 @@ async def post_results(
             )
 
             await websocket.send_text("Invoking sentences graph")
-            LOGGER.info("Invoked a general graph")
+            logger.info("Invoked a general graph")
 
             sentences_state = await sentence_app.ainvoke(
                 {
@@ -139,7 +155,7 @@ async def post_results(
                 }
             )
 
-            LOGGER.info("Invoked a sentences graph")
+            logger.info("Invoked a sentences graph")
             local_path = f"./app/data/pronunciation-{uuid4()}.wav"
             await s3_client.download_file(  # type: ignore
                 Bucket=bucket_name,
@@ -147,16 +163,17 @@ async def post_results(
                 Filename=local_path,
             )
 
-            LOGGER.info("Downloaded the reading audio file")
+            logger.info("Downloaded the reading audio file")
 
             output_path = f"./app/data/pronunciation-{uuid4()}.wav"
 
-            await convert_to_wav(local_path, output_path)
+            task = convert_to_wav.delay(local_path, output_path)
+            await task.get()
 
             reference_text = validated.readingCard.text
 
             await websocket.send_text("Transcribing reading speech")
-            LOGGER.debug("Converted the audio to a wav format")
+            logger.debug("Converted the audio to a wav format")
 
             speech_config = speechsdk.SpeechConfig(
                 subscription=azure_api_key,
@@ -182,7 +199,7 @@ async def post_results(
 
             pronunciation_assessment_config.apply_to(recognizer)
 
-            LOGGER.info("Applied config to a recognizer")
+            logger.info("Applied config to a recognizer")
 
             accuracy = 0
             transcriptions = []
@@ -240,7 +257,7 @@ async def post_results(
                 await asyncio.sleep(0.5)
 
             await websocket.send_text("Invoking pronunciation agent")
-            LOGGER.info("Transcribed audio for pronunciation assessment")
+            logger.info("Transcribed audio for pronunciation assessment")
 
             if not accuracy:
                 raise WebSocketException(
@@ -256,7 +273,7 @@ async def post_results(
                 }
             )
 
-            LOGGER.info("Pronunciation agent run successfully")
+            logger.info("Pronunciation agent run successfully")
 
             pronunciation_score = state["pronunciation_score"]
             pronunciation_strong_points = state["pronunciation_strong_points"]
@@ -343,27 +360,28 @@ async def post_results(
                 general_tips=general_tips,
             )
 
-            LOGGER.info("Results object was added to the session")
+            logger.info("Results object was added to the session")
             await websocket.send_json({"data": serializable.model_dump()})
 
     except WebSocketDisconnect:
         pass
     except Exception as e:
-        LOGGER.error(e)
-        raise e
+        logger.error(e)
         raise WebSocketException(
             code=status.WS_1011_INTERNAL_ERROR, reason=f"Server error: {e}"
         )
 
     finally:
         if local_path and OSPath(local_path).exists():
-            OSPath(local_path).unlink()
+            OSPath(local_path).unlink(missing_ok=True)
 
         if output_path and OSPath(output_path).exists():
-            OSPath(output_path).unlink()
+            OSPath(output_path).unlink(missing_ok=True)
 
         if validated and validated.reading_audio_path:
-            await s3_client.delete_object(Bucket=bucket_name, Key=validated.reading_audio_path)  # type: ignore
+            await s3_client.delete_object(
+                Bucket=bucket_name, Key=validated.reading_audio_path
+            )  # type: ignore
 
 
 @router.get("/{test_id}")

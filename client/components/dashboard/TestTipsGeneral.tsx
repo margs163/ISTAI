@@ -159,7 +159,7 @@ export function TestTipsDialog({
   return (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
       <DialogTrigger>{children}</DialogTrigger>
-      <DialogContent className="font-geist max-h-[600px] space-y-2 overflow-y-scroll max-w-[352px] px-6.5 lg:px-8">
+      <DialogContent className="font-geist max-h-[600px] space-y-2 overflow-y-scroll max-w-[350px] lg:max-w-[460px] px-6.5 lg:p-8 lg:px-9 pb-0 lg:pb-0">
         <DialogHeader className="items-start text-left">
           <DialogTitle className="text-base text-gray-800 font-semibold">
             <div className="flex items-center gap-2 mb-0">
@@ -188,7 +188,7 @@ export function TestTipsDialog({
               }`}
               onClick={() => setActivePart(part.id)}
             >
-              <part.icon className="h-4 w-4" />
+              <part.icon className="h-4 w-4 lg:h-5" />
               {part.title}
             </Button>
           ))}
@@ -266,7 +266,7 @@ export function TestTipsDialog({
             </>
           )}
         </main>
-        <DialogFooter className="mt-4">
+        <DialogFooter className="mt-4 sticky bottom-0 bg-white w-full pt-4 lg:pt-6 py-6">
           <div className="flex flex-row gap-2 items-start justify-end">
             <DialogClose asChild>
               <MainButton variant="secondary" className="ml-0 self-end">
