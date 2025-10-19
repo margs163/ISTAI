@@ -40,9 +40,11 @@ if not SECRET:
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s",
+    handlers=[logging.StreamHandler()],
 )
 
 logger = logging.getLogger(__name__)
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -156,6 +158,7 @@ app.include_router(
 async def main(request: Request):
     logger.info("Root endpoint was hit!")
     return {"message": "Hello, World!"}
+
 
 Instrumentator().instrument(app).expose(app)
 
