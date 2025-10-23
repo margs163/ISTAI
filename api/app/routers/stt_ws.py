@@ -73,6 +73,8 @@ async def stt_websocket(websocket: WebSocket):
     except WebSocketDisconnect:
         pass
     except Exception as e:
+        print(e)
+        raise e
         raise WebSocketException(
             code=status.WS_1011_INTERNAL_ERROR,
             reason="Could not recieve audio chunks",

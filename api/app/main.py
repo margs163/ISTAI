@@ -28,7 +28,6 @@ from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from .dependencies import limiter
 from .users import google_oauth_client
-import logging
 import uvicorn
 
 load_dotenv()

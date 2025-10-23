@@ -227,7 +227,7 @@ services:
   celery:
     build: ./api
     container_name: celery_worker
-    command: celery -A tasks worker --loglevel=info
+    command: celery -A tasks worker -pool=gevent --loglevel=info --concurrency=10
     depends_on:
       redis:
         condition: service_healthy

@@ -18,9 +18,6 @@ load_dotenv()
 current_active_user = fastapi_users.current_user(active=True)
 limiter = Limiter(key_func=get_remote_address)
 
-celery_app = Celery("tasks", broker="redis://kv-redis:6379/0")
-celery_logger = get_task_logger(__name__)
-
 
 async def get_openai_client() -> AsyncGenerator[OpenAI, None]:
     client = OpenAI(
@@ -34,7 +31,12 @@ async def get_openai_client() -> AsyncGenerator[OpenAI, None]:
 
 
 async def get_redis_client() -> AsyncGenerator[redis.Redis, None]:
-    instance = redis.Redis(host="kv-redis", port=6379, decode_responses=True, password=os.getenv("REDIS_PASSWORD"))
+    instance = redis.Redis(
+        host="localhost",
+        port=6379,
+        decode_responses=True,
+        password=os.getenv("REDIS_PASSWORD"),
+    )
 
     try:
         yield instance
@@ -62,8 +64,7 @@ async def get_s3_client() -> AsyncGenerator[Session, None]:
 
 async def get_pollar_client() -> AsyncGenerator[Polar, None]:
     async with Polar(
-        access_token=os.getenv("POLAR_ACCESS_TOKEN_TEST"),
-        server="sandbox"
+        access_token=os.getenv("POLAR_ACCESS_TOKEN_TEST"), server="sandbox"
     ) as polar:
         try:
             yield polar

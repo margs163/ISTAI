@@ -41,17 +41,19 @@ import { Msg } from "@/components/ToastCustom";
 const Joyride = dynamic(() => import("react-joyride"), { ssr: false });
 const Confetti = dynamic(() => import("react-confetti"), { ssr: false });
 
-const notify = () =>
-  rtoast(Msg, {
-    data: {
-      title: "Please, record your speech!",
-      text: "You are making a long pause.",
-    },
-    theme: "colored",
-    position: "top-center",
-  });
-
 export default function Page() {
+  const notify = useCallback(
+    () =>
+      rtoast(Msg, {
+        data: {
+          title: "Please, record your speech!",
+          text: "You are making a long pause.",
+        },
+        theme: "colored",
+        position: "top-center",
+      }),
+    []
+  );
   const { width, height } = useWindowSize();
   const router = useRouter();
   const localTestId = useLocalPracticeTestStore((state) => state.id);

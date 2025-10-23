@@ -21,7 +21,8 @@ from .lib.auth_db import User, get_async_session, get_user_db
 from fastapi import Request, Depends, Response
 from fastapi.responses import RedirectResponse
 from httpx_oauth.clients.google import GoogleOAuth2
-from .dependencies import celery_app
+from .lib.celery_app import celery_app
+import asyncio
 from typing import Optional
 import uuid
 from dotenv import load_dotenv
@@ -59,10 +60,20 @@ google_oauth_client = GoogleOAuth2(
     CLIENT_ID, CLIENT_SECRET, scopes=["openid", "email", "profile"]
 )
 
+
 @celery_app.task(ignore_result=True)
-async def send_email_offload(message: MessageSchema, conf: ConnectionConfig) -> None:
+async def send_email_offload(subject: str, user_email: str, html_content: str) -> None:
+    global conf
+
+    message = MessageSchema(
+        subject=subject,
+        recipients=[user_email],
+        body=html_content,
+        subtype=MessageType.html,
+    )
     fm = FastMail(conf)
     await fm.send_message(message=message)
+
 
 class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
     reset_password_token_secret = SECRET
@@ -70,13 +81,7 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
 
     async def on_after_register(self, user: User, request: Optional[Request] = None):
         html = "<p>Hi, you have successfully registered in <strong>FluentFlow!</strong> Visit the dashboard to learn more.</p>"
-
-        message = MessageSchema(
-            subject="Successful Registration in FluentFlow",
-            recipients=[user.email],
-            body=html,
-            subtype=MessageType.html,
-        )
+        subject = "Successful Registration in FluentFlow"
 
         async for session in get_async_session():
             try:
@@ -102,7 +107,7 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
                     user_id=str(user.id),
                     subscription_tier=TierEnum.FREE.value,
                     credits_total_purchased=0,
-                    pronunciation_tests_left=2, 
+                    pronunciation_tests_left=2,
                     credits_left=20,
                 )
 
@@ -130,7 +135,7 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
 
         # fm = FastMail(conf)
         # await fm.send_message(message=message)
-        await send_email_offload(message, conf)
+        send_email_offload.delay(subject, user.email, html)
         print(f"User {user.id} has registered.")
 
     async def on_after_forgot_password(
@@ -151,16 +156,11 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
                 </body>
                 </html>"""
 
-        message = MessageSchema(
-            subject="Password Reset in FluentFlow",
-            recipients=[user.email],
-            body=html,
-            subtype=MessageType.html,
-        )
+        subject = "Password Reset in FluentFlow"
 
         # fm = FastMail(conf)
         # await fm.send_message(message=message)
-        await send_email_offload(message, conf)
+        send_email_offload.delay(subject, user.email, html)
         print(f"User {user.id} has forgot their password. Reset token: {token}")
 
     async def on_after_request_verify(
@@ -181,16 +181,11 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
                 </body>
                 </html>"""
 
-        message = MessageSchema(
-            subject="Account Verification in FluentFlow",
-            recipients=[user.email],
-            body=html,
-            subtype=MessageType.html,
-        )
+        subject = "Account Verification in FluentFlow"
 
         # fm = FastMail(conf)
         # await fm.send_message(message=message)
-        await send_email_offload(message, conf)
+        send_email_offload.delay(subject, user.email, html)
         print(f"Verification requested for user {user.id}. Verification token: {token}")
 
     async def on_after_login(
@@ -204,8 +199,12 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
                 analytic = await session.scalar(
                     select(Analytics).where(Analytics.user_id == user.id)
                 )
-                user_record = await session.scalar(select(User).where(User.id == user.id))
-                sub_record = await session.scalar(select(Subscription).where(Subscription.user_id == user.id))
+                user_record = await session.scalar(
+                    select(User).where(User.id == user.id)
+                )
+                sub_record = await session.scalar(
+                    select(Subscription).where(Subscription.user_id == user.id)
+                )
 
                 tests = await session.scalars(
                     select(PracticeTest)
@@ -215,14 +214,16 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
                 result = tests.unique()
                 result = result.all()
 
-
                 if result and analytic:
                     last = result[0]
                     print("LAST DATE:", last.test_date)
                     if datetime.now() - last.test_date > timedelta(days=1):
                         analytic.streak_days = 0
 
-                if user_record.last_login_at is not None and datetime.now() - user_record.last_login_at > timedelta(days=1):
+                if (
+                    user_record.last_login_at is not None
+                    and datetime.now() - user_record.last_login_at > timedelta(days=1)
+                ):
                     if sub_record.subscription_tier == TierEnum.STARTER.value:
                         sub_record.pronunciation_tests_left = 6
                     elif sub_record.subscription_tier == TierEnum.PRO.value:
@@ -234,7 +235,7 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
                 await session.commit()
 
                 print("Last login is set!", user_record.last_login_at)
-                
+
         if response is not None:
             return RedirectResponse(url="http://localhost:3000/dashboard")
 
