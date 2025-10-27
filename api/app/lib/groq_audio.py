@@ -553,16 +553,11 @@ async def transcribe_audio_in_chunks(
     if not api_key:
         raise ValueError("GROQ_API_KEY environment variable not set")
 
-    print(f"\nStarting transcription of: {audio_path}")
-    # Make sure your Groq API key is configured. If you don't have one, you can get one at https://console.groq.com/keys!
     client = Groq(api_key=api_key, max_retries=0)
 
     processed_path = None
     try:
-        # Preprocess audio and get basic info
-        print("Running the task")
         task = preprocess_task.delay(str(audio_path))
-        print("Task id:", task.id)
 
         result = AsyncResult(task.id)
 
@@ -572,8 +567,6 @@ async def transcribe_audio_in_chunks(
         if result.successful():
             processed_path = Path(result.get())
 
-            # processed_path = await task.get()
-            print("Processed path:", str(processed_path))
             logger.info(f"Preprocessed audio {audio_path} with FFmpeg")
             try:
                 audio = AudioSegment.from_file(processed_path, format="flac")

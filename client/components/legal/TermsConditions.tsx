@@ -18,7 +18,7 @@ export default function TermsConditions() {
           AGREEMENT TO OUR LEGAL TERMS
         </RegularLegalHeader>
         <RegularLegalParagraph>
-          We are FluentFLow (&quot;Company&quot;, &quot;we&quot;,
+          We are FluentFlow (&quot;Company&quot;, &quot;we&quot;,
           &quot;us&quot;, or &quot;our&quot;) a company registered in
           Kazakhstan. We operate the website https://fluentflow.space (the
           &quot;Site&quot;), as well as any other related products and services

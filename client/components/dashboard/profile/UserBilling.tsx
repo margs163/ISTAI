@@ -66,7 +66,7 @@ export default function UserBilling() {
                   View Plans
                 </button>
               </Link>
-              <UpgradePlan />
+              {/* <UpgradePlan /> */}
             </div>
           </div>
         </div>

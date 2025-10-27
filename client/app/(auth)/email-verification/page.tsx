@@ -59,7 +59,7 @@ export default function Page() {
           <div className="absolute top-1/2 xl:top-3/5 w-full pr-12 flex flex-col items-end gap-6 p-4 drop-shadow-2xl">
             <h2 className="font-bold leading-[1.3] tracking-tight text-3xl text-white w-[90%] xl:w-3/4 text-right text-shadow-sm">
               Unlock Your IELTS Success with AI-Powered Speaking Practice. Join
-              ISTAI today.
+              FluentFlow today.
             </h2>
             <div className="flex flex-row">
               <p className="text-sm font-semibold text-white relative -right-4 text-shadow-sm">

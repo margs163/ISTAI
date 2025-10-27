@@ -17,7 +17,14 @@ import DialogWeakSides from "@/components/dashboard/practiceDialog/DialogWeakSid
 import LoadingSmallUI from "@/components/loadingSmallUI";
 import { useGlobalPracticeTestsStore } from "@/lib/practiceTestStore";
 import { useUserStore } from "@/lib/userStorage";
-import React, { use, useCallback, useEffect, useMemo, useRef } from "react";
+import React, {
+  use,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useTransition,
+} from "react";
 import html2canvas from "html2canvas-pro";
 import { jsPDF } from "jspdf";
 import { QuestionCardType } from "@/lib/types";
@@ -34,6 +41,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
   const lastName = useUserStore((state) => state.lastName);
   const printRef = useRef<HTMLDivElement>(null);
   const setTTSWords = useWordsTTSStore((state) => state.setUrls);
+  const [isPending, startTransition] = useTransition();
 
   useQuery({
     queryKey: ["tts-get"],
@@ -64,40 +72,42 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
   }
 
   const handleExport = useCallback(async () => {
-    const element = printRef.current;
-    if (!element) return;
+    startTransition(async () => {
+      const element = printRef.current;
+      if (!element) return;
 
-    const canvas = await html2canvas(element, {
-      scale: 2,
-      ignoreElements: (el) => el.classList?.contains("no-print"),
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        ignoreElements: (el) => el.classList?.contains("no-print"),
+      });
+      const imgData = canvas.toDataURL("image/jpeg");
+
+      const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "px",
+        format: "a4",
+      });
+
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+
+      const imgProps = pdf.getImageProperties(imgData);
+      const imgWidth = pageWidth;
+      const imgHeight = (imgProps.height * imgWidth) / imgProps.width;
+
+      let y = 0;
+      let pageNum = 0;
+
+      while (y < imgHeight) {
+        if (pageNum > 0) pdf.addPage();
+
+        pdf.addImage(imgData, "PNG", 0, -y, imgWidth, imgHeight);
+        y += pageHeight;
+        pageNum++;
+      }
+
+      pdf.save(`results-${practiceTest.practice_name}.pdf`);
     });
-    const imgData = canvas.toDataURL("image/jpeg");
-
-    const pdf = new jsPDF({
-      orientation: "portrait",
-      unit: "px",
-      format: "a4",
-    });
-
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
-
-    const imgProps = pdf.getImageProperties(imgData);
-    const imgWidth = pageWidth;
-    const imgHeight = (imgProps.height * imgWidth) / imgProps.width;
-
-    let y = 0;
-    let pageNum = 0;
-
-    while (y < imgHeight) {
-      if (pageNum > 0) pdf.addPage();
-
-      pdf.addImage(imgData, "PNG", 0, -y, imgWidth, imgHeight);
-      y += pageHeight;
-      pageNum++;
-    }
-
-    pdf.save(`results-${practiceTest.practice_name}.pdf`);
   }, [practiceTest.practice_name]);
 
   return (
