@@ -6,7 +6,13 @@ import QuickActions from "@/components/dashboard/QuickActions";
 import RadarChart from "@/components/dashboard/RadarChart";
 import RecentPracticeTests from "@/components/dashboard/RecentPracticeTests";
 import StatisticsCards from "@/components/dashboard/StatisticsCards";
-import React, { useEffect, useRef, useState } from "react";
+import React, {
+  startTransition,
+  useEffect,
+  useRef,
+  useState,
+  useTransition,
+} from "react";
 import { useAnalyticsStore, useUserStore } from "@/lib/userStorage";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -29,6 +35,7 @@ import { Msg } from "@/components/ToastCustom";
 
 export default function Page() {
   const setUserData = useUserStore((state) => state.setUserData);
+  const [isPending, startTransition] = useTransition();
   const avatarPath = useUserStore((state) => state.avatar_path);
   const setAnalytics = useAnalyticsStore((state) => state.setAnalyticsData);
   const setSubscription = useSubscriptionStore((state) => state.setSubData);
@@ -48,30 +55,32 @@ export default function Page() {
     }
   }, []);
 
-  // const handleExport = async () => {
-  //   const element = printRef.current;
-  //   if (!element) return;
+  const handleExport = async () => {
+    startTransition(async () => {
+      const element = printRef.current;
+      if (!element) return;
 
-  //   const canvas = await html2canvas(element, {
-  //     scale: 2,
-  //     ignoreElements: (el) => el.classList?.contains("no-print"),
-  //   });
-  //   const imgData = canvas.toDataURL("image/jpeg");
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        ignoreElements: (el) => el.classList?.contains("no-print"),
+      });
+      const imgData = canvas.toDataURL("image/jpeg");
 
-  //   const pdf = new jsPDF({
-  //     orientation: "portrait",
-  //     unit: "px",
-  //     format: "a4",
-  //   });
+      const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "px",
+        format: "a4",
+      });
 
-  //   const pageWidth = pdf.internal.pageSize.getWidth();
-  //   const imgProps = pdf.getImageProperties(imgData);
-  //   const imgWidth = pageWidth;
-  //   const imgHeight = (imgProps.height * imgWidth) / imgProps.width;
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const imgProps = pdf.getImageProperties(imgData);
+      const imgWidth = pageWidth;
+      const imgHeight = (imgProps.height * imgWidth) / imgProps.width;
 
-  //   pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
-  //   pdf.save(`stats.pdf`);
-  // };
+      pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
+      pdf.save(`stats.pdf`);
+    });
+  };
 
   useQuery({
     queryKey: ["user"],
@@ -111,7 +120,7 @@ export default function Page() {
   return (
     <div className="w-full flex flex-col gap-6 bg-gray-50 pb-6">
       <DashboardHeader />
-      <Greeting />
+      <Greeting handleExport={handleExport} />
       <div
         className="w-full flex flex-col gap-6 lg:grid lg:grid-cols-[0.24fr_0.49fr_0.32fr] lg:justify-items-stretch"
         ref={printRef}

@@ -17,7 +17,14 @@ import DialogWeakSides from "@/components/dashboard/practiceDialog/DialogWeakSid
 import LoadingSmallUI from "@/components/loadingSmallUI";
 import { useGlobalPracticeTestsStore } from "@/lib/practiceTestStore";
 import { useUserStore } from "@/lib/userStorage";
-import React, { use, useCallback, useEffect, useMemo, useRef } from "react";
+import React, {
+  use,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useTransition,
+} from "react";
 import html2canvas from "html2canvas-pro";
 import { jsPDF } from "jspdf";
 import { QuestionCardType } from "@/lib/types";
@@ -34,6 +41,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
   const lastName = useUserStore((state) => state.lastName);
   const printRef = useRef<HTMLDivElement>(null);
   const setTTSWords = useWordsTTSStore((state) => state.setUrls);
+  const [isPending, startTransition] = useTransition();
 
   useQuery({
     queryKey: ["tts-get"],
@@ -60,8 +68,9 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
   });
   
   const handleExport = useCallback(async () => {
-    const element = printRef.current;
-    if (!element) return;
+    startTransition(async () => {
+      const element = printRef.current;
+      if (!element) return;
 
     const canvas = await html2canvas(element, {
       scale: 2,

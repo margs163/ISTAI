@@ -3,9 +3,12 @@ import { useGlobalPracticeTestsStore } from "@/lib/practiceTestStore";
 import { deletePracticeTest, fetchPracticeTests } from "@/lib/queries";
 import { cn, getPreciseTimeAgo, parseTimeInt } from "@/lib/utils";
 import {
+  QueryClient,
   useMutation,
   UseMutationResult,
   useQuery,
+  useQueryClient,
+  UseQueryResult,
 } from "@tanstack/react-query";
 import { BookText, Bot, ChartColumn, Ellipsis, Trash } from "lucide-react";
 import Link from "next/link";
@@ -17,9 +20,11 @@ import RecentTestsFallback from "./RecentTestsFallback";
 export function PracticeTest({
   test,
   mutation,
+  refetch,
 }: {
   test: PracticeTestType;
   mutation: UseMutationResult<true | undefined, Error, string, unknown>;
+  refetch: () => Promise<UseQueryResult>;
 }) {
   if (!test.result) return;
   return (
@@ -73,7 +78,10 @@ export function PracticeTest({
           <Ellipsis className="size-4 p-1.5 rounded-full hover:bg-gray-100 active:bg-gray-100 text-gray-800 hover:text-gray-700 active:text-gray-700 transition-colors box-content" />
         </Link>
         <Trash
-          onClick={async () => await mutation.mutateAsync(test.id)}
+          onClick={async () => {
+            await mutation.mutateAsync(test.id);
+            await refetch();
+          }}
           className="size-4 p-1.5 rounded-full hover:bg-gray-100 active:bg-gray-100 text-gray-800 hover:text-gray-700 active:text-gray-700 transition-colors box-content"
         />
       </div>
@@ -85,7 +93,7 @@ export default function RecentPracticeTests() {
   const setGlobalPracticeTests = useGlobalPracticeTestsStore(
     (state) => state.setPracticeTests
   );
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error, refetch } = useQuery({
     queryKey: ["practice-tests"],
     queryFn: async () => await fetchPracticeTests(setGlobalPracticeTests),
   });
@@ -130,7 +138,12 @@ export default function RecentPracticeTests() {
         <div className="space-y-3">
           {data && data.length > 0 && lastFive && lastFive.length > 0 ? (
             lastFive.map((item, index) => (
-              <PracticeTest key={index} test={item} mutation={mutation} />
+              <PracticeTest
+                key={index}
+                test={item}
+                mutation={mutation}
+                refetch={refetch}
+              />
             ))
           ) : (
             <RecentTestsFallback />

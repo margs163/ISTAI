@@ -40,6 +40,7 @@ from ..lib.general_agents import general_app
 from ..lib.sentence_agents import sentence_app
 from ..lib.pronunciation_agent import pronunciation_app
 import azure.cognitiveservices.speech as speechsdk
+from azure.cognitiveservices.speech import EventSignal
 from sqlalchemy.ext.asyncio import AsyncSession
 from dotenv import load_dotenv
 from ..dependencies import limiter
@@ -123,13 +124,22 @@ async def azure_speech_recognition(output_path: str, reference_text: str) -> dic
     done_event = asyncio.Event()
 
     def stop_callback(event):
+        logger.info(f"Session stopped: session_id={event.session_id}")
         recognizer.stop_continuous_recognition_async()
         done_event.set()
 
     def cancell_callback(event):
-        print(f"CLOSING ON: {event}")
+        logger.error(
+            f"Recognition cancelled: reason={event.cancellation_details.reason}, "
+            f"error_details={event.cancellation_details.error_details}, "
+            f"session_id={event.session_id}, "
+            f"result_id={event.result.result_id}"
+        )
+        print(
+            f"Recognition cancelled: reason={event.cancellation_details.reason}, "
+            f"error_details={event.cancellation_details.error_details}"
+        )
         recognizer.stop_continuous_recognition_async()
-
         done_event.set()
         if event.cancellation_details.reason == speechsdk.CancellationReason.Error:
             raise WebSocketException(
@@ -140,11 +150,12 @@ async def azure_speech_recognition(output_path: str, reference_text: str) -> dic
     def recognize_handle(event):
         if event.result.reason == speechsdk.ResultReason.RecognizedSpeech:
             pronunciation_result = speechsdk.PronunciationAssessmentResult(event.result)
-
+            logger.info(
+                f"Recognized speech: text={event.result.text}, accuracy={pronunciation_result.accuracy_score}"
+            )
             nonlocal accuracy
             accuracy = pronunciation_result.accuracy_score
             transcriptions.append(event.result.text)
-
             for word in pronunciation_result.words:
                 phonemes.append(
                     {
@@ -162,7 +173,12 @@ async def azure_speech_recognition(output_path: str, reference_text: str) -> dic
     recognizer.recognized.connect(recognize_handle)
 
     recognizer.start_continuous_recognition_async()
-    await done_event.wait()
+    try:
+        await asyncio.wait_for(done_event.wait(), timeout=30.0)  # 30-second timeout
+    except asyncio.TimeoutError:
+        logger.error("Speech recognition timed out after 30 seconds")
+        recognizer.stop_continuous_recognition_async()
+        raise RuntimeError("Speech recognition timed out after 30 seconds")
 
     return {
         "accuracy": accuracy,
@@ -250,7 +266,7 @@ async def post_results(
             )
 
             logger.info("Invoked a sentences graph")
-            local_path = f"./app/data/pronunciation-{uuid4()}.wav"
+            local_path = f"./app/data/temp/pronunciation-{uuid4()}.wav"
             await s3_client.download_file(  # type: ignore
                 Bucket=bucket_name,
                 Key=validated.reading_audio_path,
@@ -259,14 +275,22 @@ async def post_results(
 
             logger.info("Downloaded the reading audio file")
 
-            output_path = f"./app/data/pronunciation-{uuid4()}.wav"
+            output_path = f"./app/data/temp/pronunciation-{uuid4()}.wav"
 
             task = wav_converter_task.delay(local_path, output_path)
             result = AsyncResult(task.id)
-            logger.info("Wav conversion started with task id:", task.id)
+            logger.info("Wav conversion started with task id:")
 
             while not result.ready():
                 await asyncio.sleep(0.1)
+
+            if not result.successful():
+                error = result.get(propagate=False)
+                logger.error(f"WAV conversion failed: {str(error)}")
+                raise WebSocketException(
+                    code=status.WS_1011_INTERNAL_ERROR,
+                    reason=f"WAV conversion failed: {str(error)}",
+                )
 
             if result.successful():
                 reference_text = validated.readingCard.text
@@ -278,7 +302,15 @@ async def post_results(
                 result_recognize = AsyncResult(task_recognize.id)
 
                 while not result_recognize.ready():
-                    await asyncio.sleep(1)
+                    await asyncio.sleep(0.2)
+
+                if not result_recognize.successful():
+                    error = result_recognize.get(propagate=False)
+                    logger.error(f"Speech recognition failed: {str(error)}")
+                    raise WebSocketException(
+                        code=status.WS_1011_INTERNAL_ERROR,
+                        reason=f"Speech recognition failed: {str(error)}",
+                    )
 
                 if result_recognize.successful():
                     results: dict = result_recognize.get()
@@ -406,7 +438,7 @@ async def post_results(
     except WebSocketDisconnect:
         pass
     except Exception as e:
-        logger.error(e)
+        logger.error(f"Could not process results for test: {str(e)}")
         raise WebSocketException(
             code=status.WS_1011_INTERNAL_ERROR, reason=f"Server error: {e}"
         )
@@ -450,6 +482,7 @@ async def get_results(
 
                 return {"data": results, "status": "success"}
     except Exception as e:
+        logger.error(f"Could not fetch practice_tests and results: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Could not fetch practice_tests and results: {str(e)}",

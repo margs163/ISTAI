@@ -44,7 +44,7 @@ export default function TestHeader({
           >
             {overallBand.toFixed(1)}
           </h3>
-          <p className="text-xs font-medium text-green-700 bg-green-50 px-2 py-1 border border-green-200 rounded-md">
+          <p className="text-xs font-medium text-green-600 bg-green-50 px-2 py-1 border border-green-200 rounded-md">
             Overall Score
           </p>
         </div>

@@ -6,8 +6,10 @@ import Link from "next/link";
 
 export default function UnexpectedError({
   error,
+  setRefunded,
 }: {
-  error: Error & { digest?: string };
+  error?: Error & { digest?: string };
+  setRefunded?: (refund: boolean) => void;
 }) {
   return (
     <div className="flex flex-col lg:flex-row lg:justify-center bg-white lg:items-center mb-28 lg:mt-6 lg:mb-16 lg:gap-20 gap-0 items-center justify-center text-center w-full">
@@ -21,15 +23,16 @@ export default function UnexpectedError({
           Something Went Wrong...
         </h1>
         <p className="text-sm lg:text-base font-medium text-gray-500">
-          Sorry, an unexpected error has occurred. Don&apos;t worry we have refunded
-          your credits for this test. Try again later!
+          Sorry, an unexpected error has occurred. Don&apos;t worry we have
+          refunded your credits for this test. Try again later!
         </p>
         <Link
-          href={"/"}
+          href={"/dashboard"}
+          onClick={setRefunded && (() => setRefunded(false))}
           replace
           className="px-6 lg:px-8 py-2.5 lg:py-3 mt-4 lg:mt-10 bg-indigo-500 hover:bg-indigo-600 active:bg-indigo-600 transition-colors text-sm font-medium text-white flex items-center justify-center rounded-md gap-2"
         >
-          Go back to home page <MoveRight className="size-5" />
+          Go back to dashboard <MoveRight className="size-5" />
         </Link>
       </div>
     </div>

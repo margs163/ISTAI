@@ -3,7 +3,6 @@ import { Montserrat, Roboto, Inter, Geist } from "next/font/google";
 import Providers from "./providers";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
-import Script from "next/script";
 
 const montFont = Montserrat({
   subsets: ["latin"],
@@ -27,9 +26,10 @@ const geistFont = Geist({
 });
 
 export const metadata: Metadata = {
-  title: "Practice IELTS Speaking with ISTAI",
+  title:
+    "FluentFlow - an AI IELTS Speaking Test Simulator. Practice IELTS Speaking with FluentFlow",
   description:
-    "IELTS AI simulator that is proven to be improving English Fluency",
+    "Practice your speaking by using our AI powered IELTS test simulator. Get instant feedback and improve your score with realistic practice sessions.",
 };
 
 export default function RootLayout({

@@ -100,7 +100,7 @@ export default function Page() {
           <UserBilling />
         </div>
       </div>
-      <DashboardFooter className="justify-center lg:px-6" />
+      <DashboardFooter className="justify-center lg:px-6 mt-2" />
     </div>
   );
 }

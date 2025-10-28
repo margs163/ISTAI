@@ -117,6 +117,9 @@ services:
 
     container_name: fastapi
 
+    volumes:
+      - temp_data:/api/app/data/temp
+
     # ports:
     #   - "8000:8000"
 
@@ -228,18 +231,28 @@ services:
   celery:
     build: ./api
     container_name: celery_worker
-    command: uv run celery -A app.lib.celery_app worker --pool=gevent --concurrency=4 -E
+
+    command: 
+    - uv run celery -A app.lib.celery_app worker --pool=gevent --concurrency=4 -E
+
+    environment:
+      - ENVIRONMENT=production
+    
+    volumes:
+      - temp_data:/api/app/data/temp
+
+    env_file:
+      - .env
+
     depends_on:
       redis:
         condition: service_healthy
-    environment:
-      - ENVIRONMENT=production
-    env_file:
-      - .env
     networks:
       - app-network
 
 volumes:
+  temp_data:
+
   postgres_data:
     driver: local
 
@@ -252,3 +265,10 @@ volumes:
 networks:
   app-network:
     driver: bridge
+
+
+
+# 1. Upgrade dependencies
+# 2. Add activity component
+# 3. Refactor with socket io, handle websocket exceptions, test refunding credits
+# 4. Add pagination for recent practice tests

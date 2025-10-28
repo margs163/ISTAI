@@ -123,6 +123,7 @@ export function TestControls({
     audioContext,
     setIsRecording,
   ]);
+  console.log("Timer is active:", timerActive);
   return (
     <div className="rounded-2xl pt-1.5 bg-white border border-gray-200 relative -top-2 fifth-step">
       <div className="p-4 flex flex-col gap-6">
@@ -158,7 +159,11 @@ export function TestControls({
               <Mic
                 size={30}
                 className="sm:w-8"
-                onClick={() => (timerActive ? null : ToggleRecording)}
+                onClick={async () => {
+                  if (!timerActive) {
+                    await ToggleRecording();
+                  }
+                }}
                 aria-disabled={timerActive}
               />
             </button>

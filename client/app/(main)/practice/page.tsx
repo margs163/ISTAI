@@ -22,7 +22,7 @@ import IntroductionDialog from "@/components/practice/IntroductionDialog";
 import { tourSteps, dialogInfo } from "@/lib/constants";
 import dynamic from "next/dynamic";
 import PauseDialog from "@/components/practice/PauseDialog";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocalPracticeTestStore } from "@/lib/practiceTestStore";
 import { toast } from "sonner";
 import { toast as rtoast, ToastContainer } from "react-toastify";
@@ -32,30 +32,22 @@ import {
   fetchPart2QuestionCard,
   fetchReadingCard,
   sendReadingCardSpeech,
+  updateSubscription,
 } from "@/lib/queries";
 import { useWindowSize } from "react-use";
 import { getSecondsDifference } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { Msg } from "@/components/ToastCustom";
+import { useRefundStore } from "@/lib/refundStore";
+import UnexpectedError from "@/components/UnexpectedError";
 
 const Joyride = dynamic(() => import("react-joyride"), { ssr: false });
 const Confetti = dynamic(() => import("react-confetti"), { ssr: false });
 
 export default function Page() {
-  const notify = useCallback(
-    () =>
-      rtoast(Msg, {
-        data: {
-          title: "Please, record your speech!",
-          text: "You are making a long pause.",
-        },
-        theme: "colored",
-        position: "top-center",
-      }),
-    []
-  );
   const { width, height } = useWindowSize();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const localTestId = useLocalPracticeTestStore((state) => state.id);
   const setMetadata = useMetadataStore((state) => state.setMetadataData);
   const addTranscriptionsLocal = useLocalPracticeTestStore(
@@ -106,6 +98,10 @@ export default function Page() {
   );
   const testStatus = useLocalPracticeTestStore((state) => state.status);
   const setStatus = useLocalPracticeTestStore((state) => state.setStatus);
+
+  const refunded = useRefundStore((state) => state.practiceRefunded);
+  const setRefunded = useRefundStore((state) => state.setPracticeRefunded);
+
   const transcribeWebsocketRef = useRef<WebSocket>(null);
   const chatWebsocketRef = useRef<WebSocket>(null);
 
@@ -124,7 +120,7 @@ export default function Page() {
   const chatRef = useRef<HTMLDivElement>(null);
 
   const [isRecording, setIsRecording] = useState(false);
-  const [partTwoTime, setPartTwoTime] = useState(120);
+  const [partTwoTime, setPartTwoTime] = useState(10);
   const [dialogOpen, setDialogOpen] = useState(true);
   const [runTour, setRunTour] = useState(false);
   const [controlsDialogOpen, setControlsDialogOpen] = useState(false);
@@ -136,6 +132,8 @@ export default function Page() {
   const [firstMesssage, setFirstMessage] = useState(true);
   const [pauseTime, setPauseTime] = useState(0);
   const [didNotifyPause, setDidNotifyPause] = useState(false);
+  const [refundMutated, setRefundMutated] = useState(false);
+  const [error, setError] = useState<{ message: string }>();
 
   const { data } = useQuery({
     queryKey: ["part1-card"],
@@ -153,17 +151,38 @@ export default function Page() {
     queryFn: async () => await fetchReadingCard(setReadingCard),
   });
 
+  const mutation = useMutation({
+    mutationKey: ["refund-practice"],
+    mutationFn: updateSubscription,
+  });
+
   useEffect(() => {
-    if (localTestId) return;
+    if (error?.message) {
+      if (!refundMutated && !refunded) {
+        mutation.mutate({ refund_credits: 10 });
+        setRefundMutated(true);
+        setRefunded(true);
 
-    const timeout = setTimeout(() => {
-      if (!localTestId) {
-        router.replace("/dashboard");
+        restoreChatMessages();
+        resetTranscriptions();
+        resetLocalPracticeTest();
+
+        queryClient.invalidateQueries({ queryKey: ["subscription-fetch"] });
       }
-    }, 300);
+    }
+  }, [refundMutated, refunded, error?.message]);
 
-    return () => clearTimeout(timeout);
-  }, [localTestId]);
+  // useEffect(() => {
+  //   if (localTestId || part2Question) return;
+
+  //   const timeout = setTimeout(() => {
+  //     if (!localTestId) {
+  //       router.replace("/dashboard");
+  //     }
+  //   }, 300);
+
+  //   return () => clearTimeout(timeout);
+  // }, [localTestId]);
 
   useEffect(() => {
     const timerId = setInterval(() => {
@@ -189,12 +208,25 @@ export default function Page() {
     return () => clearInterval(timerId);
   }, [isRecording, didNotifyPause, currentPart]);
 
+  const notify = useCallback(
+    () =>
+      rtoast(Msg, {
+        data: {
+          title: "Please, record your speech!",
+          text: "You are making a long pause.",
+        },
+        theme: "colored",
+        position: "top-center",
+      }),
+    []
+  );
+
   const playTTSAudio = useCallback(
     async (fileKey: string) => {
       try {
         const response = await fetch(`/api/tts?fileKey=${fileKey}`);
         if (!response.ok) {
-          throw new Error("Could not fetch audio");
+          setError({ message: "Could not fetch audio" });
         }
         const blob = await response.blob();
         const url = URL.createObjectURL(blob);
@@ -234,13 +266,14 @@ export default function Page() {
           }
         };
       } catch {
-        toast("Failed TTS fetch", {
-          description: "Could not fetch TTS blobs",
-          action: {
-            label: "Log",
-            onClick: () => console.log("Could not fetch TTS blobs"),
-          },
-        });
+        setError({ message: "Failed to fetch TTS blobs" });
+        // toast("Failed TTS fetch", {
+        //   description: "Could not fetch TTS blobs",
+        //   action: {
+        //     label: "Log",
+        //     onClick: () => console.log("Could not fetch TTS blobs"),
+        //   },
+        // });
       }
     },
     [sessionState.currentPart]
@@ -303,13 +336,14 @@ export default function Page() {
       const result = TranscribedMessage.safeParse(message);
 
       if (!result.success) {
-        toast("Failed parsing", {
-          description: "Could not parse TTS websocket message",
-          action: {
-            label: "Log",
-            onClick: () => console.log(result.error),
-          },
-        });
+        setError({ message: `Failed parsing: ${result.error.message}` });
+        // toast("Failed parsing", {
+        //   description: "Could not parse TTS websocket message",
+        //   action: {
+        //     label: "Log",
+        //     onClick: () => console.log(result.error),
+        //   },
+        // });
         return;
       }
 
@@ -386,18 +420,24 @@ export default function Page() {
     ]
   );
 
+  // const websocketErrorHandler = useCallback((e: Event) => {
+  //   console.log(e);
+  //   throw new Error("Websocket error happened!");
+  // }, []);
+
   const chatWebsocketMessageHandler = useCallback(
     (event: MessageEvent) => {
       const message = JSON.parse(event.data);
       const result = ChatSocketResponseSchema.safeParse(message);
       if (!result.success) {
-        toast("Failed parsing", {
-          description: "Could not parse chat websocket message",
-          action: {
-            label: "Log",
-            onClick: () => console.log(result.error),
-          },
-        });
+        setError({ message: `Failed parsing: ${result.error.message}` });
+        // toast("Failed parsing", {
+        //   description: "Could not parse chat websocket message",
+        //   action: {
+        //     label: "Log",
+        //     onClick: () => console.log(result.error),
+        //   },
+        // });
         return;
       }
 
@@ -494,22 +534,24 @@ export default function Page() {
           }
         };
       } catch (error) {
-        toast("Failed to capture microphone", {
-          description: "Could not initialize media stream",
-          action: {
-            label: "Log",
-            onClick: () => console.log(error),
-          },
-        });
+        setError({ message: "Failed to capture microphone" });
+        // toast("Failed to capture microphone", {
+        //   description: "Could not initialize media stream",
+        //   action: {
+        //     label: "Log",
+        //     onClick: () => console.log(error),
+        //   },
+        // });
       }
     } else {
-      toast("Browser does not support Media Devices", {
-        description: "Could not initialize media stream",
-        action: {
-          label: "Log",
-          onClick: () => console.log("Browser does not support Media Devices"),
-        },
-      });
+      setError({ message: "Browser does not support Media Devices" });
+      // toast("Browser does not support Media Devices", {
+      //   description: "Could not initialize media stream",
+      //   action: {
+      //     label: "Log",
+      //     onClick: () => console.log("Browser does not support Media Devices"),
+      //   },
+      // });
     }
   }, []);
 
@@ -555,6 +597,10 @@ export default function Page() {
         "message",
         transcribeSocketMessageHandler
       );
+      // transcribeWebsocketRef.current.addEventListener(
+      //   "error",
+      //   websocketErrorHandler
+      // );
     }
 
     if (chatWebsocketRef.current) {
@@ -562,6 +608,7 @@ export default function Page() {
         "message",
         chatWebsocketMessageHandler
       );
+      // chatWebsocketRef.current.addEventListener("error", websocketErrorHandler);
     }
 
     if (mediaRecorder.current) {
@@ -574,12 +621,20 @@ export default function Page() {
           "message",
           transcribeSocketMessageHandler
         );
+        // transcribeWebsocketRef.current.removeEventListener(
+        //   "error",
+        //   websocketErrorHandler
+        // );
       }
       if (chatWebsocketRef.current) {
         chatWebsocketRef.current.removeEventListener(
           "message",
           chatWebsocketMessageHandler
         );
+        // chatWebsocketRef.current.removeEventListener(
+        //   "error",
+        //   websocketErrorHandler
+        // );
       }
       if (mediaRecorder.current) {
         mediaRecorder.current.removeEventListener("stop", recorderStopHandler);
@@ -588,6 +643,7 @@ export default function Page() {
   }, [
     chatWebsocketMessageHandler,
     transcribeSocketMessageHandler,
+    recorderStopHandler,
     dialogOpen,
     greetingPlayed,
     playInstructionsAudioWithVideo,
@@ -627,18 +683,19 @@ export default function Page() {
 
   const optimizedStopRecording = useCallback(() => {
     if (mediaRecorder.current && mediaRecorder.current.state === "recording") {
+      console.log("STOPPED RECORDING");
       mediaRecorder.current.stop();
     }
 
     if (sessionState.currentPart === 2) {
       setIsAnsweringQuestion(false);
+      console.log("NO LONGER ANSWERING THE QUESTION");
     }
 
     if (openReadingCard) {
       const copySession2 = { ...sessionState };
       copySession2.status = "inactive";
       setSession(copySession2);
-      setDialogOpen(true);
       setStatus("Finished");
       const finalTranscriptions = {
         part_one: partOneTranscription,
@@ -658,12 +715,13 @@ export default function Page() {
         part_three: partThreeTranscription,
       };
       console.log(`Final Transcriptions:\n${finalTranscriptions}`);
+      setDialogOpen(true);
       setRunConfetti(true);
       addTranscriptionsLocal(finalTranscriptions);
       setTestDuration(sessionState.duration);
-      restoreChatMessages();
-      resetTranscriptions();
-      resetLocalPracticeTest();
+      // restoreChatMessages();
+      // resetTranscriptions();
+      // resetLocalPracticeTest();
     }
 
     audioChunks.current = [];
@@ -710,84 +768,92 @@ export default function Page() {
   ]);
 
   return (
-    <div className="w-full min-h-screen flex flex-col gap-6 bg-gray-50 py-6 font-geist lg:grid lg:grid-cols-[0.5fr_0.8fr_0.5fr] xl:grid-cols-[0.38fr_0.84fr_0.38fr] lg:justify-items-stretch lg:items-stretch lg:gap-6 lg:w-full max-w-[1420px] mx-auto xl:py-8">
-      <div className="space-y-6">
-        <TestSession />
-        <TestProgress />
-        <Joyride
-          // @ts-expect-error tour object is always error
-          steps={tourSteps}
-          run={runTour}
-          continuous={true}
-          scrollToFirstStep={true}
-          showProgress={true}
-          showSkipButton={true}
-          callback={(data) => {
-            if (data.status === "finished" || data.status === "skipped") {
-              playInstructionsAudioWithVideo("greeting.mp3");
-              setRunTour(false);
-            }
-          }}
-          styles={{
-            options: {
-              primaryColor: "#3b82f6",
-              zIndex: 1000,
-            },
-          }}
-          floaterProps={{
-            styles: {
-              floater: {
-                transition: "opacity 0.3s ease-in-out",
-              },
-            },
-          }}
-          tooltipComponent={CustomTooltip}
-        />
-      </div>
-      <div className="space-y-6">
-        <div className="lg:hidden">
-          <PartInfo currentPart={1} />
+    <>
+      {error?.message ? (
+        <div className="flex flex-col gap-6 items-center justify-center min-h-screen w-full font-geist">
+          <UnexpectedError setRefunded={setRefunded} />
         </div>
-        <CharacterSection
-          openReadingCard={openReadingCard}
-          setOpenReadingCard={setOpenReadingCard}
-          setControlsDialogOpen={setControlsDialogOpen}
-          setPartTwoTime={setPartTwoTime}
-          partTwoTime={partTwoTime}
-          volumeSliderRef={volumeSlider}
-          startRecording={optimizedStartRecoring}
-          stopRecording={optimizedStopRecording}
-          isRecording={isRecording}
-          setIsRecording={setIsRecording}
-          videoRef={videoRef}
-          audioContext={audioContext}
-          activePart={currentPart as 1}
-          timerActive={timerActive}
-          setTimerActive={setTimerActive}
-          setIsAnsweringQuestion={setIsAnsweringQuestion}
-        />
-      </div>
-      <div className="space-y-6">
-        <Chat chatRef={chatRef} />
-        <QuickTestActions
-          audioFile={audioFile}
-          instructionsAduio={instructionsAudio}
-        />
-        <IntroductionDialog
-          setDialogOpen={setDialogOpen}
-          setIsOpen={setRunTour}
-          dialogOpen={dialogOpen}
-          dialogInfo={dialogInfo}
-          currentPart={currentPart}
-          status={testStatus}
-        />
-        <PauseDialog
-          dialogOpen={controlsDialogOpen}
-          setDialogOpen={setControlsDialogOpen}
-        />
-        <Confetti run={runConfetti} width={width} height={height} />
-        <ToastContainer />
-      </div>
-    </div>
+      ) : (
+        <div className="w-full min-h-screen flex flex-col gap-6 bg-gray-50 py-6 font-geist lg:grid lg:grid-cols-[0.5fr_0.8fr_0.5fr] xl:grid-cols-[0.38fr_0.84fr_0.38fr] lg:justify-items-stretch lg:items-stretch lg:gap-6 lg:w-full max-w-[1420px] mx-auto xl:py-8">
+          <div className="space-y-6">
+            <TestSession />
+            <TestProgress />
+            <Joyride
+              // @ts-expect-error tour object is always error
+              steps={tourSteps}
+              run={runTour}
+              continuous={true}
+              scrollToFirstStep={true}
+              showProgress={true}
+              showSkipButton={true}
+              callback={(data) => {
+                if (data.status === "finished" || data.status === "skipped") {
+                  playInstructionsAudioWithVideo("greeting.mp3");
+                  setRunTour(false);
+                }
+              }}
+              styles={{
+                options: {
+                  primaryColor: "#3b82f6",
+                  zIndex: 1000,
+                },
+              }}
+              floaterProps={{
+                styles: {
+                  floater: {
+                    transition: "opacity 0.3s ease-in-out",
+                  },
+                },
+              }}
+              tooltipComponent={CustomTooltip}
+            />
+          </div>
+          <div className="space-y-6">
+            <div className="lg:hidden">
+              <PartInfo currentPart={1} />
+            </div>
+            <CharacterSection
+              openReadingCard={openReadingCard}
+              setOpenReadingCard={setOpenReadingCard}
+              setControlsDialogOpen={setControlsDialogOpen}
+              setPartTwoTime={setPartTwoTime}
+              partTwoTime={partTwoTime}
+              volumeSliderRef={volumeSlider}
+              startRecording={optimizedStartRecoring}
+              stopRecording={optimizedStopRecording}
+              isRecording={isRecording}
+              setIsRecording={setIsRecording}
+              videoRef={videoRef}
+              audioContext={audioContext}
+              activePart={currentPart as 1}
+              timerActive={timerActive}
+              setTimerActive={setTimerActive}
+              setIsAnsweringQuestion={setIsAnsweringQuestion}
+            />
+          </div>
+          <div className="space-y-6">
+            <Chat chatRef={chatRef} />
+            <QuickTestActions
+              audioFile={audioFile}
+              instructionsAduio={instructionsAudio}
+            />
+            <IntroductionDialog
+              setDialogOpen={setDialogOpen}
+              setIsOpen={setRunTour}
+              dialogOpen={dialogOpen}
+              dialogInfo={dialogInfo}
+              currentPart={currentPart}
+              status={testStatus}
+            />
+            <PauseDialog
+              dialogOpen={controlsDialogOpen}
+              setDialogOpen={setControlsDialogOpen}
+            />
+            <Confetti run={runConfetti} width={width} height={height} />
+            <ToastContainer />
+          </div>
+        </div>
+      )}
+    </>
   );
 }

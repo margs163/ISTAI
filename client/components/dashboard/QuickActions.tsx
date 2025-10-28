@@ -263,7 +263,7 @@ export function QuickActionsDialog({
   return (
     <Dialog>
       <DialogTrigger>
-        <div className="text-sm font-medium text-gray-800 px-4 py-2 border rounded-md border-gray-300 text-center">
+        <div className="text-sm font-medium text-gray-800 px-4 py-2 border rounded-md border-gray-300 text-center hover:bg-gray-50 active:bg-gray-50 transition-colors cursor-pointer">
           View All Features
         </div>
       </DialogTrigger>
