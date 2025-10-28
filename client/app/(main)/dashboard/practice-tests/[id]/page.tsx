@@ -58,18 +58,14 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
     },
     enabled: !!practiceTest,
   });
-
-  if (!practiceTest || !practiceTest.result) {
-    return <LoadingSmallUI />;
-  }
-
+  
   const handleExport = useCallback(async () => {
     const element = printRef.current;
     if (!element) return;
 
     const canvas = await html2canvas(element, {
       scale: 2,
-      ignoreElements: (el) => el.classList?.contains("no-print"),
+      ignoreElements: (el: Element) => el.classList?.contains("no-print"),
     });
     const imgData = canvas.toDataURL("image/jpeg");
 
@@ -97,8 +93,15 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
       pageNum++;
     }
 
-    pdf.save(`results-${practiceTest.practice_name}.pdf`);
-  }, [practiceTest.practice_name]);
+    if (practiceTest && practiceTest.practice_name) {
+      pdf.save(`results-${practiceTest.practice_name}.pdf`);
+    }
+  }, [practiceTest]);
+
+  if (!practiceTest || !practiceTest.result) {
+    return <LoadingSmallUI />;
+  }
+
 
   return (
     <div className="w-full flex flex-col gap-6 bg-gray-50 pb-6">

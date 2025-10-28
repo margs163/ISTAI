@@ -200,14 +200,15 @@ services:
     container_name: kv-redis
     restart: unless-stopped
 
-    command:
-      - /bin/sh
-      - -c
-      # - Double dollars, so that the variable is not expanded by Docker Compose
-      # - Surround by quotes, so that the shell does not split the password
-      # - The ${variable:?message} syntax causes shell to exit with a non-zero
-      #   code and print a message, when the variable is not set or empty
-      - redis-server --requirepass "$${REDIS_PASSWORD:?REDIS_PASSWORD variable is not set}"
+    # command:
+    #   - /bin/sh
+    #   - -c
+    #   # - Double dollars, so that the variable is not expanded by Docker Compose
+    #   # - Surround by quotes, so that the shell does not split the password
+    #   # - The ${variable:?message} syntax causes shell to exit with a non-zero
+    #   #   code and print a message, when the variable is not set or empty
+    #   - redis-server --requirepass "$${REDIS_PASSWORD:?REDIS_PASSWORD variable is not set}"
+    command: redis-server --requirepass Brawl01man
 
     ports:
       - "6379:6379"
@@ -227,7 +228,7 @@ services:
   celery:
     build: ./api
     container_name: celery_worker
-    command: celery -A tasks worker -pool=gevent --loglevel=info --concurrency=10
+    command: uv run celery -A app.lib.celery_app worker --pool=gevent --concurrency=4 -E
     depends_on:
       redis:
         condition: service_healthy

@@ -32,7 +32,7 @@ async def get_openai_client() -> AsyncGenerator[OpenAI, None]:
 
 async def get_redis_client() -> AsyncGenerator[redis.Redis, None]:
     instance = redis.Redis(
-        host="localhost",
+        host="kv-redis",
         port=6379,
         decode_responses=True,
         password=os.getenv("REDIS_PASSWORD"),
