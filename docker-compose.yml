@@ -118,7 +118,7 @@ services:
     container_name: fastapi
 
     volumes:
-      - temp_data:/api/app/data/temp
+      - shared_temp:/app/app/data/temp
 
     # ports:
     #   - "8000:8000"
@@ -227,19 +227,22 @@ services:
 
     networks:
       - app-network
-  
+
   celery:
     build: ./api
     container_name: celery_worker
 
-    command: 
-    - uv run celery -A app.lib.celery_app worker --pool=gevent --concurrency=4 -E
+    command: >
+      sh -c "
+        echo 'Running the celery worker...' &&
+        uv run celery -A app.lib.celery_app worker --pool=gevent --concurrency=4 -E
+      "
 
     environment:
       - ENVIRONMENT=production
-    
+
     volumes:
-      - temp_data:/api/app/data/temp
+      - shared_temp:/app/app/data/temp
 
     env_file:
       - .env
@@ -251,7 +254,8 @@ services:
       - app-network
 
 volumes:
-  temp_data:
+  shared_temp:
+      driver: local
 
   postgres_data:
     driver: local

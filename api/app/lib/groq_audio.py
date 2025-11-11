@@ -19,28 +19,75 @@ from celery.result import AsyncResult
 logger = logging.getLogger(__name__)
 
 
-async def preprocess_audio(input_path: str) -> str:
-    """
-    Preprocess audio file to 16kHz mono FLAC using ffmpeg.
-    FLAC provides lossless compression for faster upload times.
-    """
-    output_path = None
-    path_comp = Path(input_path)
+# async def preprocess_audio(input_path: str) -> str:
+#     """
+#     Preprocess audio file to 16kHz mono FLAC using ffmpeg.
+#     FLAC provides lossless compression for faster upload times.
+#     """
+#     output_path = None
+#     path_comp = Path(input_path)
 
-    if not path_comp.exists():
-        raise FileNotFoundError(f"Input file not found: {path_comp}")
+#     if not path_comp.exists():
+#         raise FileNotFoundError(f"Input file not found: {path_comp}")
 
-    with tempfile.NamedTemporaryFile(suffix=".flac", delete=False) as temp_file:
-        output_path = Path(temp_file.name)
+#     with tempfile.NamedTemporaryFile(suffix=".flac", delete=False) as temp_file:
+#         output_path = Path(temp_file.name)
 
-    try:
-        process = await asyncio.create_subprocess_exec(
+#     try:
+#         process = await asyncio.create_subprocess_exec(
+#             "ffmpeg",
+#             "-hide_banner",
+#             "-loglevel",
+#             "error",
+#             "-i",
+#             str(path_comp),
+#             "-ar",
+#             "16000",
+#             "-ac",
+#             "1",
+#             "-c:a",
+#             "flac",
+#             "-sample_fmt",
+#             "s16",
+#             "-threads",
+#             "auto",
+#             "-y",
+#             str(output_path),
+#             stdout=asyncio.subprocess.PIPE,
+#             stderr=asyncio.subprocess.PIPE,
+#         )
+
+#         stdout, stderr = await process.communicate()
+#         if process.returncode != 0:
+#             output_path.unlink(missing_ok=True)
+#             print(f"FFmpeg conversion failed: {stderr.decode()}")
+#             raise RuntimeError(f"FFmpeg conversion failed: {stderr.decode()}")
+
+#         print("FFMPEG conversion was succesffull")
+#         print("Input path:", str(path_comp))
+#         print("Output path:", str(output_path))
+
+#         return str(output_path)
+#     # We'll raise an error if our FFmpeg conversion fails
+#     except Exception as e:
+#         logger.error(f"FFmpeg conversion failed {str(e)}")
+#         print(f"FFmpeg conversion failed {str(e)}")
+#         raise RuntimeError(f"FFmpeg conversion failed: {str(e)}")
+
+async def convert_to_wav(input_path: str, output_path: str) -> None:
+    if not os.path.exists(input_path):
+        raise FileNotFoundError(f"Input file with path {input_path} does not exist")
+
+    logger.info("FFmpeg conversion to wav started with input path: " + str(input_path), "and output path: " + str(output_path))
+    print("FFmpeg conversion to wav started with input path: " + str(input_path), "and output path: " + str(output_path))
+
+    command = [
             "ffmpeg",
             "-hide_banner",
             "-loglevel",
             "error",
             "-i",
-            str(path_comp),
+            str(input_path),
             "-ar",
             "16000",
             "-ac",
@@ -53,29 +100,32 @@ async def preprocess_audio(input_path: str) -> str:
             "auto",
             "-y",
             str(output_path),
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE,
-        )
+    ]
 
+    try:
+        process = await asyncio.create_subprocess_exec(
+            *command, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
+        )
+        logger.info("Converted an audio file to a wav format")
         stdout, stderr = await process.communicate()
+
         if process.returncode != 0:
-            output_path.unlink(missing_ok=True)
-            print(f"FFmpeg conversion failed: {stderr.decode()}")
-            raise RuntimeError(f"FFmpeg conversion failed: {stderr.decode()}")
+            print(stderr.decode())
+            loger.error(f"FFmpeg conversion to wav failed: {stderr.decode()}")
+            # raise RuntimeError(f"FFmpeg failed: {stderr.decode()}")
 
         print("FFMPEG conversion was succesffull")
+        print("Input path:", str(path_comp))
+        print("Output path:", str(output_path))
 
-        return str(output_path)
-    # We'll raise an error if our FFmpeg conversion fails
     except Exception as e:
-        logger.error(f"FFmpeg conversion failed {str(e)}")
-        print(f"FFmpeg conversion failed {str(e)}")
-        raise RuntimeError(f"FFmpeg conversion failed: {str(e)}")
+        logger.error(f"FFmpeg conversion to wav failed: {str(e)}")
+        print(f"FFmpeg conversion to wav failed: {str(e)}")
 
 
 @celery_app.task
-def preprocess_task(input_path: str) -> str:
-    output_path = asyncio.run(preprocess_audio(input_path))
+def preprocess_task(input_path: str, output_path: str) -> str:
+    output_path = asyncio.run(convert_to_wav(input_path, output_path))
     return output_path
 
 
@@ -532,7 +582,7 @@ def save_results(result: dict, audio_path: Path) -> Path:
 
 
 async def transcribe_audio_in_chunks(
-    audio_path: Path, chunk_length: int = 30, overlap: int = 2
+    audio_path: Path, output_path: Path, chunk_length: int = 30, overlap: int = 2
 ) -> dict:
     """
     Transcribe audio in chunks with overlap with Whisper via Groq API.
@@ -557,19 +607,31 @@ async def transcribe_audio_in_chunks(
 
     processed_path = None
     try:
-        task = preprocess_task.delay(str(audio_path))
+        logger.info(f"Delaying a task with {str(audio_path)} and {str(output_path)}")
+        print(f"Delaying a task with {str(audio_path)} and {str(output_path)}")
+        task = preprocess_task.delay(str(audio_path), str(output_path))
 
         result = AsyncResult(task.id)
 
         while not result.ready():
             await asyncio.sleep(0.1)
 
-        if result.successful():
-            processed_path = Path(result.get())
+        if not result.successful():
+            error = result.get(propagate=False)
+            logger.error(f"WAV conversion failed: {str(error)}")
+            print(f"WAV conversion failed: {str(error)}")
+            raise WebSocketException(
+                code=status.WS_1011_INTERNAL_ERROR,
+                reason=f"WAV conversion failed: {str(error)}",
+            )
 
-            logger.info(f"Preprocessed audio {audio_path} with FFmpeg")
+        if result.successful():
+            # processed_path = Path(result.get())
+
+            logger.info(f"Processed audio path: {str(output_path)}")
+            print(f"Processed audio path: {str(output_path)}")
             try:
-                audio = AudioSegment.from_file(processed_path, format="flac")
+                audio = AudioSegment.from_file(str(output_path), format="flac")
             except Exception as e:
                 raise RuntimeError(f"Failed to load audio: {str(e)}")
 

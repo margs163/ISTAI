@@ -104,7 +104,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
 
     if (practiceTest && practiceTest.practice_name) {
       pdf.save(`results-${practiceTest.practice_name}.pdf`);
-    }
+    }})
   }, [practiceTest]);
 
   if (!practiceTest || !practiceTest.result) {

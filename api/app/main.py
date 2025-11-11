@@ -153,9 +153,8 @@ app.include_router(
 
 
 @app.get("/")
-@limiter.limit("8/minute")
+@limiter.limit("24/minute")
 async def main(request: Request):
-    logger.info("Root endpoint was hit!")
     return {"message": "Hello, World!"}
 
 

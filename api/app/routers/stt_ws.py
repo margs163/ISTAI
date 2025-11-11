@@ -41,6 +41,7 @@ router = APIRouter()
 async def stt_websocket(websocket: WebSocket):
     transcription = {"text": ""}
     temp_file_path = f"./app/data/temp/temp_audio_{uuid.uuid4().hex}.webm"
+    temp_output_path = f"./app/data/temp/temp_audio_{uuid.uuid4().hex}.wav"
 
     try:
         await websocket.accept()
@@ -51,7 +52,7 @@ async def stt_websocket(websocket: WebSocket):
                 file.write(data)
 
             try:
-                result = await transcribe_audio_in_chunks(Path(temp_file_path))
+                result = await transcribe_audio_in_chunks(Path(temp_file_path), Path(temp_output_path))
                 metadata = get_speech_metadata(result)
 
                 for segment in result["segments"]:
@@ -81,3 +82,6 @@ async def stt_websocket(websocket: WebSocket):
     finally:
         if os.path.exists(temp_file_path):
             os.remove(temp_file_path)
+
+        if os.path.exists(temp_output_path):
+            os.remove(temp_output_path)
