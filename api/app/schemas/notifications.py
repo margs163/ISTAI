@@ -20,6 +20,7 @@ class NotificationsSchema(BaseModel):
     user_id: str | None = Field(default=None)
     type: str = Field(max_length=50)
     message: str = Field(max_length=150)
+    is_read: bool = Field(default=False)
     time: datetime | None = Field(default=None)
 
 
@@ -36,4 +37,5 @@ class NotificationTypeEnum(enum.StrEnum):
 class CreateNotificationSchema(BaseModel):
     type: str = Field(max_length=50)
     message: str = Field(max_length=150)
+    is_read: bool = Field(default=False)
     time: datetime | None = Field(default=None)

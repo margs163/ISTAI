@@ -50,15 +50,6 @@ router = APIRouter()
 WEBHOOK_SECRET = os.getenv("PADDLE_WEBHOOK_SECRET")
 PADDLE_API_KEY = os.getenv("PADDLE_API_KEY")
 
-if not PADDLE_API_KEY:
-    raise Exception("No paddle api key")
-
-if not WEBHOOK_SECRET:
-    raise Exception("No paddle api key")
-
-
-paddle = Client(PADDLE_API_KEY, Options(environment=Environment.SANDBOX))
-
 
 def make_naive(dt: datetime) -> datetime:
     if dt is not None and dt.tzinfo is not None:
@@ -118,7 +109,7 @@ async def paddle_webhook(
 
             if not user_email:
                 raise Exception("No user email was found in metadata")
-            
+
             user = await session.scalar(select(User).where(User.email == user_email))
 
             user_subscription = await session.scalar(
@@ -143,7 +134,6 @@ async def paddle_webhook(
 
             polar_product_name = event.data.product.name
 
-
             user_subscription.polar_subscription_status = event.data.status.value
 
             created_at = event.data.current_period_start
@@ -158,7 +148,7 @@ async def paddle_webhook(
             recurring_interval = event.data.recurring_interval
 
             if recurring_interval == SubscriptionRecurringInterval.MONTH:
-                user_subscription.billing_interval = "month" 
+                user_subscription.billing_interval = "month"
                 user_subscription.billing_frequency = 1
             elif recurring_interval == SubscriptionRecurringInterval.YEAR:
                 user_subscription.billing_interval = "year"
@@ -196,11 +186,11 @@ async def paddle_webhook(
             user_email = redis_client.get(customer_id)
 
             if not user_email:
-                raise Exception(f"No user email was found in redis for customer id {customer_id}")
+                raise Exception(
+                    f"No user email was found in redis for customer id {customer_id}"
+                )
 
-            user = await session.scalar(
-                select(User).where(User.email == user_email)
-            )
+            user = await session.scalar(select(User).where(User.email == user_email))
 
             if not user:
                 raise Exception(f"No user was found with email {user_email}")
@@ -210,27 +200,33 @@ async def paddle_webhook(
             )
 
             if not user_subscription:
-                raise Exception("No subscription record was found") 
+                raise Exception("No subscription record was found")
 
             user_subscription.polar_subscription_status = "canceled"
-            user_subscription.subscription_cancelled_at = make_naive(event.data.canceled_at)
-            user_subscription.cancellation_reason = event.data.customer_cancellation_reason
-            user_subscription.cancellation_comment = event.data.customer_cancellation_comment
+            user_subscription.subscription_cancelled_at = make_naive(
+                event.data.canceled_at
+            )
+            user_subscription.cancellation_reason = (
+                event.data.customer_cancellation_reason
+            )
+            user_subscription.cancellation_comment = (
+                event.data.customer_cancellation_comment
+            )
 
             await session.commit()
             print("Subscription was canceled.")
-        
+
         if event.TYPE == "subscription.revoked":
             subscription_id = event.data.id
             customer_id = event.data.customer_id
             user_email = redis_client.get(customer_id)
 
             if not user_email:
-                raise Exception(f"No user email was found in redis for customer id {customer_id}")
+                raise Exception(
+                    f"No user email was found in redis for customer id {customer_id}"
+                )
 
-            user = await session.scalar(
-                select(User).where(User.email == user_email)
-            )
+            user = await session.scalar(select(User).where(User.email == user_email))
 
             if not user:
                 raise Exception(f"No user was found with email {user_email}")
@@ -245,7 +241,9 @@ async def paddle_webhook(
             user_subscription.polar_subscription_status = "revoked"
             user_subscription.credits_left = 0
             user_subscription.subscription_tier = TierEnum.FREE.value
-            user_subscription.subscription_cancelled_at = make_naive(event.data.canceled_at)
+            user_subscription.subscription_cancelled_at = make_naive(
+                event.data.canceled_at
+            )
 
             user_subscription.polar_product_id = None
             user_subscription.polar_price_id = None
@@ -272,7 +270,6 @@ async def paddle_webhook(
         #     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         #     detail=f"Could not process webhook record: {e}",
         # )
-  
 
 
 @router.get("/me")
@@ -284,8 +281,7 @@ async def get_my_subscription(
 ):
     try:
         record = await session.scalar(
-            select(Subscription)
-            .where(Subscription.user_id == user.id)
+            select(Subscription).where(Subscription.user_id == user.id)
         )
 
         if not record:
@@ -433,13 +429,13 @@ async def update_subscription(
 
         if update.subscription_next_billed_at:
             record.subscription_next_billed_at = update.subscription_next_billed_at
-        
+
         if update.subscription_cancelled_at:
             record.subscription_cancelled_at = update.subscription_cancelled_at
-        
+
         if update.cancellation_reason:
             record.cancellation_reason = update.cancellation_reason
-        
+
         if update.cancellation_comment:
             record.cancellation_comment = update.cancellation_comment
 
@@ -448,7 +444,7 @@ async def update_subscription(
 
         if update.credits_left:
             record.credits_left -= update.credits_left
-        
+
         if update.refund_credits:
             record.credits_left += update.refund_credits
 

@@ -126,45 +126,80 @@ async def create_test(
                 )
 
 
+@router.get("/recent")
+@limiter.limit("25/minute")
+async def get_recent_tests(
+    request: Request,
+    session: Annotated[AsyncSession, Depends(get_async_session)],
+    user: Annotated[User, Depends(current_active_user)],
+    paging_number: Annotated[int, Query()] = 5,
+):
+    try:
+        query = (
+            select(PracticeTest)
+            .join(PracticeTest.result)
+            .options(
+                joinedload(PracticeTest.result),
+                joinedload(PracticeTest.transcription),
+                joinedload(PracticeTest.part_one_card),
+                joinedload(PracticeTest.part_two_card),
+                selectinload(PracticeTest.reading_cards),
+            )
+            .order_by(PracticeTest.test_date.desc())
+            .where(PracticeTest.user_id == user.id)
+            .limit(paging_number)
+        )
+
+        practice_test = await session.scalars(query)
+        return {"data": practice_test.all()}
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Could not get practice test(s) {str(e)}",
+        )
+
+
 @router.get("/")
 @limiter.limit("25/minute")
 async def get_practice_test(
     request: Request,
+    session: Annotated[AsyncSession, Depends(get_async_session)],
     user: Annotated[User, Depends(current_active_user)],
     test_ids: Annotated[list[str] | None, Query()] = None,
     user_id: Annotated[bool | None, Query()] = None,
 ):
-    if not test_ids and not user_id:
+    try:
+        if not test_ids and not user_id:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Specify one of the parameters",
+            )
+
+        query = (
+            select(PracticeTest)
+            .options(
+                joinedload(PracticeTest.result),
+                joinedload(PracticeTest.transcription),
+                joinedload(PracticeTest.part_one_card),
+                joinedload(PracticeTest.part_two_card),
+                selectinload(PracticeTest.reading_cards),
+            )
+            .order_by(PracticeTest.test_date.desc())
+        )
+        if user_id:
+            query = query.where(PracticeTest.user_id == user.id)
+        if test_ids:
+            query = query.where(PracticeTest.id.in_(test_ids))
+
+        practice_test = await session.scalars(query)
+        return {"data": practice_test.all()}
+
+    except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Specify one of the parameters",
+            detail=f"Could not get practice test(s) {str(e)}",
         )
-
-    query = (
-        select(PracticeTest)
-        .options(
-            joinedload(PracticeTest.result),
-            joinedload(PracticeTest.transcription),
-            joinedload(PracticeTest.part_one_card),
-            joinedload(PracticeTest.part_two_card),
-            selectinload(PracticeTest.reading_cards),
-        )
-        .order_by(PracticeTest.test_date.desc())
-    )
-    if user_id:
-        query = query.where(PracticeTest.user_id == user.id)
-    if test_ids:
-        query = query.where(PracticeTest.id.in_(test_ids))
-    async for session in get_async_session():
-        async with session.begin():
-            try:
-                practice_test = await session.scalars(query)
-                return {"data": practice_test.all()}
-            except Exception as e:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=f"Could not create a practice test {e}",
-                )
 
 
 @router.put("/{test_id}")

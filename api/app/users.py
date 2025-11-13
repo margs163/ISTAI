@@ -4,9 +4,12 @@ from fastapi_users.authentication import (
     JWTStrategy,
     AuthenticationBackend,
 )
+from typing import Annotated
 from fastapi_users import UUIDIDMixin, BaseUserManager, FastAPIUsers
 from fastapi_mail import ConnectionConfig, MessageSchema, FastMail, MessageType
-from sqlalchemy import select
+from sqlalchemy import select, delete, and_
+from sqlalchemy.ext.asyncio import AsyncSession
+from logging import getLogger
 
 from .schemas.analytics import AnalyticsSchema, AverageBandScores, BandScoresIncrease
 from .schemas.db_tables import (
@@ -36,6 +39,7 @@ if not SECRET:
 
 mail_address = os.getenv("MAIL_ADDRESS")
 mail_pwd = os.getenv("APP_PWD")
+logger = getLogger(__name__)
 
 if not mail_address or not mail_pwd:
     raise Exception("no env variables")
@@ -194,49 +198,71 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
         request: Optional[Request] = None,
         response: Optional[Response] = None,
     ):
-        async for session in get_async_session():
-            async with session.begin():
-                analytic = await session.scalar(
-                    select(Analytics).where(Analytics.user_id == user.id)
-                )
-                user_record = await session.scalar(
-                    select(User).where(User.id == user.id)
-                )
-                sub_record = await session.scalar(
-                    select(Subscription).where(Subscription.user_id == user.id)
-                )
+        try:
+            async for session in get_async_session():
+                async with session.begin():
+                    analytic = await session.scalar(
+                        select(Analytics).where(Analytics.user_id == user.id)
+                    )
+                    user_record = await session.scalar(
+                        select(User).where(User.id == user.id)
+                    )
+                    sub_record = await session.scalar(
+                        select(Subscription).where(Subscription.user_id == user.id)
+                    )
 
-                tests = await session.scalars(
-                    select(PracticeTest)
-                    .where(PracticeTest.user_id == user.id)
-                    .order_by(PracticeTest.test_date.desc())
-                )
-                result = tests.unique()
-                result = result.all()
+                    tests = await session.scalars(
+                        select(PracticeTest)
+                        .where(PracticeTest.user_id == user.id)
+                        .order_by(PracticeTest.test_date.desc())
+                    )
 
-                if result and analytic:
-                    last = result[0]
-                    print("LAST DATE:", last.test_date)
-                    if datetime.now() - last.test_date > timedelta(days=1):
-                        analytic.streak_days = 0
+                    one_day_ago = datetime.now() - timedelta(days=1)
 
-                if (
-                    user_record.last_login_at is not None
-                    and datetime.now() - user_record.last_login_at > timedelta(days=1)
-                ):
-                    if sub_record.subscription_tier == TierEnum.STARTER.value:
-                        sub_record.pronunciation_tests_left = 6
-                    elif sub_record.subscription_tier == TierEnum.PRO.value:
-                        sub_record.pronunciation_tests_left = 10
-                    else:
-                        sub_record.pronunciation_tests_left = 2
+                    deleted_result = await session.execute(
+                        delete(Notifications).where(
+                            and_(
+                                Notifications.time < one_day_ago,
+                                Notifications.user_id == user.id,
+                            )
+                        )
+                    )
 
-                user_record.last_login_at = datetime.now()
-                await session.commit()
+                    result = tests.unique()
+                    result = result.all()
 
-                print("Last login is set!", user_record.last_login_at)
+                    if result and analytic:
+                        last = result[0]
+                        print("LAST DATE:", last.test_date)
+                        if datetime.now() - last.test_date > timedelta(days=1):
+                            analytic.streak_days = 0
 
-        if response is not None:
+                    if (
+                        user_record.last_login_at is not None
+                        and datetime.now() - user_record.last_login_at
+                        > timedelta(days=1)
+                    ):
+                        if sub_record.subscription_tier == TierEnum.STARTER.value:
+                            sub_record.pronunciation_tests_left = 6
+                        elif sub_record.subscription_tier == TierEnum.PRO.value:
+                            sub_record.pronunciation_tests_left = 10
+                        else:
+                            sub_record.pronunciation_tests_left = 2
+
+                    user_record.last_login_at = datetime.now()
+                    await session.commit()
+
+                    logger.log(
+                        f"Deleted {str(deleted_result.rowcount)} notifications from user {str(user.id)}"
+                    )
+
+                    print("Last login is set!", user_record.last_login_at)
+
+            if response is not None:
+                return RedirectResponse(url="http://localhost:3000/dashboard")
+
+        except Exception as e:
+            logger.error(f"Could not process login request: {str(e)}")
             return RedirectResponse(url="http://localhost:3000/dashboard")
 
 

@@ -15,6 +15,7 @@ from sqlalchemy import (
     Float,
     ARRAY,
     Text,
+    Boolean,
 )
 from datetime import date, timedelta
 from sqlalchemy.dialects.postgresql import JSONB
@@ -66,18 +67,30 @@ class User(Base, SQLAlchemyBaseUserTableUUID):
     updatedAt: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.now(), nullable=True, onupdate=datetime.now()
     )
-    last_login_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now(), nullable=True)
+    last_login_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.now(), nullable=True
+    )
     subscription: Mapped["Subscription"] = relationship(
         back_populates="user", lazy="joined", cascade="all, delete-orphan"
     )
-    practice_tests: Mapped[list["PracticeTest"]] = relationship(back_populates="user", cascade="all, delete-orphan")
-    analytics: Mapped["Analytics"] = relationship(back_populates="user", cascade="all, delete-orphan")
-    notificates: Mapped[list["Notifications"]] = relationship(back_populates="user", cascade="all, delete-orphan")
-    transcriptions: Mapped[list["Transcription"]] = relationship(back_populates="user", cascade="all, delete-orphan")
+    practice_tests: Mapped[list["PracticeTest"]] = relationship(
+        back_populates="user", cascade="all, delete-orphan"
+    )
+    analytics: Mapped["Analytics"] = relationship(
+        back_populates="user", cascade="all, delete-orphan"
+    )
+    notificates: Mapped[list["Notifications"]] = relationship(
+        back_populates="user", cascade="all, delete-orphan"
+    )
+    transcriptions: Mapped[list["Transcription"]] = relationship(
+        back_populates="user", cascade="all, delete-orphan"
+    )
     pronunciation_tests: Mapped[list["PronunciationTest"]] = relationship(
         back_populates="user", cascade="all, delete-orphan"
     )
-    questionnaire_answers: Mapped["Questionnaire"] = relationship(back_populates="user", cascade="all, delete-orphan")
+    questionnaire_answers: Mapped["Questionnaire"] = relationship(
+        back_populates="user", cascade="all, delete-orphan"
+    )
     oauth_accounts: Mapped[list["OAuthAccount"]] = relationship(
         back_populates="user", lazy="joined", cascade="all, delete-orphan"
     )
@@ -172,7 +185,9 @@ class Questionnaire(Base):
     __tablename__ = "questionnaire_table"
 
     id: Mapped[UUID_ID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
-    user: Mapped[User] = relationship(back_populates="questionnaire_answers", passive_deletes=True)
+    user: Mapped[User] = relationship(
+        back_populates="questionnaire_answers", passive_deletes=True
+    )
     user_id: Mapped[UUID_ID] = mapped_column(
         UUID, ForeignKey("user_table.id", ondelete="CASCADE"), index=True, nullable=True
     )
@@ -254,6 +269,7 @@ class Notifications(Base):
     user: Mapped[User] = relationship(back_populates="notificates")
     type: Mapped[str] = mapped_column(String(30))
     message: Mapped[str] = mapped_column(String(250))
+    is_read: Mapped[bool] = mapped_column(Boolean, default=False)
     time: Mapped[datetime] = mapped_column(DateTime, default=datetime.now())
 
 
@@ -263,7 +279,7 @@ class Subscription(Base):
     id: Mapped[UUID_ID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
     user: Mapped[User] = relationship(back_populates="subscription")
     user_id: Mapped[UUID_ID] = mapped_column(
-       UUID, ForeignKey("user_table.id"), index=True
+        UUID, ForeignKey("user_table.id"), index=True
     )
 
     status: Mapped[str] = mapped_column(String(50), nullable=True)
@@ -280,15 +296,9 @@ class Subscription(Base):
     subscription_next_billed_at: Mapped[datetime] = mapped_column(
         DateTime, nullable=True
     )
-    subscription_cancelled_at: Mapped[datetime] = mapped_column(
-        DateTime, nullable=True
-    )
-    cancellation_reason: Mapped[str] = mapped_column(
-        Text, nullable=True
-    )
-    cancellation_comment: Mapped[str] = mapped_column(
-        Text, nullable=True
-    )
+    subscription_cancelled_at: Mapped[datetime] = mapped_column(DateTime, nullable=True)
+    cancellation_reason: Mapped[str] = mapped_column(Text, nullable=True)
+    cancellation_comment: Mapped[str] = mapped_column(Text, nullable=True)
     total_money_spent: Mapped[float] = mapped_column(Float, default=0, nullable=True)
 
     # credit_card: Mapped["CreditCard"] = relationship(
@@ -296,7 +306,9 @@ class Subscription(Base):
     # )
     credits_total_purchased: Mapped[int] = mapped_column(Integer)
     credits_left: Mapped[int] = mapped_column(Integer)
-    pronunciation_tests_left: Mapped[int] = mapped_column(Integer, default=2, nullable=True)
+    pronunciation_tests_left: Mapped[int] = mapped_column(
+        Integer, default=2, nullable=True
+    )
 
     billing_interval: Mapped[str] = mapped_column(String(20), nullable=True)
     billing_frequency: Mapped[int] = mapped_column(Integer, nullable=True)

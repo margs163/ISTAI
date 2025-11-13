@@ -1,13 +1,22 @@
 from datetime import date
 from typing import Annotated
-from fastapi import APIRouter, Body, Depends, HTTPException, Query, Request, status
-from sqlalchemy import func, select
-
+from fastapi import (
+    APIRouter,
+    Body,
+    Depends,
+    HTTPException,
+    Query,
+    Request,
+    status,
+    Path,
+)
+from sqlalchemy import func, select, and_
 from ..lib.auth_db import get_async_session
 from ..schemas.db_tables import Notifications, User
 from ..dependencies import current_active_user
 from sqlalchemy.ext.asyncio import AsyncSession
 from ..dependencies import limiter
+import logging
 
 from ..schemas.notifications import (
     CreateNotificationSchema,
@@ -16,6 +25,7 @@ from ..schemas.notifications import (
 )
 
 router = APIRouter(dependencies=[Depends(current_active_user)])
+logger = logging.getLogger(__name__)
 
 
 @router.get("/me")
@@ -27,7 +37,6 @@ async def get_notifications(
     today: Annotated[bool, Query()] = False,
 ):
     try:
-
         query = select(Notifications).where(Notifications.user_id == user.id)
 
         if today:
@@ -36,6 +45,46 @@ async def get_notifications(
         records = await session.scalars(query.order_by(Notifications.time))
         return {"data": records.all()}
     except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Could not fetch notifications record: {e}",
+        )
+
+
+@router.patch("/")
+@limiter.limit("25/minute")
+async def read_notification(
+    request: Request,
+    user: Annotated[User, Depends(current_active_user)],
+    session: Annotated[AsyncSession, Depends(get_async_session)],
+    notification_ids: Annotated[list[str], Query()],
+):
+    try:
+        if not notification_ids:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="No notification ids are specified",
+            )
+
+        query = select(Notifications).where(
+            and_(
+                Notifications.user_id == user.id, Notifications.id.in_(notification_ids)
+            )
+        )
+
+        result = await session.scalars(query)
+        records = result.all()
+
+        for record in records:
+            record.is_read = True
+
+        await session.commit()
+
+        return {"data": records}
+
+    except Exception as e:
+        await session.rollback()
+        logger.error(f"Could not read notifications: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Could not fetch notifications record: {e}",
@@ -51,7 +100,7 @@ async def init_notifications(
 ):
     try:
         hello_message = (
-            "Hello, welcome to AIELTSTalk! You have successfully registered."
+            "Hello, welcome to FluentFlow! You have successfully registered."
         )
 
         new_message = NotificationsSchema(

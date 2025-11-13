@@ -64,7 +64,7 @@ async def get_s3_client() -> AsyncGenerator[Session, None]:
 
 async def get_pollar_client() -> AsyncGenerator[Polar, None]:
     async with Polar(
-        access_token=os.getenv("POLAR_ACCESS_TOKEN_TEST"), server="sandbox"
+        access_token=os.getenv("POLAR_ACCESS_TOKEN_PROD"), server="sandbox"
     ) as polar:
         try:
             yield polar
