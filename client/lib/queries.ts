@@ -601,6 +601,7 @@ export async function fetchPracticeTests(
       `${process.env.NEXT_PUBLIC_FASTAPI}/practice_test/?user_id=true`,
       { withCredentials: true }
     );
+    console.log(response.data);
     if (response.data.data.length === 0) {
       return [];
     }
@@ -615,6 +616,61 @@ export async function fetchPracticeTests(
   } catch (error) {
     toast("Error Fetching Practice Tests", {
       description: "Could not fetch analytics",
+      action: {
+        label: "Log",
+        onClick: () => console.log(error),
+      },
+    });
+  }
+}
+
+export async function fetchRecentPracticeTests(
+  setGlobalPracticeTests: (data: PracticeTestType[]) => void
+) {
+  try {
+    const response = await axios.get<{ data: PracticeTestType[] }>(
+      `${process.env.NEXT_PUBLIC_FASTAPI}/practice_test/recent?paging_number=5`,
+      { withCredentials: true }
+    );
+    if (response.data.data.length === 0) {
+      return [];
+    }
+    const validated = await PracticeTestSchema.safeParseAsync(
+      response.data.data.at(-1)
+    );
+    if (validated.error) {
+      throw validated.error;
+    }
+    setGlobalPracticeTests(response.data.data);
+    return response.data.data;
+  } catch (error) {
+    toast("Error Fetching Practice Tests", {
+      description: "Could not fetch analytics",
+      action: {
+        label: "Log",
+        onClick: () => console.log(error),
+      },
+    });
+  }
+}
+
+export async function markNotifications(ids: string[]) {
+  try {
+    const queryString = ids
+      .map((id) => `notification_ids=${encodeURIComponent(id)}`)
+      .join("&");
+    const response = await axios.patch<{ data: NotificationType[] }>(
+      `${process.env.NEXT_PUBLIC_FASTAPI}/notifications/?${queryString}`,
+      undefined,
+      { withCredentials: true }
+    );
+    if (response.data.data.length === 0) {
+      return [];
+    }
+    return response.data.data;
+  } catch (error) {
+    toast("Error reading notifications", {
+      description: "Could not make a fetch request",
       action: {
         label: "Log",
         onClick: () => console.log(error),

@@ -1,6 +1,10 @@
 "use client";
 import { useGlobalPracticeTestsStore } from "@/lib/practiceTestStore";
-import { deletePracticeTest, fetchPracticeTests } from "@/lib/queries";
+import {
+  deletePracticeTest,
+  fetchPracticeTests,
+  fetchRecentPracticeTests,
+} from "@/lib/queries";
 import { cn, getPreciseTimeAgo, parseTimeInt } from "@/lib/utils";
 import {
   QueryClient,
@@ -94,8 +98,8 @@ export default function RecentPracticeTests() {
     (state) => state.setPracticeTests
   );
   const { data, isLoading, error, refetch } = useQuery({
-    queryKey: ["practice-tests"],
-    queryFn: async () => await fetchPracticeTests(setGlobalPracticeTests),
+    queryKey: ["recent-practice-tests"],
+    queryFn: async () => await fetchRecentPracticeTests(setGlobalPracticeTests),
   });
 
   const mutation = useMutation({
@@ -103,20 +107,20 @@ export default function RecentPracticeTests() {
     mutationFn: deletePracticeTest,
   });
 
-  const lastFive = useMemo(() => {
-    const recentTests = data && data.filter((item) => item.result);
-    const sorted =
-      recentTests &&
-      recentTests.sort((a, b) => {
-        return (
-          new Date(b.test_date).getTime() - new Date(a.test_date).getTime()
-        );
-      });
+  // const lastFive = useMemo(() => {
+  //   const recentTests = data && data.filter((item) => item.result);
+  //   const sorted =
+  //     recentTests &&
+  //     recentTests.sort((a, b) => {
+  //       return (
+  //         new Date(b.test_date).getTime() - new Date(a.test_date).getTime()
+  //       );
+  //     });
 
-    const last = sorted && sorted.length > 5 ? sorted.slice(0, 5) : sorted;
+  //   const last = sorted && sorted.length > 5 ? sorted.slice(0, 5) : sorted;
 
-    return last;
-  }, [data]);
+  //   return last;
+  // }, [data]);
 
   if (isLoading) return <LoadingSmallUI />;
 
@@ -136,8 +140,8 @@ export default function RecentPracticeTests() {
           </Link>
         </header>
         <div className="space-y-3">
-          {data && data.length > 0 && lastFive && lastFive.length > 0 ? (
-            lastFive.map((item, index) => (
+          {data ? (
+            data.map((item, index) => (
               <PracticeTest
                 key={index}
                 test={item}

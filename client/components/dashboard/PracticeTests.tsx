@@ -13,6 +13,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useQuery } from "@tanstack/react-query";
+import { fetchPracticeTests } from "@/lib/queries";
 
 export function PracticeTest({ test }: { test: PracticeTestType }) {
   if (!test.result) return;
@@ -75,16 +77,22 @@ export function PracticeTest({ test }: { test: PracticeTestType }) {
 }
 
 export default function AllPracticeTests() {
-  const allPracticeTests = useGlobalPracticeTestsStore(
-    (state) => state.practice_tests
+  const setGlobalPracticeTests = useGlobalPracticeTestsStore(
+    (state) => state.setPracticeTests
   );
+  const { data, isLoading, error, refetch } = useQuery({
+    queryKey: ["practice-tests"],
+    queryFn: async () => await fetchPracticeTests(setGlobalPracticeTests),
+  });
+
   const [sort, setSort] = useState<"recent" | "score" | "duration">("recent");
   const [search, setSearch] = useState("");
   const onValueChange = (value: "recent" | "score" | "duration") =>
     setSort(value);
 
   const searched = useMemo(() => {
-    const filtered = allPracticeTests.filter((test) => test.result);
+    if (!data) return;
+    const filtered = data.filter((test) => test.result);
     const searched = filtered.filter((item) =>
       item.practice_name.includes(search)
     );
@@ -101,7 +109,7 @@ export default function AllPracticeTests() {
         return Number(b.test_duration) - Number(a.test_duration);
       }
     });
-  }, [allPracticeTests]);
+  }, [data]);
 
   return (
     <section className="px-4 lg:px-6 w-full flex flex-col gap-6">
@@ -140,12 +148,12 @@ export default function AllPracticeTests() {
           </Select>
           <Link href={"#"}>
             <p className="font-medium text-sm text-gray-800 p-1 hover:text-gray-700 active:text-gray-700">
-              {searched.length} tests
+              {searched?.length} tests
             </p>
           </Link>
         </header>
         <div className="space-y-3">
-          {allPracticeTests && searched.length > 0 ? (
+          {data && searched && searched.length > 0 ? (
             searched.map((item, index) => (
               <PracticeTest key={index} test={item} />
             ))

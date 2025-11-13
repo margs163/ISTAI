@@ -2,9 +2,12 @@
 import MainButton from "@/components/MainButton";
 import { Check } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function Page() {
   const router = useRouter();
+  const queryClient = useQueryClient();
+
   return (
     <div className="w-full h-screen flex items-center justify-center p-4 font-geist">
       <div className="flex flex-col space-y-4 items-center max-w-[500px]">
@@ -21,7 +24,12 @@ export default function Page() {
             subscription.
           </p>
           <MainButton
-            onClick={() => router.replace("/dashboard")}
+            onClick={() => {
+              queryClient.invalidateQueries({
+                queryKey: ["subscription-fetch"],
+              });
+              router.replace("/dashboard");
+            }}
             variant="primary"
             className={"mx-auto text-sm px-6 mt-6"}
           >

@@ -137,3 +137,14 @@ export default function Page() {
     </div>
   );
 }
+
+/* 
+
+WHAT TO DO NEXT:
+1. Edit the db notifications schema to include notification status
+2. Make an endpoint to mark the read notification
+3. Make it so that on every log in if 24 hours past from the notification to delete it
+4. Change the ui
+5. Make API calls
+
+*/

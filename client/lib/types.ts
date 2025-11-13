@@ -465,6 +465,7 @@ export const NotificationSchema = z.object({
     "Plan Change",
   ]),
   message: z.string(),
+  is_read: z.boolean().default(false),
   time: z.union([z.date(), z.string()]).optional(),
 });
 

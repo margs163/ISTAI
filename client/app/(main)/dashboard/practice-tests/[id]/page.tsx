@@ -17,14 +17,7 @@ import DialogWeakSides from "@/components/dashboard/practiceDialog/DialogWeakSid
 import LoadingSmallUI from "@/components/loadingSmallUI";
 import { useGlobalPracticeTestsStore } from "@/lib/practiceTestStore";
 import { useUserStore } from "@/lib/userStorage";
-import React, {
-  use,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useTransition,
-} from "react";
+import React, { use, useCallback, useMemo, useRef, useTransition } from "react";
 import html2canvas from "html2canvas-pro";
 import { jsPDF } from "jspdf";
 import { QuestionCardType } from "@/lib/types";
