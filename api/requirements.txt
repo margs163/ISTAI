@@ -101,7 +101,7 @@ packaging==25.0
 paddle-python-sdk==1.10.0
 pathspec==0.12.1
 phonemizer==3.3.0
-pillow==12.0.0
+pillow==12.1.1
 platformdirs==4.3.8
 polar-sdk==0.25.0
 prometheus-client==0.23.1
