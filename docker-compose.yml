@@ -211,7 +211,7 @@ services:
     #   # - The ${variable:?message} syntax causes shell to exit with a non-zero
     #   #   code and print a message, when the variable is not set or empty
     #   - redis-server --requirepass "$${REDIS_PASSWORD:?REDIS_PASSWORD variable is not set}"
-    command: redis-server --requirepass Brawl01man
+    command: redis-server --requirepass
 
     ports:
       - "6379:6379"
