@@ -1,5 +1,5 @@
-FluentFlow 🎙️
-AI-Powered IELTS Speaking Simulator | Infomatrix Asia 2026
+# FluentFlow 🎙️
+## AI-Powered IELTS Speaking Simulator | Infomatrix Asia 2026
 
 FluentFlow is a real-time, low-latency web application designed to simulate the official IELTS Speaking test. Unlike standard chatbots, FluentFlow enforces the strict 3-part structure of the IELTS exam and utilizes a network of parallel AI agents to evaluate candidates on Fluency, Lexical Resource, Grammatical Range, and Pronunciation.
 
@@ -47,3 +47,4 @@ TTS: OpenAI TTS
 Agent Framework: LangChain & LangGraph
 
 Database / Storage: PostgreSQL & Cloudflare R2
+
