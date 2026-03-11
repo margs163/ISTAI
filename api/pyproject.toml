@@ -39,7 +39,7 @@ dependencies = [
     "charset-normalizer==3.4.2",
     "click==8.2.1",
     "colorama==0.4.6",
-    "cryptography==45.0.6",
+    "cryptography==46.0.5",
     "csvw==3.5.1",
     "dataclasses-json==0.6.7",
     "deprecated==1.2.18",
