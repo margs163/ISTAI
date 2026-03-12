@@ -96,7 +96,7 @@ dependencies = [
     "mypy-extensions==1.1.0",
     "numpy==2.3.2",
     "openai>=1.109.1",
-    "orjson==3.11.1",
+    "orjson==3.11.6",
     "ormsgpack==1.10.0",
     "packaging==25.0",
     "paddle-python-sdk==1.10.0",
